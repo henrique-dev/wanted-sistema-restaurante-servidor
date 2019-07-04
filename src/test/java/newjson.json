@@ -1,0 +1,20 @@
+{
+    "itens": [{
+            "id": 6,
+            "quantidade": 1,
+            "total": 32.8,
+            "complementos": [],
+            "variacoes": [{
+                    "variacoes": [{
+                            "id": 4
+                        }]
+                }, {
+                    "variacoes": [{
+                            "id": 5
+                        }, {
+                            "id": 6
+                        }]
+                }]
+        }],
+    "codigoPromocional": ""
+}
