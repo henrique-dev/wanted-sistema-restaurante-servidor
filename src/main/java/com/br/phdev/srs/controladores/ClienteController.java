@@ -33,7 +33,6 @@ import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.HttpUtils;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
-import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
 import com.br.phdev.srs.utils.ServicoPagamentoPayPal;
 import com.br.phdev.srs.utils.ServicoValidacaoCliente;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -543,6 +542,7 @@ public class ClienteController {
                         }
                         break;
                     case 2:
+                        /*
                         if (!clienteDAO.possuiPrePredido(cliente)) {
                             String tokenSessao;
                             if (sessao.getAttribute("token_sessao_pagseguro") == null) {
@@ -566,9 +566,10 @@ public class ClienteController {
                             confirmacaoPedido.setLink(tokenSessao);
                         } else {
                             confirmacaoPedido.setStatus(-2);
-                        }
+                        }*/
                         break;
                     case 3:
+                        /*
                         if (!clienteDAO.possuiPrePredido(cliente)) {
                             String tokenSessao;
                             if (sessao.getAttribute("token_sessao_pagseguro") == null) {
@@ -588,7 +589,7 @@ public class ClienteController {
                             confirmacaoPedido.setLink(tokenSessao);
                         } else {
                             confirmacaoPedido.setStatus(-2);
-                        }
+                        }*/
                         break;
                     default:
                         confirmacaoPedido.setStatus(-1);
