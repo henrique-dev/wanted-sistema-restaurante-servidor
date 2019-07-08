@@ -16,20 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `arquivo`
---
-
-DROP TABLE IF EXISTS `arquivo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `arquivo` (
-  `id_arquivo` int(11) NOT NULL,
-  `caminho` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id_arquivo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `arquivo`
 --
 
@@ -58,26 +44,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `cliente`
---
-
-DROP TABLE IF EXISTS `cliente`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `cliente` (
-  `id_cliente` int(11) NOT NULL,
-  `nome` varchar(150) NOT NULL,
-  `cpf` varchar(15) NOT NULL,
-  `telefone` varchar(15) NOT NULL,
-  `email` varchar(150) NOT NULL,
-  `id_usuario` int(11) NOT NULL,
-  PRIMARY KEY (`id_cliente`),
-  KEY `fk_cliente_usuario1_idx` (`id_usuario`),
-  CONSTRAINT `fk_cliente_usuario1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `cliente`
 --
 
@@ -86,24 +52,6 @@ LOCK TABLES `cliente` WRITE;
 INSERT INTO `cliente` VALUES (0,'','','','',0),(10,'Paulo Henrique ','01741053200','96991100443','henrique.pbgb@gmail.com',29),(11,'Renan','02782267280','96981243468','pororoca@mrfood.com',30),(13,'Argério Queiroz','02295260205','96992055072','argerioaf@gmail.com',33),(14,'Argério','02295260205','91983517619','argerioaf@gmail.com',36);
 /*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `complemento`
---
-
-DROP TABLE IF EXISTS `complemento`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `complemento` (
-  `id_complemento` int(11) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  `preco` decimal(8,2) NOT NULL,
-  `id_arquivo` int(11) NOT NULL,
-  PRIMARY KEY (`id_complemento`),
-  KEY `fk_complemento_arquivo1_idx` (`id_arquivo`),
-  CONSTRAINT `fk_complemento_arquivo1` FOREIGN KEY (`id_arquivo`) REFERENCES `arquivo` (`id_arquivo`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `complemento`
@@ -134,29 +82,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `endereco`
---
-
-DROP TABLE IF EXISTS `endereco`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `endereco` (
-  `id_endereco` int(11) NOT NULL,
-  `id_cliente` int(11) NOT NULL,
-  `logradouro` varchar(150) NOT NULL,
-  `bairro` varchar(100) NOT NULL,
-  `complemento` varchar(100) NOT NULL,
-  `numero` varchar(10) NOT NULL,
-  `cidade` varchar(45) NOT NULL,
-  `cep` varchar(45) NOT NULL,
-  `descricao` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id_endereco`),
-  KEY `fk_endereco_cliente1_idx` (`id_cliente`),
-  CONSTRAINT `fk_endereco_cliente1` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `endereco`
 --
 
@@ -165,24 +90,6 @@ LOCK TABLES `endereco` WRITE;
 INSERT INTO `endereco` VALUES (0,0,'','','','','','','Buscar no local'),(7,10,'Avenida Brasil (Lot F Deus)','Fonte Nova','Prox a um comercio','53','Santana','68928313','Minha casa'),(9,11,'Avenida Presidente Getúlio Vargas','Central','D','974','Macapá','68900070','Minha casa'),(14,13,'Rua Capitão Euclides Rodrigues','Central','De esquina','388','Santana','68925192','Minha casa'),(15,13,'Rua Capitão Euclides Rodrigues','Central','','388','Santana','68925192','Minha outra casa'),(16,13,'Rua Capitão Euclides Rodrigues','Central','sem complemento','XXX','Santana','68925192','My house'),(17,13,'Rua Capitão Euclides Rodrigues','Central','sem complemento','XXX','Santana','68925192','Casonq'),(18,14,'Rua Capitão Euclides Rodrigues','Central','sem complemento','388','Santana','68925192','Minha casa');
 /*!40000 ALTER TABLE `endereco` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `entrega`
---
-
-DROP TABLE IF EXISTS `entrega`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `entrega` (
-  `id_entrega` int(11) NOT NULL,
-  `id_pedido` int(11) NOT NULL,
-  `efetuada` tinyint(1) NOT NULL,
-  `eventualidade` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id_entrega`,`id_pedido`),
-  KEY `fk_entrega_pedido1_idx` (`id_pedido`),
-  CONSTRAINT `fk_entrega_pedido1` FOREIGN KEY (`id_pedido`) REFERENCES `pedido` (`id_pedido`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `entrega`
@@ -195,23 +102,6 @@ INSERT INTO `entrega` VALUES (253,259,0,0),(254,260,0,0),(255,261,0,0),(256,262,
 UNLOCK TABLES;
 
 --
--- Table structure for table `formapagamento`
---
-
-DROP TABLE IF EXISTS `formapagamento`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `formapagamento` (
-  `id_formapagamento` int(11) NOT NULL,
-  `descricao` varchar(45) NOT NULL,
-  `id_cliente` int(11) NOT NULL,
-  PRIMARY KEY (`id_formapagamento`),
-  KEY `fk_formapagamento_cliente1_idx` (`id_cliente`),
-  CONSTRAINT `fk_formapagamento_cliente1` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `formapagamento`
 --
 
@@ -220,20 +110,6 @@ LOCK TABLES `formapagamento` WRITE;
 INSERT INTO `formapagamento` VALUES (0,'A dinheiro',0),(1,'Paypal',0),(2,'Cartao Credito - PagSeguro',0);
 /*!40000 ALTER TABLE `formapagamento` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `genero`
---
-
-DROP TABLE IF EXISTS `genero`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `genero` (
-  `id_genero` int(11) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  PRIMARY KEY (`id_genero`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `genero`
@@ -264,25 +140,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `grupo_variacao`
---
-
-DROP TABLE IF EXISTS `grupo_variacao`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grupo_variacao` (
-  `id_grupo_variacao` varchar(45) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  `grupo` int(11) NOT NULL,
-  `max` int(11) NOT NULL,
-  `id_item` int(11) NOT NULL,
-  PRIMARY KEY (`id_grupo_variacao`),
-  KEY `fk_grupo_variacao_item1_idx` (`id_item`),
-  CONSTRAINT `fk_grupo_variacao_item1` FOREIGN KEY (`id_item`) REFERENCES `item` (`id_item`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `grupo_variacao`
 --
 
@@ -293,20 +150,6 @@ INSERT INTO `grupo_variacao` VALUES ('1','Tamanho',0,1,6),('2','Sabor',1,3,6),('
 UNLOCK TABLES;
 
 --
--- Table structure for table `ingrediente`
---
-
-DROP TABLE IF EXISTS `ingrediente`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ingrediente` (
-  `id_ingrediente` int(11) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  PRIMARY KEY (`id_ingrediente`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `ingrediente`
 --
 
@@ -315,27 +158,6 @@ LOCK TABLES `ingrediente` WRITE;
 INSERT INTO `ingrediente` VALUES (1,'Alface'),(2,'Tomate'),(3,'Cebola'),(4,'Pepino'),(5,'Cenoura'),(200,'Batata palha'),(201,'Cheiro verde'),(202,'Mastruz'),(203,'Leite'),(204,'Amendoim'),(205,'Alcaçus');
 /*!40000 ALTER TABLE `ingrediente` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `item`
---
-
-DROP TABLE IF EXISTS `item`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item` (
-  `id_item` int(11) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  `descricao` varchar(200) NOT NULL,
-  `preco` decimal(8,2) NOT NULL,
-  `id_genero` int(11) NOT NULL,
-  `modificavel` tinyint(1) NOT NULL,
-  `modificavel_ingrediente` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`id_item`),
-  KEY `fk_prato_generoprato1_idx` (`id_genero`),
-  CONSTRAINT `fk_prato_generoprato1` FOREIGN KEY (`id_genero`) REFERENCES `genero` (`id_genero`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item`
@@ -366,24 +188,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `item_arquivo`
---
-
-DROP TABLE IF EXISTS `item_arquivo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item_arquivo` (
-  `id_item` int(11) NOT NULL,
-  `id_arquivo` int(11) NOT NULL,
-  PRIMARY KEY (`id_item`,`id_arquivo`),
-  KEY `fk_arquivo_has_prato_prato1_idx` (`id_item`),
-  KEY `fk_arquivo_has_prato_arquivo1_idx` (`id_arquivo`),
-  CONSTRAINT `fk_arquivo_has_prato_arquivo1` FOREIGN KEY (`id_arquivo`) REFERENCES `arquivo` (`id_arquivo`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_arquivo_has_prato_prato1` FOREIGN KEY (`id_item`) REFERENCES `item` (`id_item`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `item_arquivo`
 --
 
@@ -392,24 +196,6 @@ LOCK TABLES `item_arquivo` WRITE;
 INSERT INTO `item_arquivo` VALUES (1,6),(1,7),(1,8),(2,9),(2,10),(3,12),(3,13),(4,14),(4,15),(4,16),(5,17),(6,18),(6,19),(7,20),(8,23),(8,24),(9,25),(9,26),(9,27),(10,28),(10,29),(11,30),(11,31),(11,32),(11,33),(12,34),(12,35),(12,36),(13,37),(13,38),(13,39),(14,40),(14,41),(15,46),(15,47),(15,48),(400,404),(400,405),(403,410),(403,411),(404,412),(404,413),(405,414);
 /*!40000 ALTER TABLE `item_arquivo` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `item_complemento`
---
-
-DROP TABLE IF EXISTS `item_complemento`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item_complemento` (
-  `id_item` int(11) NOT NULL,
-  `id_complemento` int(11) NOT NULL,
-  PRIMARY KEY (`id_item`,`id_complemento`),
-  KEY `fk_prato_has_complemento_complemento1_idx` (`id_complemento`),
-  KEY `fk_prato_has_complemento_prato1_idx` (`id_item`),
-  CONSTRAINT `fk_prato_has_complemento_complemento1` FOREIGN KEY (`id_complemento`) REFERENCES `complemento` (`id_complemento`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_prato_has_complemento_prato1` FOREIGN KEY (`id_item`) REFERENCES `item` (`id_item`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_complemento`
@@ -422,24 +208,6 @@ INSERT INTO `item_complemento` VALUES (1,1),(4,1),(8,1),(9,1),(10,1),(404,1),(6,
 UNLOCK TABLES;
 
 --
--- Table structure for table `item_ingrediente`
---
-
-DROP TABLE IF EXISTS `item_ingrediente`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item_ingrediente` (
-  `id_item` int(11) NOT NULL,
-  `id_ingrediente` int(11) NOT NULL,
-  PRIMARY KEY (`id_item`,`id_ingrediente`),
-  KEY `fk_ingrediente_has_item_item1_idx` (`id_item`),
-  KEY `fk_ingrediente_has_item_ingrediente1_idx` (`id_ingrediente`),
-  CONSTRAINT `fk_ingrediente_has_item_ingrediente1` FOREIGN KEY (`id_ingrediente`) REFERENCES `ingrediente` (`id_ingrediente`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ingrediente_has_item_item1` FOREIGN KEY (`id_item`) REFERENCES `item` (`id_item`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `item_ingrediente`
 --
 
@@ -450,24 +218,6 @@ INSERT INTO `item_ingrediente` VALUES (9,1),(9,2),(9,3),(9,4),(9,5),(400,2),(400
 UNLOCK TABLES;
 
 --
--- Table structure for table `item_tipo`
---
-
-DROP TABLE IF EXISTS `item_tipo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item_tipo` (
-  `id_item` int(11) NOT NULL,
-  `id_tipo` int(11) NOT NULL,
-  PRIMARY KEY (`id_item`,`id_tipo`),
-  KEY `fk_prato_has_tipo_tipo1_idx` (`id_tipo`),
-  KEY `fk_prato_has_tipo_prato1_idx` (`id_item`),
-  CONSTRAINT `fk_prato_has_tipo_prato1` FOREIGN KEY (`id_item`) REFERENCES `item` (`id_item`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_prato_has_tipo_tipo1` FOREIGN KEY (`id_tipo`) REFERENCES `tipo` (`id_tipo`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `item_tipo`
 --
 
@@ -476,34 +226,6 @@ LOCK TABLES `item_tipo` WRITE;
 INSERT INTO `item_tipo` VALUES (1,1),(4,1),(9,1),(404,1),(1,2),(9,2),(401,2),(402,2),(403,2),(404,2),(405,2),(8,3),(400,3),(401,3),(402,3),(403,3),(404,3),(405,3),(2,4),(3,4),(5,4),(6,4),(7,4),(10,4),(11,4),(12,4),(13,4),(14,4),(15,4),(400,4),(401,4),(402,4),(403,4),(405,4),(12,5),(13,5),(15,5),(400,5),(401,5),(402,5);
 /*!40000 ALTER TABLE `item_tipo` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `pedido`
---
-
-DROP TABLE IF EXISTS `pedido`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `pedido` (
-  `id_pedido` int(11) NOT NULL,
-  `datapedido` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `itens` json NOT NULL,
-  `precototal` decimal(8,2) NOT NULL,
-  `id_formapagamento` int(11) NOT NULL,
-  `id_cliente` int(11) DEFAULT NULL,
-  `id_endereco` int(11) DEFAULT NULL,
-  `pagamentoefetuado` tinyint(1) NOT NULL DEFAULT '0',
-  `estado` enum('1','2','3','4') DEFAULT '1',
-  `observacao_entrega` varchar(150) DEFAULT NULL,
-  PRIMARY KEY (`id_pedido`),
-  KEY `fk_pedido_formapagamento1_idx` (`id_formapagamento`),
-  KEY `fk_pedido_cliente1_idx` (`id_cliente`),
-  KEY `fk_pedido_endereco1_idx` (`id_endereco`),
-  CONSTRAINT `fk_pedido_cliente1` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_pedido_endereco1` FOREIGN KEY (`id_endereco`) REFERENCES `endereco` (`id_endereco`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_pedido_formapagamento1` FOREIGN KEY (`id_formapagamento`) REFERENCES `formapagamento` (`id_formapagamento`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pedido`
@@ -535,33 +257,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `pre_pedido`
---
-
-DROP TABLE IF EXISTS `pre_pedido`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `pre_pedido` (
-  `id_pre_pedido` int(11) NOT NULL,
-  `datapedido` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `itens` json NOT NULL,
-  `precototal` decimal(8,2) NOT NULL,
-  `id_formapagamento` int(11) NOT NULL,
-  `id_cliente` int(11) NOT NULL,
-  `id_endereco` int(11) NOT NULL,
-  `token` varchar(128) DEFAULT NULL,
-  `observacao_entrega` varchar(150) DEFAULT NULL,
-  PRIMARY KEY (`id_pre_pedido`),
-  KEY `fk_pre_pedido_endereco1_idx` (`id_endereco`),
-  KEY `fk_pre_pedido_formapagamento1_idx` (`id_formapagamento`),
-  KEY `fk_pre_pedido_cliente1_idx` (`id_cliente`),
-  CONSTRAINT `fk_pre_pedido_cliente1` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_pre_pedido_endereco1` FOREIGN KEY (`id_endereco`) REFERENCES `endereco` (`id_endereco`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_pre_pedido_formapagamento1` FOREIGN KEY (`id_formapagamento`) REFERENCES `formapagamento` (`id_formapagamento`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `pre_pedido`
 --
 
@@ -569,22 +264,6 @@ LOCK TABLES `pre_pedido` WRITE;
 /*!40000 ALTER TABLE `pre_pedido` DISABLE KEYS */;
 /*!40000 ALTER TABLE `pre_pedido` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `restaurante`
---
-
-DROP TABLE IF EXISTS `restaurante`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `restaurante` (
-  `id_restaurante` int(11) NOT NULL,
-  `nome` varchar(150) NOT NULL,
-  `endereco` varchar(150) NOT NULL,
-  `ultima_modificacao_itens` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_restaurante`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `restaurante`
@@ -595,20 +274,6 @@ LOCK TABLES `restaurante` WRITE;
 INSERT INTO `restaurante` VALUES (1,'MRFOOD','AVENIDA 32','2019-01-23 21:43:52');
 /*!40000 ALTER TABLE `restaurante` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `tipo`
---
-
-DROP TABLE IF EXISTS `tipo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tipo` (
-  `id_tipo` int(11) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  PRIMARY KEY (`id_tipo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `tipo`
@@ -639,28 +304,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `usuario`
---
-
-DROP TABLE IF EXISTS `usuario`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `usuario` (
-  `id_usuario` int(11) NOT NULL,
-  `nome` varchar(150) NOT NULL,
-  `senha` varchar(150) NOT NULL,
-  `token_sessao` varchar(150) DEFAULT NULL,
-  `token_cadastro` varchar(10) DEFAULT NULL,
-  `ativo` tinyint(1) NOT NULL DEFAULT '0',
-  `verificado` tinyint(1) DEFAULT '0',
-  `token_websocket` varchar(128) DEFAULT NULL,
-  `token_cadastro_data` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_usuario`),
-  UNIQUE KEY `nome_UNIQUE` (`nome`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping data for table `usuario`
 --
 
@@ -669,25 +312,6 @@ LOCK TABLES `usuario` WRITE;
 INSERT INTO `usuario` VALUES (0,'','',NULL,NULL,0,0,NULL,'2019-01-22 23:05:09'),(29,'96991100443','root','C6727E749F0D5D1A0AC695975194512C','E1ABEC',1,1,NULL,'2019-07-05 16:48:54'),(30,'96981243468','12345678','AB54DD39D4E58E57A644E7BC5F098B52','104509',1,1,'408D28BBDFFC080A2803733CA7DF62F9','2019-05-09 20:54:33'),(31,'96991126476','',NULL,'89FE1B',0,0,NULL,'2019-01-22 23:05:09'),(33,'96992055072','12345','0303B77D69EE71B10AD3D3D4CDC8E927','7ECFEF',1,1,NULL,'2019-07-05 17:54:21'),(34,'96991781167','',NULL,'EAA47D',0,0,NULL,'2019-03-09 22:21:47'),(35,'96999099674','',NULL,'71B0E3',0,0,NULL,'2019-03-16 19:07:41'),(36,'91983517619','12345',NULL,'1D01E3',1,1,NULL,'2019-04-26 22:56:42'),(37,'96992055073','',NULL,'BC5F64',0,0,NULL,'2019-07-05 03:21:11'),(38,'96992055074','',NULL,'1C63DC',0,0,NULL,'2019-07-05 03:28:54');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `variacao`
---
-
-DROP TABLE IF EXISTS `variacao`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `variacao` (
-  `id_variacao` int(11) NOT NULL,
-  `nome` varchar(45) NOT NULL,
-  `preco` decimal(8,2) NOT NULL,
-  `ordem` int(11) DEFAULT NULL,
-  `id_grupo_variacao` varchar(45) NOT NULL,
-  PRIMARY KEY (`id_variacao`),
-  KEY `fk_variacao_grupo_variacao1_idx` (`id_grupo_variacao`),
-  CONSTRAINT `fk_variacao_grupo_variacao1` FOREIGN KEY (`id_grupo_variacao`) REFERENCES `grupo_variacao` (`id_grupo_variacao`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `variacao`
@@ -708,4 +332,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-07-07 19:36:11
+-- Dump completed on 2019-07-07 21:22:38
