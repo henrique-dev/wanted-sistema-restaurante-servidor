@@ -7,7 +7,6 @@
 package com.br.phdev.srs.controladores;
 
 import com.br.phdev.srs.daos.AutenticaDAO;
-import com.br.phdev.srs.daos.BasicDAO;
 import com.br.phdev.srs.daos.CadastroDAO;
 import com.br.phdev.srs.daos.ClienteDAO;
 import com.br.phdev.srs.daos.RepositorioProdutos;
@@ -20,7 +19,6 @@ import com.br.phdev.srs.models.Codigo;
 import com.br.phdev.srs.models.ConfirmaPedido;
 import com.br.phdev.srs.models.ConfirmacaoPedido;
 import com.br.phdev.srs.models.Endereco;
-import com.br.phdev.srs.models.ExecutarPagamento;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.ListaItens;
@@ -31,11 +29,9 @@ import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.TokenAlerta;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Mensagem;
-import com.br.phdev.srs.utils.HttpUtils;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.br.phdev.srs.utils.ServicoPagamentoPayPal;
 import com.br.phdev.srs.utils.ServicoValidacaoCliente;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypal.api.payments.Payment;
 import com.twilio.exception.ApiException;
 import java.io.IOException;
@@ -45,7 +41,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -143,8 +138,7 @@ public class ClienteController {
             e.printStackTrace();
             mensagem.setDescricao(e.getMessage());
             mensagem.setCodigo(200);
-        } catch (DAOException e) {
-            e.printStackTrace();
+        } catch (DAOException e) {            
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
         }
@@ -436,7 +430,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping("cliente/refazer-pedido")
     public ResponseEntity<List<ItemPedido>> refazerPedido(HttpSession sessao, HttpServletRequest req, @RequestBody Pedido pedido) throws Exception {
         HttpStatus httpStatus = HttpStatus.OK;
@@ -494,7 +488,7 @@ public class ClienteController {
 
                 sessao.setAttribute("pre-pedido-itens", confirmaPedido.getItens());
                 sessao.setAttribute("pre-pedido-preco", confirmaPedido.getPrecoTotal());
-                
+
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }
@@ -631,7 +625,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(pedidos, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping("cliente/info-pedido")
     public ResponseEntity<Pedido2> listarPedidos(@RequestBody Pedido2 pedido, HttpSession sessao) {
         try (Connection conexao = new FabricaConexao().conectar()) {
@@ -649,7 +643,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(pedido, httpHeaders, HttpStatus.OK);
     }
-    
+
     @PostMapping("cliente/info-entrega")
     public ResponseEntity<List<Pedido>> infoEntrega() {
         return null;

@@ -116,27 +116,33 @@ public class CadastroDAO extends BasicDAO {
     }
 
     synchronized public String preCadastrar(String usuario) throws DAOException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL inserir_pre_cadastro_usuario(?,?)")) {
+        try {
+            PreparedStatement stmt = super.conexao.prepareStatement("SELECT usuario.ativo FROM usuario WHERE usuario.nome = ?");
             stmt.setString(1, usuario);
-
-            StringBuilder token = new StringBuilder();
-            String textoParaHash = usuario
-                    + Calendar.getInstance().getTime().toString() + this.chave;
-            MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
-            byte textoDigerido[] = algoritmo.digest(textoParaHash.getBytes("UTF-8"));
-            for (int i = 0; i < textoDigerido.length; i = i + 14) {
-                token.append(String.format("%02X", 0xFF & textoDigerido[i]));
-            }
-
-            stmt.setString(2, token.toString());
-            stmt.execute();
-            return token.toString();
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("45000")) {
-                throw new DAOException(e, 500);
-            } else if (e.getSQLState().equals("45001")) {
-                throw new DAOException(e, 501);
-            }
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {
+                stmt.close();
+                stmt = super.conexao.prepareStatement("INSERT INTO usuario VALUES (default, ?, '', null, ?, 0, 0, null, now())");
+                stmt.setString(1, usuario);
+                StringBuilder token = new StringBuilder();
+                String textoParaHash = usuario
+                        + Calendar.getInstance().getTime().toString() + this.chave;
+                MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
+                byte textoDigerido[] = algoritmo.digest(textoParaHash.getBytes("UTF-8"));
+                for (int i = 0; i < textoDigerido.length; i = i + 14) {
+                    token.append(String.format("%02X", 0xFF & textoDigerido[i]));
+                }
+                stmt.setString(2, token.toString());
+                stmt.execute();
+                return token.toString();
+            } else {
+                if(rs.getBoolean("ativo")) {
+                    throw new DAOException(500);
+                } else {
+                    throw new DAOException(501);
+                }
+            }            
+        } catch (SQLException e) {            
             throw new DAOException(e, 200);
         }
     }
@@ -191,16 +197,18 @@ public class CadastroDAO extends BasicDAO {
         if (codigo.getCodigo().isEmpty()) {
             throw new DAOIncorrectData(301);
         }
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL utils_validar_numero(?,?)")) {
+        try {
+            PreparedStatement stmt = super.conexao.prepareStatement("SELECT id_usuario FROM usuario WHERE usuario.nome = ? AND usuario.token_cadastro = ?");
             stmt.setString(1, codigo.getTelefone());
             stmt.setString(2, codigo.getCodigo());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getString("erro") == null) {
-                    return true;
-                } else {
-                    return false;
-                }
+                long idUsuario = rs.getInt("id_usuario");
+                stmt.close();
+                stmt = super.conexao.prepareStatement("UPDATE usuario SET  usuario.verificado = true WHERE usuario.id_usuario = ?");
+                stmt.setLong(1, idUsuario);
+                stmt.execute();
+                return true;
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);

@@ -15,6 +15,10 @@ import java.io.IOException;
 public class DAOException extends Exception{
     
     public final int codigo;
+
+    public DAOException(int codigo) {
+        this.codigo = codigo;
+    }
     
     public DAOException(Exception e, int codigo) {
         super(e);

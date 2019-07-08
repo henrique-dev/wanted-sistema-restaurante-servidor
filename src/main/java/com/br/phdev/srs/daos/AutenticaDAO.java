@@ -37,19 +37,25 @@ public class AutenticaDAO extends BasicDAO {
         }
         Cliente cliente = null;
         try {
-            String sql = "call utils_autenticar(?,?)";
+            String sql = "SELECT " +
+                "	cliente.id_usuario, " +
+                "    cliente.id_cliente, " +
+                "    cliente.nome, " +
+                "    cliente.cpf, " +
+                "    cliente.telefone, " +
+                "    cliente.email" +
+                " FROM cliente " +
+                " WHERE cliente.id_usuario = (SELECT usuario.id_usuario FROM usuario WHERE usuario.nome = ? AND usuario.senha = ? AND usuario.ativo = true)";
             PreparedStatement stmt = super.conexao.prepareStatement(sql);
             stmt.setString(1, usuario.getNomeUsuario());
             stmt.setString(2, usuario.getSenhaUsuario());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getString("erro") == null) {
-                    usuario.setIdUsuario(rs.getLong("id_usuario"));
-                    usuario.setNomeUsuario(null);
-                    usuario.setSenhaUsuario(null);
-                    cliente = new Cliente();
-                    cliente.setId(rs.getLong("id_cliente"));
-                }
+                usuario.setIdUsuario(rs.getLong("id_usuario"));
+                usuario.setNomeUsuario(null);
+                usuario.setSenhaUsuario(null);
+                cliente = new Cliente();
+                cliente.setId(rs.getLong("id_cliente"));
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -58,10 +64,10 @@ public class AutenticaDAO extends BasicDAO {
     }
 
     public void gerarSessao(Usuario usuario, String token1) throws DAOException {
-        String sql = "CALL utils_validar_sessao(?,?)";
+        String sql = "UPDATE usuario SET token_sessao = ? WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, usuario.getIdUsuario());
-            stmt.setString(2, token1);
+            stmt.setString(1, token1);
+            stmt.setLong(2, usuario.getIdUsuario());            
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -75,7 +81,7 @@ public class AutenticaDAO extends BasicDAO {
         if (usuario.getIdUsuario() == 0) {
             throw new DAOIncorrectData(301);
         }
-        String sql = "CALL utils_invalidar_sessao(?)";
+        String sql = "UPDATE usuario SET token_sessao = null WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, usuario.getIdUsuario());
             stmt.execute();
@@ -88,7 +94,7 @@ public class AutenticaDAO extends BasicDAO {
         if (sessaoId == null) {
             return false;
         }
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL utils_verificar_sessao(?)")) {
+        try (PreparedStatement stmt = super.conexao.prepareStatement("SELECT id_usuario FROM usuario WHERE usuario.token_sessao = ?")) {
             stmt.setString(1, sessaoId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
