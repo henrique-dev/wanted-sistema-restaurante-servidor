@@ -96,18 +96,34 @@ public class CadastroDAO extends BasicDAO {
             throw new DAOIncorrectData(306);
         }
 
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL inserir_cliente(?,?,?,?,?,?)")) {
-            stmt.setString(1, cadastro.getNome());
-            stmt.setString(2, cadastro.getCpf());
-            stmt.setString(3, cadastro.getTelefone());
-            stmt.setString(4, cadastro.getEmail());
-            stmt.setString(5, cadastro.getSenhaUsuario());
-            stmt.setString(6, cadastro.getCodigo());
+        try {
+            String sql = "SELECT usuario.id_usuario "
+                    + " FROM usuario "
+                    + " WHERE usuario.nome = ? AND usuario.token_cadastro = ? AND usuario.ativo = false AND usuario.verificado = true";
+            PreparedStatement stmt = super.conexao.prepareStatement(sql);
+            stmt.setString(1, cadastro.getTelefone());
+            stmt.setString(2, cadastro.getCodigo());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getString("erro") != null) {
-                    throw new DAOExpectedException(rs.getString("erro"), 400);
-                }
+                long idUsuario = rs.getInt("id_usuario");
+                stmt.close();
+                sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true WHERE usuario.id_usuario = ?";
+                stmt = super.conexao.prepareStatement(sql);
+                stmt.setString(1, cadastro.getSenhaUsuario());
+                stmt.setLong(2, idUsuario);
+                stmt.execute();
+                stmt.close();
+                sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";                
+                stmt = super.conexao.prepareStatement(sql);
+                stmt.setString(1, cadastro.getNome());
+                stmt.setString(2, cadastro.getCpf());
+                stmt.setString(3, cadastro.getTelefone());
+                stmt.setString(4, cadastro.getEmail());
+                stmt.setLong(5, idUsuario);
+                stmt.execute();
+                stmt.close();
+            } else {
+                throw new DAOExpectedException("Não foi possível realizar o cadastro", 400);
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -149,16 +165,21 @@ public class CadastroDAO extends BasicDAO {
 
     public Mensagem reenviarCodigo(String usuario) throws DAOException {
         Mensagem mensagem = new Mensagem();
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL utils_verificar_data_token_cadastro(?)")) {
+        String sql = "SELECT id_usuario, ativo, verificado, token_cadastro_data, "
+                        + " (MINUTE(TIMEDIFF(now(), token_cadastro_data)) * 60 + SECOND(TIMEDIFF(now(), token_cadastro_data))) tempo_atual "
+                        + " FROM usuario WHERE usuario.nome = ?";
+        try {
+            PreparedStatement stmt = super.conexao.prepareStatement(sql);
             stmt.setString(1, usuario);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getObject("erro") != null) {
-                    int segundos = rs.getInt("tempo_atual");
+                boolean ativo = rs.getBoolean("ativo");
+                boolean verificado = rs.getBoolean("verificado");
+                if (!ativo && !verificado) {
+                    long segundos = rs.getInt("tempo_atual");
                     if (segundos > 300) {
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL utils_reenviar_token_cadastro(?,?)")) {
-                            stmt2.setString(1, usuario);
-
+                        sql = "UPDATE usuario SET token_cadastro = ?, token_cadastro_data = NOW() WHERE usuario.nome = ?";
+                        try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                            
                             StringBuilder token = new StringBuilder();
                             String textoParaHash = usuario
                                     + Calendar.getInstance().getTime().toString() + this.chave;
@@ -167,7 +188,8 @@ public class CadastroDAO extends BasicDAO {
                             for (int i = 0; i < textoDigerido.length; i = i + 14) {
                                 token.append(String.format("%02X", 0xFF & textoDigerido[i]));
                             }
-                            stmt2.setString(2, token.toString());
+                            stmt2.setString(1, token.toString());
+                            stmt2.setString(2, usuario);
                             stmt2.execute();
                             mensagem.setCodigo(100);
                             mensagem.setDescricao(token.toString());
@@ -178,8 +200,11 @@ public class CadastroDAO extends BasicDAO {
                     }
                 } else {
                     mensagem.setCodigo(200);
-                    mensagem.setDescricao(rs.getString("erro"));
+                    mensagem.setDescricao("Usuário já ativo ou verificado");
                 }
+            } else {
+                mensagem.setCodigo(200);
+                mensagem.setDescricao(rs.getString("Usuário não pré cadastrado"));
             }
         } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new DAOException(e, 200);

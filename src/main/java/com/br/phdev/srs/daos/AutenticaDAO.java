@@ -98,7 +98,7 @@ public class AutenticaDAO extends BasicDAO {
             stmt.setString(1, sessaoId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                if (rs.getObject("id") != null) {
+                if (rs.getObject("id_usuario") != null) {
                     return true;
                 } else {
                     return false;

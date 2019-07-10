@@ -2,6 +2,36 @@
 
 ROTAS WANTED
 
+Todas as rotas:
+
+	- cliente/autenticar
+	- cliente/sair
+	- cliente/verificar-numero
+	- cliente/validar-numero
+	- cliente/reenviar-codigo
+	- cliente/cadastrar-token-alerta
+	- cliente/cadastrar
+	- cliente/verificar-sessao
+	- cliente/sem-autorizacao		
+	- cliente/meu-perfil
+	- cliente/listar-itens
+	- cliente/info-item
+	- cliente/existe-prepedido
+	- cliente/recuperar-prepedido
+	- cliente/remover-prepedido
+	- cliente/refazer-pedido
+	- cliente/pre-confirmar-pedido
+	- cliente/confirmar-pedido
+	- cliente/listar-pedidos
+	- cliente/info-pedido
+	- cliente/info-entrega
+	- cliente/listar-enderecos
+	- cliente/cadastrar-endereco
+	- cliente/remover-endereco
+	- cliente/listar-formas-pagamento
+	- cliente/anunciantes
+	- imagens/{idArquivo}	
+
 CLIENTE
 
 	cliente/autenticar
@@ -9,30 +39,12 @@ CLIENTE
 			{
 				"nomeUsuario" : "96991100443",
 				"senhaUsuario" : "root"
-			}
-		retorna:
-			{
-			    "codigo": 100,
-			    "descricao": null
-			}
-
-	cliente/sair
-		recebe:
-		retorna:
-			{
-			    "codigo": 100,
-			    "descricao": "Desconectado do sistema"
-			}
+			}	
 
 	cliente/verificar-numero
 		recebe:
 			{				
 				"telefone" : "96991100443"
-			}
-		retorna:
-			{
-			    "codigo": 100,
-			    "descricao": "Um código foi enviado para seu número. Insira esse código no aplicativo"
 			}
 
 	cliente/validar-numero
@@ -41,68 +53,42 @@ CLIENTE
 				"telefone" : "9699110044a",
 				"codigo" : "0E7470"
 			}
-		retorna:
-			{
-			    "codigo": 100,
-			    "descricao": "Numero verificado com sucesso. Agora falta apenas finalizar se ucadastro."
-			}
 			
 	cliente/reenviar-codigo
 		recebe:
 			{				
 				"telefone" : ""
 			}
-		retorna:
+
 	cliente/cadastrar-token-alerta
 		recebe:
 			{
-				"token" : ""
+				"token" : "ABCDE"
 			}
-		retorna:
+
 	cliente/cadastrar
 		recebe:
 			{
-				"nome" : "",
-				"cpf" : "",
-				"telefone" : "",
-				"email" : "",
-				"senhaUsuario" : ""
+				"nome" : "Algum nome",
+				"cpf" : "12345678910",
+				"telefone" : "9696969696",
+				"email" : "algumemail@email.com",
+				"senhaUsuario" : "qwert",
+				"codigo" : "50B927"
 			}
-		retorna:
-	cliente/verificar-sessao
-		recebe:
-		retorna:
-	cliente/sem-autorizacao
-		recebe:
-		retorna:
-	cliente/meu-perfil
-		recebe:
-		retorna:
-	cliente/listar-itens
-		recebe:
-		retorna:
+
 	cliente/info-item
 		recebe:
 			{
-				"id" : ""
+				"id" : 15
 			}
-		retorna:
-	cliente/existe-prepedido
-		recebe:
 
-		retorna:
-	cliente/recuperar-prepedido
-		recebe:
-		retorna:
-	cliente/remover-prepedido
-		recebe:
-		retorna:
 	cliente/refazer-pedido
 		recebe:
 			{
-				"id" : ""
+				"id" : 15
 			}
-		retorna:
+
 	cliente/pre-confirmar-pedido
 		recebe:
 			{
@@ -121,7 +107,7 @@ CLIENTE
 					]
 				]
 			}
-		retorna:
+
 	cliente/confirmar-pedido
 		recebe:
 			{
@@ -137,22 +123,13 @@ CLIENTE
 				],
 				"observacaoEntrega" : ""
 			}
-		retorna:
-	cliente/listar-pedidos
-		recebe:
-		retorna:
+
 	cliente/info-pedido
 		recebe:
 			{
 				"id" : ""
 			}
-		retorna:
-	cliente/info-entrega
-		recebe:
-		retorna:
-	cliente/listar-enderecos
-		recebe:
-		retorna:
+
 	cliente/cadastrar-endereco
 		recebe:
 			{
@@ -164,21 +141,11 @@ CLIENTE
 				"cep" : "",
 				"descricao" : ""
 			}
-		retorna:
+
 	cliente/remover-endereco
 		recebe:
 			{
-				"id" : ""
+				"id" : 15
 			}
-		retorna:
-	cliente/listar-formas-pagamento
-		recebe:
-		retorna:
-	cliente/anunciantes
-		recebe:
-		retorna:
-	imagens/{idArquivo}
-		recebe:
-		retorna:
 
 

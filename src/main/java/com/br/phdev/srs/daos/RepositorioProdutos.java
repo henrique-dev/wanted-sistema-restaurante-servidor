@@ -7,14 +7,11 @@ package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
-import com.br.phdev.srs.jdbc.FabricaConexao;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Variacao;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -107,7 +103,8 @@ public class RepositorioProdutos {
     }
 
     public void carregar(Connection conexao) throws DAOException {
-        try (PreparedStatement stmt = conexao.prepareStatement("CALL get_data_ultima_alteracao_base(?)")) {
+        String sql = "SELECT restaurante.ultima_modificacao_itens FROM restaurante WHERE restaurante.id_restaurante = ?";
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
             stmt.setLong(1, 1);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -134,7 +131,11 @@ public class RepositorioProdutos {
         this.itens.clear();
         this.complementos.clear();
         this.variacoes.clear();
-        try (PreparedStatement stmt = conexao.prepareStatement("CALL get_lista_itens_basico")) {
+        String sql = "SELECT item.id_item, item.nome, item.preco, item.modificavel, item.modificavel_ingrediente, "
+                        + " (select id_arquivo from item_arquivo where item_arquivo.id_item = item.id_item limit 1) id_arquivo "
+                        + " FROM item "
+                        + " ORDER BY item.id_item";
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Item item = new Item();
@@ -149,7 +150,8 @@ public class RepositorioProdutos {
                 this.itens.put(rs.getLong("id_item"), item);
             }
         }
-        try (PreparedStatement stmt = conexao.prepareStatement("CALL get_lista_complementos_basico")) {
+        sql = "SELECT id_complemento, nome, preco FROM complemento ORDER BY id_complemento";
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Complemento complemento = new Complemento();
@@ -159,8 +161,12 @@ public class RepositorioProdutos {
                 this.complementos.put(rs.getLong("id_complemento"), complemento);
             }
         }
-
-        try (PreparedStatement stmt = conexao.prepareStatement("CALL get_lista_variacoes")) {
+        sql = "SELECT variacao.id_variacao, variacao.nome, variacao.preco, variacao.ordem, grupo_variacao.id_item, "
+                + " grupo_variacao.nome nome_grupo, grupo_variacao.max, grupo_variacao.grupo "
+                + " FROM variacao "
+                + " LEFT JOIN grupo_variacao ON variacao.id_grupo_variacao = grupo_variacao.id_grupo_variacao "
+                + " ORDER BY grupo_variacao.id_item, grupo_variacao.grupo, variacao.ordem";
+        try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             List<GrupoVariacao> variacoesList = new ArrayList<>();
             long idItemAtual = -1;

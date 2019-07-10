@@ -6,11 +6,7 @@
  */
 package com.br.phdev.srs.daos;
 
-import com.br.phdev.srs.exceptions.DAOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  *
