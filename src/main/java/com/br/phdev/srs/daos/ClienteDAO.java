@@ -89,17 +89,20 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-
-    public ListaItens getItens() throws DAOException {
-        ListaItens listaItens = null;
+    
+    public ListaItens getItensFavoritos(Cliente cliente) throws DAOException {
+        ListaItens listaItens = new ListaItens();
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
-                        + " item.modificavel, item.modificavel_ingrediente, tipo.id_tipo, tipo.nome tipo_nome "
-                        + " FROM item "
+                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
+                        + " FROM itens_favoritos "
+                        + " LEFT JOIN item ON itens_favoritos.id_item = item.id_item "
                         + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                         + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
+                        + " WHERE itens_favoritos.id_cliente = ? "
                         + " order by item.id_item, genero.nome, tipo.id_tipo";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             List<Item> itens = new ArrayList<>();
             Set<Tipo> tipos = new HashSet<>();
@@ -140,6 +143,7 @@ public class ClienteDAO extends BasicDAO {
                     item.setId(rs.getLong("id_item"));
                     item.setNome(rs.getString("nome"));
                     item.setPreco(rs.getDouble("preco"));
+                    item.setTempoPreparo(rs.getString("tempo_preparo"));
                     item.setModificavel(rs.getBoolean("modificavel"));
                     item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
                     Genero genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
@@ -182,6 +186,195 @@ public class ClienteDAO extends BasicDAO {
         }
         return listaItens;
     }
+    
+    public void cadastrarItemFavorito(Cliente cliente, Item item) throws DAOException {
+        if (cliente == null || item == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (item.getId() <= 0) {
+            throw new DAOIncorrectData(300);
+        }        
+        String sql = "SELECT item.id_item, "
+                        + " (SELECT id_cliente FROM itens_favoritos i_f WHERE i_f.id_item = ? AND i_f.id_cliente = ?) id_cliente FROM item "
+                        + " LEFT JOIN itens_favoritos ON item.id_item = itens_favoritos.id_item "
+                        + " WHERE item.id_item = ?";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, item.getId());
+            stmt.setLong(2, cliente.getId());
+            stmt.setLong(3, item.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getString("id_cliente") == null) {
+                    sql = "INSERT INTO itens_favoritos VALUES (?,?)";
+                    try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, cliente.getId());
+                        stmt2.setLong(2, item.getId());
+                        stmt2.execute();
+                    } catch (SQLException e) {
+                        throw new DAOException(e, 200);
+                    }
+                }                
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+
+    public void removerItemFavorito(Cliente cliente, Item item) throws DAOException {
+        if (cliente == null || item == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (item.getId() <= 0) {
+            throw new DAOIncorrectData(300);
+        }
+        String sql = "DELETE FROM itens_favoritos WHERE id_cliente = ? AND id_item = ?";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+            stmt.setLong(1, cliente.getId());
+            stmt.setLong(2, item.getId());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public List<Genero> getGeneros() throws DAOException {
+        List<Genero> generos = new ArrayList<>();
+        String sql = "SELECT * FROM genero";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Genero genero = new Genero();
+                genero.setId(rs.getLong("id_genero"));
+                genero.setNome(rs.getString("nome"));
+                generos.add(genero);
+            }            
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return generos;
+    }    
+
+    public ListaItens getItens(Genero genero) throws DAOException {
+        ListaItens listaItens = new ListaItens();
+        String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
+                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
+                        + " FROM item "
+                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo ";
+        if (genero != null && genero.getId() > 0) {
+            sql += " WHERE item.id_genero = ?";
+        }
+        sql += " order by item.id_item, genero.nome, tipo.id_tipo";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            if (genero != null && genero.getId() > 0) {
+                stmt.setLong(1, genero.getId());
+            }            
+            ResultSet rs = stmt.executeQuery();
+            List<Item> itens = new ArrayList<>();
+            Set<Tipo> tipos = new HashSet<>();
+            Set<Genero> generos = new HashSet<>();
+            List<Genero> generos2 = new ArrayList<>();
+            Set<Foto> fotos = null;
+            Item item = new Item();
+            long pratoAtual = -1;
+            while (rs.next()) {
+                long idPrato = rs.getLong("id_item");
+                if (idPrato != pratoAtual) {
+                    if (pratoAtual != -1) {
+                        item.setTipos(tipos);
+                        sql = "SELECT arquivo.id_arquivo "
+                                + " FROM arquivo "
+                                + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                                + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                                + " WHERE item.id_item = ?";
+                        try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                            stmt2.setLong(1, pratoAtual);
+                            ResultSet rs2 = stmt2.executeQuery();
+                            fotos = new HashSet<>();
+                            while (rs2.next()) {
+                                Foto foto = new Foto();
+                                foto.setId(rs2.getLong("id_arquivo"));
+                                fotos.add(ServicoArmazenamento.setTamanho(foto));
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+
+                        item.setFotos(fotos);
+                        itens.add(item);
+                    }
+                    pratoAtual = idPrato;
+                    item = new Item();
+                    tipos = new HashSet<>();
+                    item.setId(rs.getLong("id_item"));
+                    item.setNome(rs.getString("nome"));
+                    item.setPreco(rs.getDouble("preco"));
+                    item.setTempoPreparo(rs.getString("tempo_preparo"));
+                    item.setModificavel(rs.getBoolean("modificavel"));
+                    item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
+                    genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
+                    item.setGenero(genero);
+                    generos.add(genero);
+                }
+                tipos.add(new Tipo(rs.getLong("id_tipo"), rs.getString("tipo_nome")));
+            }
+            if (pratoAtual != -1) {
+                item.setTipos(tipos);
+                // get_lista_arquivos
+                sql = "SELECT arquivo.id_arquivo "
+                                + " FROM arquivo "
+                                + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                                + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                                + " WHERE item.id_item = ?";
+                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, pratoAtual);
+                    ResultSet rs2 = stmt2.executeQuery();
+                    fotos = new HashSet<>();
+                    while (rs2.next()) {
+                        Foto foto = new Foto();
+                        foto.setId(rs2.getLong("id_arquivo"));
+                        fotos.add(ServicoArmazenamento.setTamanho(foto));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                item.setFotos(fotos);
+                itens.add(item);
+                listaItens = new ListaItens();
+                generos2.add(new Genero(0, "Todos"));
+                generos2.addAll(generos);
+                listaItens.setGeneros(generos2);
+                listaItens.setItens(itens);
+            }
+                        
+            sql = " SELECT item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
+                        + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
+                        + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
+            try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
+                ResultSet rs2 = stmt2.executeQuery();
+                List<Item> itensDia = new ArrayList<>();
+                while (rs2.next()) {
+                    Item itemDia = new Item();
+                    itemDia.setId(rs2.getLong("id_item"));
+                    itemDia.setNome(rs2.getString("nome"));
+                    fotos = new HashSet<>();
+                    Foto foto = new Foto();
+                    foto.setId(rs2.getLong("id_arquivo"));
+                    fotos.add(ServicoArmazenamento.setTamanho(foto));
+                    itemDia.setFotos(fotos);
+                    itensDia.add(itemDia);
+                }
+                listaItens.setItensDia(itensDia);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return listaItens;
+    }
 
     public Item getItem(Item item) throws DAOException {
         if (item == null) {
@@ -192,7 +385,7 @@ public class ClienteDAO extends BasicDAO {
         }
         // get_item
         String sql = "SELECT item.id_item, item.nome, item.descricao, item.preco, genero.id_genero, genero.nome genero, "
-                        + " item.modificavel, item.modificavel_ingrediente, tipo.id_tipo, tipo.nome tipo_nome "
+                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
                         + " FROM item "
                         + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                         + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
@@ -217,6 +410,7 @@ public class ClienteDAO extends BasicDAO {
                     item.setNome(rs.getString("nome"));
                     item.setPreco(rs.getDouble("preco"));
                     item.setDescricao(rs.getString("descricao"));
+                    item.setTempoPreparo(rs.getString("tempo_preparo"));
                     item.setModificavel(rs.getBoolean("modificavel"));
                     item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
                     Genero genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
@@ -730,15 +924,15 @@ public class ClienteDAO extends BasicDAO {
         }
     }
 
-    public List<Pedido2> getPedidos(Cliente cliente) throws DAOException {
+    public List<Pedido2> getPedidos(Cliente cliente) throws DAOException, IOException {
         List<Pedido2> pedidos = null;
-        String sql = "SELECT pedido.id_pedido, pedido.datapedido, pedido.precototal, pedido.id_endereco, pedido.estado, "
+        String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, "
                         + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
                         + " FROM pedido "
                         + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                         + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                         + " WHERE pedido.id_cliente = ? "
-                        + " ORDER BY pedido.datapedido DESC";
+                        + " ORDER BY pedido.data DESC";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
@@ -746,7 +940,7 @@ public class ClienteDAO extends BasicDAO {
             while (rs.next()) {
                 Pedido2 pedido = new Pedido2();
                 pedido.setId(rs.getLong("id_pedido"));
-                String time = new SimpleDateFormat("dd/MM/YYYY - HH:mm").format(new Date(((Timestamp) rs.getObject("datapedido", Timestamp.class)).getTime()));
+                String time = new SimpleDateFormat("dd/MM/YYYY - HH:mm").format(new Date(((Timestamp) rs.getObject("data", Timestamp.class)).getTime()));
                 pedido.setData(time);
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setFormaPagamento(new FormaPagamento(0, rs.getString("formapagamento_descricao")));
@@ -768,6 +962,10 @@ public class ClienteDAO extends BasicDAO {
                         pedido.setStatus("Entregue");
                         break;                        
                 }                
+                ObjectMapper mapeador = new ObjectMapper();
+                List<ItemPedidoFacil> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedidoFacil>>() {
+                });
+                pedido.setItens(itens);
                 pedidos.add(pedido);
             }
         } catch (SQLException e) {

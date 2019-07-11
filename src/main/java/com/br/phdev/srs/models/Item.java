@@ -22,6 +22,7 @@ public class Item {
     private String descricao;
     private double preco;
     private Genero genero;
+    private String tempoPreparo;
     private Set<Tipo> tipos;
     private boolean modificavel;    
     private Set<Complemento> complementos;
@@ -141,6 +142,14 @@ public class Item {
     public void setModificavelIngrediente(boolean modificavelIngrediente) {
         this.modificavelIngrediente = modificavelIngrediente;
     }        
+
+    public String getTempoPreparo() {
+        return tempoPreparo;
+    }
+
+    public void setTempoPreparo(String tempoPreparo) {
+        this.tempoPreparo = tempoPreparo;
+    }
 
     @Override
     public String toString() {

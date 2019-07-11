@@ -18,6 +18,7 @@ public class ListaItens {
     private double frete;
     private List<Genero> generos;
     private List<Item> itens;
+    private List<Item> itensDia;
 
     public List<Genero> getGeneros() {
         return generos;
@@ -42,5 +43,13 @@ public class ListaItens {
     public void setFrete(double frete) {
         this.frete = frete;
     }        
+
+    public List<Item> getItensDia() {
+        return itensDia;
+    }
+
+    public void setItensDia(List<Item> itensDia) {
+        this.itensDia = itensDia;
+    }
     
 }

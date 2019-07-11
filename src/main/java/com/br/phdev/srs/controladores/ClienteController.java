@@ -21,6 +21,7 @@ import com.br.phdev.srs.models.ConfirmacaoPedido;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
+import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.ItemPedido;
@@ -42,6 +43,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -307,15 +310,112 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(cliente, httpHeaders, httpStatus);
     }
+    
+    @PostMapping(value = "cliente/listar-favoritos")
+    public ResponseEntity<ListaItens> getFavoritos(HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        ListaItens listaItens = null;        
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                listaItens = clienteDAO.getItensFavoritos(cliente);
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
+    }
+    
+    @PostMapping("cliente/cadastrar-favorito")
+    public ResponseEntity<Mensagem> cadastrarEndereco(@RequestBody Item item, HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                clienteDAO.cadastrarItemFavorito(cliente, item);
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Item favoritado com sucesso");
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(200);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+
+    @PostMapping("cliente/remover-favorito")
+    public ResponseEntity<Mensagem> removerEndereco(@RequestBody Item item, HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                clienteDAO.removerItemFavorito(cliente, item);
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Item desfavoritado com sucesso");
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(200);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+    
+    @PostMapping(value = "cliente/listar-generos")
+    public ResponseEntity<List<Genero>> getGeneros(HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        List<Genero> listaGeneros = null;
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                listaGeneros = clienteDAO.getGeneros();
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(listaGeneros, httpHeaders, httpStatus);
+    }        
 
     @PostMapping(value = "cliente/listar-itens")
-    public ResponseEntity<ListaItens> getPratos(HttpSession sessao, HttpServletRequest req) {
+    public ResponseEntity<ListaItens> getPratos(@RequestBody Genero genero, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
-                listaItens = clienteDAO.getItens();
+                listaItens = clienteDAO.getItens(genero);
                 if (listaItens != null) {
                     listaItens.setFrete(RepositorioProdutos.getInstancia().frete);
                 }
@@ -330,7 +430,7 @@ public class ClienteController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
-    }
+    }        
 
     @PostMapping(value = "cliente/info-item")
     public ResponseEntity<Item> infoPrato(@RequestBody Item item) {
@@ -621,6 +721,8 @@ public class ClienteController {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (IOException ex) {
+            Logger.getLogger(ClienteController.class.getName()).log(Level.SEVERE, null, ex);
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

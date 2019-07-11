@@ -32,6 +32,13 @@ Todas as rotas:
 	- cliente/anunciantes
 	- imagens/{idArquivo}	
 
+	10/07/2019
+	- cliente/listar-favoritos
+	- cliente/cadastrar-favorito
+	- cliente/remover-favorito
+	- cliente/listar-itens
+	- cliente/listar-generos
+
 CLIENTE
 
 	cliente/autenticar
@@ -148,4 +155,21 @@ CLIENTE
 				"id" : 15
 			}
 
+	10/07/2019	
+	cliente/cadastrar-favorito
+		recebe:
+			{
+				"id" : 15
+			}
 
+	cliente/remover-favorito
+		recebe:
+			{
+				"id" : 15
+			}
+
+	cliente/listar-itens
+		recebe:
+			{
+				"id" : 0
+			}
