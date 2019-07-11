@@ -14,6 +14,7 @@ public class Genero {
     
     private long id;
     private String nome;
+    private Foto foto;
 
     public Genero() {
     }        
@@ -37,7 +38,15 @@ public class Genero {
 
     public void setNome(String nome) {
         this.nome = nome;
-    }        
+    }
+
+    public Foto getFoto() {
+        return foto;
+    }
+
+    public void setFoto(Foto foto) {
+        this.foto = foto;
+    }
     
     @Override
     public boolean equals(Object obj) {
@@ -45,8 +54,7 @@ public class Genero {
         if (!(obj instanceof Genero)) return false;
         if (obj == this) return true;
         return this.id == ((Genero)obj).id;
-    }
-    
+    }    
     
     @Override
     public int hashCode() {
