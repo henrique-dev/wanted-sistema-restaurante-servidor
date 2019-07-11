@@ -239,13 +239,19 @@ public class ClienteDAO extends BasicDAO {
     
     public List<Genero> getGeneros() throws DAOException {
         List<Genero> generos = new ArrayList<>();
-        String sql = "SELECT * FROM genero";
+        String sql = "SELECT DISTINCT genero.id_genero, genero.nome, item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
+                        + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
+                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                        + " GROUP BY id_genero ORDER BY RAND()";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Genero genero = new Genero();
                 genero.setId(rs.getLong("id_genero"));
                 genero.setNome(rs.getString("nome"));
+                Foto foto = new Foto();
+                foto.setId(rs.getLong("id_arquivo"));
+                genero.setFoto(ServicoArmazenamento.setTamanho(foto));
                 generos.add(genero);
             }            
         } catch (SQLException e) {
@@ -349,7 +355,7 @@ public class ClienteDAO extends BasicDAO {
                 listaItens.setItens(itens);
             }
                         
-            sql = " SELECT item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
+            /*sql = " SELECT item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
                         + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
                         + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
             try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
@@ -369,7 +375,7 @@ public class ClienteDAO extends BasicDAO {
                 listaItens.setItensDia(itensDia);
             } catch (SQLException e) {
                 e.printStackTrace();
-            }
+            }*/
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
