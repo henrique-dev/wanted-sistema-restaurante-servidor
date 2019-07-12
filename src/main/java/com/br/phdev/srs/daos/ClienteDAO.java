@@ -276,7 +276,7 @@ public class ClienteDAO extends BasicDAO {
             sql += " WHERE item.id_genero = ?";
         }
         sql += " order by item.id_item, genero.nome LIMIT ?, 10";
-        System.out.println(sql);
+        System.out.println(sql); 
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             if (genero != null && genero.getId() > 0) {
                 stmt.setLong(1, genero.getId());
