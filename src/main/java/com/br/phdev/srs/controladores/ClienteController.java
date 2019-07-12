@@ -14,6 +14,7 @@ import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.PaymentException;
 import com.br.phdev.srs.jdbc.FabricaConexao;
 import com.br.phdev.srs.models.Cadastro;
+import com.br.phdev.srs.models.Carrinho;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Codigo;
 import com.br.phdev.srs.models.ConfirmaPedido;
@@ -408,14 +409,14 @@ public class ClienteController {
         return new ResponseEntity<>(listaGeneros, httpHeaders, httpStatus);
     }        
 
-    @PostMapping(value = "cliente/listar-itens")
-    public ResponseEntity<ListaItens> getPratos(@RequestBody Genero genero, HttpSession sessao, HttpServletRequest req) {
+    @PostMapping("cliente/listar-itens")
+    public ResponseEntity<ListaItens> getPratos(@RequestBody Genero genero, Integer pg, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
-                listaItens = clienteDAO.getItens(genero);
+                listaItens = clienteDAO.getItens(genero, pg);
                 if (listaItens != null) {
                     listaItens.setFrete(RepositorioProdutos.getInstancia().frete);
                 }
@@ -553,6 +554,32 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(itens, httpHeaders, httpStatus);
     }
+    
+    @PostMapping(value = "cliente/carrinho")
+    public ResponseEntity<Carrinho> carrinho(HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Carrinho carrinho = new Carrinho();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                List<Endereco> enderecos = clienteDAO.getEnderecos(cliente);
+                List<FormaPagamento> formaPagamentos = clienteDAO.getFormasPagamento(cliente);
+                carrinho.setFormaPagamentos(formaPagamentos);
+                carrinho.setEnderecos(enderecos);
+                carrinho.setFrete(new BigDecimal(RepositorioProdutos.getInstancia().frete));
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }        
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(carrinho, httpHeaders, httpStatus);
+    }
 
     @PostMapping(value = "cliente/pre-confirmar-pedido")
     public ResponseEntity<ConfirmaPedido> preConfirmaPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao, HttpServletRequest req) {
@@ -560,12 +587,12 @@ public class ClienteController {
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                //Cliente cliente = (Cliente) sessao.getAttribute("cliente");
                 clienteDAO.inserirPrecos(confirmaPedido);
-                List<Endereco> enderecos = clienteDAO.getEnderecos(cliente);
-                List<FormaPagamento> formaPagamentos = clienteDAO.getFormasPagamento(cliente);
-                confirmaPedido.setFormaPagamentos(formaPagamentos);
-                confirmaPedido.setEnderecos(enderecos);
+                //List<Endereco> enderecos = clienteDAO.getEnderecos(cliente);
+                //List<FormaPagamento> formaPagamentos = clienteDAO.getFormasPagamento(cliente);
+                //confirmaPedido.setFormaPagamentos(formaPagamentos);
+                //confirmaPedido.setEnderecos(enderecos);
                 confirmaPedido.calcularPrecoTotal(RepositorioProdutos.getInstancia().frete);
 
                 {

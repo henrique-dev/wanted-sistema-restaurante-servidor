@@ -260,122 +260,90 @@ public class ClienteDAO extends BasicDAO {
         return generos;
     }    
 
-    public ListaItens getItens(Genero genero) throws DAOException {
+    public ListaItens getItens(Genero genero, Integer pagina) throws DAOException {
         ListaItens listaItens = new ListaItens();
+        if (pagina == null || pagina < 2) {
+            pagina = 0;
+        } else {
+            pagina *= 10;
+        }
+        System.out.println(pagina);        
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
-                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
+                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
                         + " FROM item "
-                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
-                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
-                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo ";
+                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero ";
         if (genero != null && genero.getId() > 0) {
             sql += " WHERE item.id_genero = ?";
         }
-        sql += " order by item.id_item, genero.nome, tipo.id_tipo";
+        sql += " order by item.id_item, genero.nome LIMIT ?, 10";
+        System.out.println(sql);
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             if (genero != null && genero.getId() > 0) {
                 stmt.setLong(1, genero.getId());
+                stmt.setInt(2, pagina);
+            } else {
+                stmt.setInt(1, pagina);
             }            
             ResultSet rs = stmt.executeQuery();
-            List<Item> itens = new ArrayList<>();
-            Set<Tipo> tipos = new HashSet<>();
+            List<Item> itens = new ArrayList<>();            
             Set<Genero> generos = new HashSet<>();
-            List<Genero> generos2 = new ArrayList<>();
-            Set<Foto> fotos = null;
-            Item item = new Item();
-            long pratoAtual = -1;
+            List<Genero> generos2 = new ArrayList<>();            
             while (rs.next()) {
-                long idPrato = rs.getLong("id_item");
-                if (idPrato != pratoAtual) {
-                    if (pratoAtual != -1) {
-                        item.setTipos(tipos);
-                        sql = "SELECT arquivo.id_arquivo "
-                                + " FROM arquivo "
-                                + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
-                                + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
-                                + " WHERE item.id_item = ?";
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
-                            stmt2.setLong(1, pratoAtual);
-                            ResultSet rs2 = stmt2.executeQuery();
-                            fotos = new HashSet<>();
-                            while (rs2.next()) {
-                                Foto foto = new Foto();
-                                foto.setId(rs2.getLong("id_arquivo"));
-                                fotos.add(ServicoArmazenamento.setTamanho(foto));
-                            }
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-
-                        item.setFotos(fotos);
-                        itens.add(item);
-                    }
-                    pratoAtual = idPrato;
-                    item = new Item();
-                    tipos = new HashSet<>();
-                    item.setId(rs.getLong("id_item"));
-                    item.setNome(rs.getString("nome"));
-                    item.setPreco(rs.getDouble("preco"));
-                    item.setTempoPreparo(rs.getString("tempo_preparo"));
-                    item.setModificavel(rs.getBoolean("modificavel"));
-                    item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
-                    genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
-                    item.setGenero(genero);
-                    generos.add(genero);
-                }
-                tipos.add(new Tipo(rs.getLong("id_tipo"), rs.getString("tipo_nome")));
-            }
-            if (pratoAtual != -1) {
-                item.setTipos(tipos);
-                // get_lista_arquivos
+                Item item = new Item();
+                item.setId(rs.getLong("id_item"));
+                item.setNome(rs.getString("nome"));
+                item.setPreco(rs.getDouble("preco"));
+                item.setTempoPreparo(rs.getString("tempo_preparo"));
+                item.setModificavel(rs.getBoolean("modificavel"));
+                item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
+                genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
+                item.setGenero(genero);
+                generos.add(genero);
+                
                 sql = "SELECT arquivo.id_arquivo "
-                                + " FROM arquivo "
-                                + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
-                                + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
-                                + " WHERE item.id_item = ?";
+                        + " FROM arquivo "
+                        + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                        + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                        + " WHERE item.id_item = ?";
                 try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
-                    stmt2.setLong(1, pratoAtual);
+                    stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
-                    fotos = new HashSet<>();
+                    Set<Foto> fotos = new HashSet<>();
                     while (rs2.next()) {
                         Foto foto = new Foto();
                         foto.setId(rs2.getLong("id_arquivo"));
                         fotos.add(ServicoArmazenamento.setTamanho(foto));
                     }
+                    item.setFotos(fotos);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-
-                item.setFotos(fotos);
-                itens.add(item);
-                listaItens = new ListaItens();
-                generos2.add(new Genero(0, "Todos"));
-                generos2.addAll(generos);
-                listaItens.setGeneros(generos2);
-                listaItens.setItens(itens);
-            }
-                        
-            /*sql = " SELECT item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
-                        + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
-                        + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
-            try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
-                ResultSet rs2 = stmt2.executeQuery();
-                List<Item> itensDia = new ArrayList<>();
-                while (rs2.next()) {
-                    Item itemDia = new Item();
-                    itemDia.setId(rs2.getLong("id_item"));
-                    itemDia.setNome(rs2.getString("nome"));
-                    fotos = new HashSet<>();
-                    Foto foto = new Foto();
-                    foto.setId(rs2.getLong("id_arquivo"));
-                    fotos.add(ServicoArmazenamento.setTamanho(foto));
-                    itemDia.setFotos(fotos);
-                    itensDia.add(itemDia);
+                
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
+                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
+                        + " WHERE item.id_item = ?";
+                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, rs.getLong("id_item"));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    Set<Tipo> tipos = new HashSet<>();
+                    while (rs2.next()) {
+                        Tipo tipo = new Tipo();
+                        tipo.setId(rs2.getLong("id_tipo"));
+                        tipo.setNome(rs2.getString("nome"));
+                        tipos.add(tipo);
+                    }
+                    item.setTipos(tipos);
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                listaItens.setItensDia(itensDia);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }*/
+                itens.add(item);
+            }
+            listaItens = new ListaItens();
+            generos2.add(new Genero(0, "Todos"));
+            generos2.addAll(generos);
+            listaItens.setGeneros(generos2);
+            listaItens.setItens(itens);
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }

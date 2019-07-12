@@ -39,6 +39,9 @@ Todas as rotas:
 	- cliente/listar-itens
 	- cliente/listar-generos
 
+	11/07/2019
+	- cliente/carrinho
+
 CLIENTE
 
 	cliente/autenticar
