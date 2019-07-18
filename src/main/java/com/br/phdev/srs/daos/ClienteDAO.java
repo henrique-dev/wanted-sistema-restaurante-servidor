@@ -260,31 +260,59 @@ public class ClienteDAO extends BasicDAO {
         return generos;
     }    
 
-    public ListaItens getItens(Genero genero, Integer pagina) throws DAOException {
+    public ListaItens getItens(Cliente cliente, Genero genero, Integer pagina, String buscar) throws DAOException {
         ListaItens listaItens = new ListaItens();
-        if (pagina == null || pagina < 2) {
+        pagina--;
+        if (pagina == null || pagina < 1) {
             pagina = 0;
         } else {
             pagina *= 10;
-        }
-        System.out.println(pagina);        
-        String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
+        }   
+        String sql = "SELECT * FROM itens_favoritos WHERE id_cliente = ?";
+        Set<Long> IdItensFavoritos = new HashSet<>();
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {            
+            stmt.setLong(1, 10);
+            ResultSet rs = stmt.executeQuery();
+            System.out.println(rs.getWarnings());
+            while (rs.next()) {
+                IdItensFavoritos.add(rs.getLong("id_item"));
+                System.out.println("here");
+            }            
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }        
+        sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
                         + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
                         + " FROM item "
                         + " LEFT JOIN genero ON item.id_genero = genero.id_genero ";
         if (genero != null && genero.getId() > 0) {
-            sql += " WHERE item.id_genero = ?";
-        }
-        sql += " order by item.id_item, genero.nome LIMIT ?, 10";
-        System.out.println(sql); 
+            sql += " WHERE item.id_genero = ? ";
+            if (buscar != null && !buscar.trim().equals("")) {
+                sql += " AND item.nome LIKE ? ";
+            }
+        } else {
+            if (buscar != null && !buscar.trim().equals("")) {
+                sql += " WHERE item.nome LIKE ? ";
+            }
+        }        
+        sql += " order by item.id_item, genero.nome LIMIT ?, 10";        
+        System.out.println(sql);
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            int index = 1;
             if (genero != null && genero.getId() > 0) {
-                stmt.setLong(1, genero.getId());
-                stmt.setInt(2, pagina);
+                stmt.setLong(index++, genero.getId());
+                if (buscar != null && !buscar.trim().equals("")) {
+                    stmt.setString(index++, "%" + buscar + "%");
+                }
+                stmt.setInt(index++, pagina);                
             } else {
-                stmt.setInt(1, pagina);
-            }            
+                if (buscar != null && !buscar.trim().equals("")) {
+                    stmt.setString(index++, "%" + buscar + "%");
+                }
+                stmt.setInt(index++, pagina);                
+            }                        
             ResultSet rs = stmt.executeQuery();
+            System.out.println(rs.getStatement());
             List<Item> itens = new ArrayList<>();            
             Set<Genero> generos = new HashSet<>();
             List<Genero> generos2 = new ArrayList<>();            
@@ -299,6 +327,9 @@ public class ClienteDAO extends BasicDAO {
                 genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
                 item.setGenero(genero);
                 generos.add(genero);
+                if (IdItensFavoritos.contains(item.getId())) {
+                    item.setFavorito(true);
+                }
                 
                 sql = "SELECT arquivo.id_arquivo "
                         + " FROM arquivo "

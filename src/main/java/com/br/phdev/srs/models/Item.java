@@ -23,6 +23,7 @@ public class Item {
     private double preco;
     private Genero genero;
     private String tempoPreparo;
+    private boolean favorito;
     private Set<Tipo> tipos;
     private boolean modificavel;    
     private Set<Complemento> complementos;
@@ -149,6 +150,14 @@ public class Item {
 
     public void setTempoPreparo(String tempoPreparo) {
         this.tempoPreparo = tempoPreparo;
+    }
+
+    public boolean isFavorito() {
+        return favorito;
+    }
+
+    public void setFavorito(boolean favorito) {
+        this.favorito = favorito;
     }
 
     @Override
