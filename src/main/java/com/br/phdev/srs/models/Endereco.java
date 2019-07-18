@@ -20,6 +20,7 @@ public class Endereco {
     private String cidade;
     private String cep;
     private String descricao;
+    private boolean favorito;
 
     public Endereco() {
     }        
@@ -98,6 +99,14 @@ public class Endereco {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }        
+
+    public boolean isFavorito() {
+        return favorito;
+    }
+
+    public void setFavorito(boolean favorito) {
+        this.favorito = favorito;
+    }
 
     @Override
     public String toString() {

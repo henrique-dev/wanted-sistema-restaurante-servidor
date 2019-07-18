@@ -242,7 +242,8 @@ public class ClienteDAO extends BasicDAO {
         String sql = "SELECT genero.id_genero, genero.nome, item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
                         + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
                         + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
-                        + " GROUP BY id_genero ORDER BY RAND()";
+                        + " GROUP BY id_genero ORDER BY genero.nome";
+        System.out.println(sql);
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -532,7 +533,7 @@ public class ClienteDAO extends BasicDAO {
         }
         List<Endereco> enderecos = null;
         // get_lista_enderecos
-        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao "
+        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
                 + " FROM endereco WHERE endereco.id_cliente = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
@@ -548,6 +549,7 @@ public class ClienteDAO extends BasicDAO {
                 endereco.setComplemento(rs.getString("complemento"));
                 endereco.setCep(rs.getString("cep"));
                 endereco.setDescricao(rs.getString("descricao"));
+                endereco.setFavorito(rs.getBoolean("favorito"));
                 enderecos.add(endereco);
             }
         } catch (SQLException e) {
@@ -564,7 +566,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         Endereco enderecoRetorno = null;
-        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao "
+        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
                         + " FROM endereco WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
         // get_endereco
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
@@ -581,6 +583,7 @@ public class ClienteDAO extends BasicDAO {
                 enderecoRetorno.setComplemento(rs.getString("complemento"));
                 enderecoRetorno.setCep(rs.getString("cep"));
                 enderecoRetorno.setDescricao(rs.getString("descricao"));
+                enderecoRetorno.setFavorito(rs.getBoolean("favorito"));
             }
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
@@ -596,7 +599,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         List<FormaPagamento> formaPagamentos = null;
-        String sql = "SELECT id_formapagamento, descricao FROM formapagamento WHERE formapagamento.id_cliente = ?";
+        String sql = "SELECT id_formapagamento, descricao FROM formapagamento";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
@@ -1025,7 +1028,7 @@ public class ClienteDAO extends BasicDAO {
         }
     }
 
-    synchronized public void cadastrarEndereco(Cliente cliente, Endereco endereco) throws DAOException {
+    public void cadastrarEndereco(Cliente cliente, Endereco endereco) throws DAOException {
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1038,7 +1041,7 @@ public class ClienteDAO extends BasicDAO {
                 || endereco.getNumero().isEmpty() || endereco.getCep().isEmpty() || endereco.getCidade().isEmpty()) {
             throw new DAOIncorrectData(301);
         }
-        String sql = "INSERT INTO endereco VALUES (default, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO endereco VALUES (default, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setString(2, endereco.getLogradouro());
@@ -1048,13 +1051,14 @@ public class ClienteDAO extends BasicDAO {
             stmt.setString(6, endereco.getCidade());
             stmt.setString(7, endereco.getCep());
             stmt.setString(8, endereco.getDescricao());
+            stmt.setBoolean(8, false);
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
     }
 
-    synchronized public void removerEndereco(Cliente cliente, Endereco endereco) throws DAOException {
+    public void removerEndereco(Cliente cliente, Endereco endereco) throws DAOException {
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1077,6 +1081,31 @@ public class ClienteDAO extends BasicDAO {
                     stmt2.execute();
                 }
             }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public void favoritarEndereco(Cliente cliente, Endereco endereco) throws DAOIncorrectData, DAOException {
+        if (cliente == null || endereco == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (endereco.getId() <= 0) {
+            throw new DAOIncorrectData(300);
+        }
+        String sql = "UPDATE endereco SET favorito = false WHERE id_cliente = ?";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+            stmt.setLong(1, cliente.getId());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+        
+        sql = "UPDATE endereco SET favorito = true WHERE id_cliente = ? AND id_endereco = ?";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+            stmt.setLong(1, cliente.getId());
+            stmt.setLong(2, endereco.getId());
+            stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }

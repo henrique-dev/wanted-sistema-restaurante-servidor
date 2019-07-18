@@ -855,6 +855,33 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
     }
+    
+    @PostMapping("cliente/favoritar-endereco")
+    public ResponseEntity<Mensagem> favoritarEndereco(@RequestBody Endereco endereco, HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                clienteDAO.favoritarEndereco(cliente, endereco);
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Endereço favoritado com sucesso");
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(200);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
 
     @PostMapping(value = "cliente/listar-formas-pagamento")
     public ResponseEntity<List<FormaPagamento>> listarFormasPagamento(HttpSession sessao) {
