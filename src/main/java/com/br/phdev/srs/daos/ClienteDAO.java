@@ -272,13 +272,13 @@ public class ClienteDAO extends BasicDAO {
         String sql = "SELECT * FROM itens_favoritos WHERE id_cliente = ?";
         Set<Long> IdItensFavoritos = new HashSet<>();
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {            
-            stmt.setLong(1, 10);
+            stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
-            System.out.println(rs.getWarnings());
             while (rs.next()) {
                 IdItensFavoritos.add(rs.getLong("id_item"));
-                System.out.println("here");
-            }            
+                System.out.println(rs.getLong("id_item"));
+                
+            }
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }        
@@ -329,6 +329,7 @@ public class ClienteDAO extends BasicDAO {
                 item.setGenero(genero);
                 generos.add(genero);
                 if (IdItensFavoritos.contains(item.getId())) {
+                    System.out.println(item.getId());
                     item.setFavorito(true);
                 }
                 
@@ -602,7 +603,6 @@ public class ClienteDAO extends BasicDAO {
         String sql = "SELECT id_formapagamento, descricao FROM formapagamento";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             formaPagamentos = new ArrayList<>();
             while (rs.next()) {
