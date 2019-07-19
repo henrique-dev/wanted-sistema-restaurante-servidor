@@ -52,22 +52,22 @@ public class ClienteDAO extends BasicDAO {
 
     public ClienteDAO(Connection conexao) {
         super(conexao);
-    }        
+    }
 
     public void cadastrarTokenAlerta(Cliente cliente, String token) throws DAOException {
         if (cliente == null) {
             throw new DAOException("Erro", 300);
-        }        
+        }
         String sql = "UPDATE usuario SET usuario.token_websocket = ? WHERE usuario.id_usuario = "
-                        + " (SELECT cliente.id_usuario FROM cliente WHERE cliente.id_cliente = ?)";
+                + " (SELECT cliente.id_usuario FROM cliente WHERE cliente.id_cliente = ?)";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setString(1, token);
-            stmt.setLong(2, cliente.getId());            
+            stmt.setLong(2, cliente.getId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
-    }    
+    }
 
     public void getCliente(Cliente cliente) throws DAOException {
         String sql = "SELECT nome, cpf, telefone, email"
@@ -89,18 +89,18 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public ListaItens getItensFavoritos(Cliente cliente) throws DAOException {
         ListaItens listaItens = new ListaItens();
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
-                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
-                        + " FROM itens_favoritos "
-                        + " LEFT JOIN item ON itens_favoritos.id_item = item.id_item "
-                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
-                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
-                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
-                        + " WHERE itens_favoritos.id_cliente = ? "
-                        + " order by item.id_item, genero.nome, tipo.id_tipo";
+                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
+                + " FROM itens_favoritos "
+                + " LEFT JOIN item ON itens_favoritos.id_item = item.id_item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
+                + " WHERE itens_favoritos.id_cliente = ? "
+                + " order by item.id_item, genero.nome, tipo.id_tipo";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
@@ -156,10 +156,10 @@ public class ClienteDAO extends BasicDAO {
                 item.setTipos(tipos);
                 // get_lista_arquivos
                 sql = "SELECT arquivo.id_arquivo "
-                                + " FROM arquivo "
-                                + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
-                                + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
-                                + " WHERE item.id_item = ?";
+                        + " FROM arquivo "
+                        + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                        + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                        + " WHERE item.id_item = ?";
                 try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, pratoAtual);
                     ResultSet rs2 = stmt2.executeQuery();
@@ -186,18 +186,18 @@ public class ClienteDAO extends BasicDAO {
         }
         return listaItens;
     }
-    
+
     public void cadastrarItemFavorito(Cliente cliente, Item item) throws DAOException {
         if (cliente == null || item == null) {
             throw new DAOIncorrectData(300);
         }
         if (item.getId() <= 0) {
             throw new DAOIncorrectData(300);
-        }        
+        }
         String sql = "SELECT item.id_item, "
-                        + " (SELECT id_cliente FROM itens_favoritos i_f WHERE i_f.id_item = ? AND i_f.id_cliente = ?) id_cliente FROM item "
-                        + " LEFT JOIN itens_favoritos ON item.id_item = itens_favoritos.id_item "
-                        + " WHERE item.id_item = ?";
+                + " (SELECT id_cliente FROM itens_favoritos i_f WHERE i_f.id_item = ? AND i_f.id_cliente = ?) id_cliente FROM item "
+                + " LEFT JOIN itens_favoritos ON item.id_item = itens_favoritos.id_item "
+                + " WHERE item.id_item = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, item.getId());
             stmt.setLong(2, cliente.getId());
@@ -213,7 +213,7 @@ public class ClienteDAO extends BasicDAO {
                     } catch (SQLException e) {
                         throw new DAOException(e, 200);
                     }
-                }                
+                }
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -228,7 +228,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(300);
         }
         String sql = "DELETE FROM itens_favoritos WHERE id_cliente = ? AND id_item = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, item.getId());
             stmt.execute();
@@ -236,13 +236,13 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public List<Genero> getGeneros() throws DAOException {
         List<Genero> generos = new ArrayList<>();
         String sql = "SELECT genero.id_genero, genero.nome, item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
-                        + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
-                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
-                        + " GROUP BY id_genero ORDER BY genero.nome";
+                + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                + " GROUP BY id_genero ORDER BY genero.nome";
         System.out.println(sql);
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -254,12 +254,12 @@ public class ClienteDAO extends BasicDAO {
                 foto.setId(rs.getLong("id_arquivo"));
                 genero.setFoto(ServicoArmazenamento.setTamanho(foto));
                 generos.add(genero);
-            }            
+            }
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return generos;
-    }    
+    }
 
     public ListaItens getItens(Cliente cliente, Genero genero, Integer pagina, String buscar) throws DAOException {
         ListaItens listaItens = new ListaItens();
@@ -268,24 +268,12 @@ public class ClienteDAO extends BasicDAO {
             pagina = 0;
         } else {
             pagina *= 10;
-        }   
-        String sql = "SELECT * FROM itens_favoritos WHERE id_cliente = ?";
-        Set<Long> IdItensFavoritos = new HashSet<>();
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {            
-            stmt.setLong(1, cliente.getId());
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                IdItensFavoritos.add(rs.getLong("id_item"));
-                System.out.println(rs.getLong("id_item"));
-                
-            }
-        } catch (SQLException e) {
-            throw new DAOException("Erro ao recuperar informações", e, 200);
-        }        
-        sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
-                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
-                        + " FROM item "
-                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero ";
+        }
+        String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
+                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, IF(itens_favoritos.id_item IS NULL, 0, 1) favorito "
+                + " FROM item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                + " LEFT JOIN itens_favoritos ON itens_favoritos.id_item = item.id_item AND itens_favoritos.id_cliente = ? ";
         if (genero != null && genero.getId() > 0) {
             sql += " WHERE item.id_genero = ? ";
             if (buscar != null && !buscar.trim().equals("")) {
@@ -295,28 +283,28 @@ public class ClienteDAO extends BasicDAO {
             if (buscar != null && !buscar.trim().equals("")) {
                 sql += " WHERE item.nome LIKE ? ";
             }
-        }        
-        sql += " order by item.id_item, genero.nome LIMIT ?, 10";        
-        System.out.println(sql);
+        }
+        sql += " order by item.id_item, genero.nome LIMIT ?, 10";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             int index = 1;
+            stmt.setLong(index++, cliente.getId());
             if (genero != null && genero.getId() > 0) {
                 stmt.setLong(index++, genero.getId());
                 if (buscar != null && !buscar.trim().equals("")) {
                     stmt.setString(index++, "%" + buscar + "%");
                 }
-                stmt.setInt(index++, pagina);                
+                stmt.setInt(index++, pagina);
             } else {
                 if (buscar != null && !buscar.trim().equals("")) {
                     stmt.setString(index++, "%" + buscar + "%");
                 }
-                stmt.setInt(index++, pagina);                
-            }                        
+                stmt.setInt(index++, pagina);
+            }
             ResultSet rs = stmt.executeQuery();
             System.out.println(rs.getStatement());
-            List<Item> itens = new ArrayList<>();            
+            List<Item> itens = new ArrayList<>();
             Set<Genero> generos = new HashSet<>();
-            List<Genero> generos2 = new ArrayList<>();            
+            List<Genero> generos2 = new ArrayList<>();
             while (rs.next()) {
                 Item item = new Item();
                 item.setId(rs.getLong("id_item"));
@@ -325,14 +313,11 @@ public class ClienteDAO extends BasicDAO {
                 item.setTempoPreparo(rs.getString("tempo_preparo"));
                 item.setModificavel(rs.getBoolean("modificavel"));
                 item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
+                item.setFavorito(rs.getBoolean("favorito"));
                 genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
                 item.setGenero(genero);
                 generos.add(genero);
-                if (IdItensFavoritos.contains(item.getId())) {
-                    System.out.println(item.getId());
-                    item.setFavorito(true);
-                }
-                
+
                 sql = "SELECT arquivo.id_arquivo "
                         + " FROM arquivo "
                         + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
@@ -351,7 +336,7 @@ public class ClienteDAO extends BasicDAO {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                
+
                 sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
                         + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
@@ -383,7 +368,7 @@ public class ClienteDAO extends BasicDAO {
         return listaItens;
     }
 
-    public Item getItem(Item item) throws DAOException {
+    public Item getItem(Item item, Cliente cliente) throws DAOException {
         if (item == null) {
             throw new DAOIncorrectData(300);
         }
@@ -391,55 +376,64 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         // get_item
-        String sql = "SELECT item.id_item, item.nome, item.descricao, item.preco, genero.id_genero, genero.nome genero, "
-                        + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
-                        + " FROM item "
-                        + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
-                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
-                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo " 
-                        + " WHERE item.id_item = ? " 
-                        + " ORDER BY tipo.id_tipo";
+        String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
+                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, IF(itens_favoritos.id_item IS NULL, 0, 1) favorito "
+                + " FROM item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                + " LEFT JOIN itens_favoritos ON itens_favoritos.id_item = item.id_item AND itens_favoritos.id_cliente = ? "
+                + " WHERE item.id_item = ? ";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, item.getId());
+            stmt.setLong(1, cliente.getId());
+            stmt.setLong(2, item.getId());
             ResultSet rs = stmt.executeQuery();
-            Set<Tipo> tipos = new HashSet<>();
             Set<Ingrediente> ingredientes = new HashSet<>();
-            Set<Foto> fotos = new HashSet<>();
             Set<Complemento> complementos = new HashSet<>();
             List<GrupoVariacao> variacoes = new ArrayList<>();
             long itemAtual = -1;
             while (rs.next()) {
-                long idItemRecuperado = rs.getLong("id_item");
-                if (idItemRecuperado != itemAtual) {
-                    itemAtual = idItemRecuperado;
-                    tipos = new HashSet<>();
-                    fotos = new HashSet<>();
-                    item.setNome(rs.getString("nome"));
-                    item.setPreco(rs.getDouble("preco"));
-                    item.setDescricao(rs.getString("descricao"));
-                    item.setTempoPreparo(rs.getString("tempo_preparo"));
-                    item.setModificavel(rs.getBoolean("modificavel"));
-                    item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
-                    Genero genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
-                    item.setGenero(genero);
-                }
-                tipos.add(new Tipo(rs.getLong("id_tipo"), rs.getString("tipo_nome")));
-            }
-            if (itemAtual != -1) {
+                item.setId(rs.getLong("id_item"));
+                item.setNome(rs.getString("nome"));
+                item.setPreco(rs.getDouble("preco"));
+                item.setTempoPreparo(rs.getString("tempo_preparo"));
+                item.setModificavel(rs.getBoolean("modificavel"));
+                item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
+                item.setFavorito(rs.getBoolean("favorito"));
+                item.setGenero(new Genero(rs.getLong("id_genero"), rs.getString("genero")));
+
                 sql = "SELECT arquivo.id_arquivo "
-                                + " FROM arquivo "
-                                + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
-                                + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
-                                + " WHERE item.id_item = ?";
+                        + " FROM arquivo "
+                        + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                        + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                        + " WHERE item.id_item = ?";
                 try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
-                    stmt2.setLong(1, item.getId());
+                    stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
-                    fotos = new HashSet<>();
+                    Set<Foto> fotos = new HashSet<>();
                     while (rs2.next()) {
                         Foto foto = new Foto();
                         foto.setId(rs2.getLong("id_arquivo"));
                         fotos.add(ServicoArmazenamento.setTamanho(foto));
                     }
+                    item.setFotos(fotos);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
+                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
+                        + " WHERE item.id_item = ?";
+                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, rs.getLong("id_item"));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    Set<Tipo> tipos = new HashSet<>();
+                    while (rs2.next()) {
+                        Tipo tipo = new Tipo();
+                        tipo.setId(rs2.getLong("id_tipo"));
+                        tipo.setNome(rs2.getString("nome"));
+                        tipos.add(tipo);
+                    }
+                    item.setTipos(tipos);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -512,10 +506,8 @@ public class ClienteDAO extends BasicDAO {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                item.setTipos(tipos);
                 item.setComplementos(complementos);
                 item.setIngredientes(ingredientes);
-                item.setFotos(fotos);
                 item.setVariacoes(variacoes);
             }
         } catch (SQLException e) {
@@ -568,7 +560,7 @@ public class ClienteDAO extends BasicDAO {
         }
         Endereco enderecoRetorno = null;
         String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
-                        + " FROM endereco WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
+                + " FROM endereco WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
         // get_endereco
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
@@ -733,7 +725,7 @@ public class ClienteDAO extends BasicDAO {
         return false;
     }
 
-    public void removerPrepedido(Cliente cliente) throws DAOException {        
+    public void removerPrepedido(Cliente cliente) throws DAOException {
         try {
             // invalidar_pre_pedido
             String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
@@ -752,7 +744,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public List<ItemPedido> refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {
         List<ItemPedido> itens = null;
         // recuperar_itens_pedido
@@ -816,7 +808,7 @@ public class ClienteDAO extends BasicDAO {
                 String json = objectMapper.writeValueAsString(pedido.getItens());
                 stmt.setString(1, json);
                 stmt.setDouble(2, pedido.getPrecoTotal());
-                stmt.setLong(3, pedido.getFormaPagamento().getId());                
+                stmt.setLong(3, pedido.getFormaPagamento().getId());
                 stmt.setLong(4, cliente.getId());
                 stmt.setLong(5, pedido.getEndereco().getId());
                 stmt.setString(6, token);
@@ -835,17 +827,17 @@ public class ClienteDAO extends BasicDAO {
     synchronized public void inserirPedido(Pedido pedido, Cliente cliente) throws DAOException {
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
-        }        
+        }
         String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?)";
         // inserir_pedido
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {            
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(pedido.getItens());
             stmt.setString(1, json);
             stmt.setDouble(2, pedido.getPrecoTotal());
             stmt.setLong(3, pedido.getFormaPagamento().getId());
             stmt.setLong(4, cliente.getId());
-            stmt.setLong(5, pedido.getEndereco().getId());            
+            stmt.setLong(5, pedido.getEndereco().getId());
             stmt.setString(6, pedido.getObservacaoEntrega());
             stmt.execute();
         } catch (SQLException e) {
@@ -855,7 +847,7 @@ public class ClienteDAO extends BasicDAO {
         }
     }
 
-     synchronized public boolean atualizarTokenPrePedido(String idPagamento, String idComprador) throws DAOException {
+    synchronized public boolean atualizarTokenPrePedido(String idPagamento, String idComprador) throws DAOException {
         if (idPagamento == null) {
             throw new DAOIncorrectData(300);
         }
@@ -874,7 +866,7 @@ public class ClienteDAO extends BasicDAO {
                 stmt.setLong(2, idPrePedido);
                 stmt.execute();
             }
-                        
+
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
@@ -884,9 +876,9 @@ public class ClienteDAO extends BasicDAO {
     public String recuperarSessaoClienteParaConfirmarCompra(String idComprador) throws DAOException {
         // utils_recuperar_sessao_cliente_pra_pagamento
         String sql = "SELECT usuario.token_websocket FROM usuario "
-                        + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
-                        + " LEFT JOIN pre_pedido ON cliente.id_cliente = pre_pedido.id_cliente "
-                        + " WHERE pre_pedido.token = ?";
+                + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
+                + " LEFT JOIN pre_pedido ON cliente.id_cliente = pre_pedido.id_cliente "
+                + " WHERE pre_pedido.token = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setString(1, idComprador);
             ResultSet rs = stmt.executeQuery();
@@ -935,12 +927,12 @@ public class ClienteDAO extends BasicDAO {
     public List<Pedido2> getPedidos(Cliente cliente) throws DAOException, IOException {
         List<Pedido2> pedidos = null;
         String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, "
-                        + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
-                        + " FROM pedido "
-                        + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
-                        + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
-                        + " WHERE pedido.id_cliente = ? "
-                        + " ORDER BY pedido.data DESC";
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
+                + " FROM pedido "
+                + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
+                + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
+                + " WHERE pedido.id_cliente = ? "
+                + " ORDER BY pedido.data DESC";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
@@ -959,7 +951,7 @@ public class ClienteDAO extends BasicDAO {
                 switch (rs.getInt("estado")) {
                     case 1:
                         pedido.setStatus("Conferido");
-                       break;
+                        break;
                     case 2:
                         pedido.setStatus("Em produção");
                         break;
@@ -968,8 +960,8 @@ public class ClienteDAO extends BasicDAO {
                         break;
                     case 4:
                         pedido.setStatus("Entregue");
-                        break;                        
-                }                
+                        break;
+                }
                 ObjectMapper mapeador = new ObjectMapper();
                 List<ItemPedidoFacil> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedidoFacil>>() {
                 });
@@ -984,11 +976,11 @@ public class ClienteDAO extends BasicDAO {
 
     public void getPedido(Pedido2 pedido, Cliente cliente) throws DAOException, IOException {
         String sql = "SELECT pedido.datapedido, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, "
-                        + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
-                        + " FROM pedido "
-                        + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
-                        + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
-                        + " WHERE pedido.id_cliente = ?AND pedido.id_pedido = ?";
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
+                + " FROM pedido "
+                + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
+                + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
+                + " WHERE pedido.id_cliente = ?AND pedido.id_pedido = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
@@ -1002,7 +994,7 @@ public class ClienteDAO extends BasicDAO {
                 switch (rs.getInt("estado")) {
                     case 1:
                         pedido.setStatus("Conferido");
-                       break;
+                        break;
                     case 2:
                         pedido.setStatus("Em produção");
                         break;
@@ -1011,7 +1003,7 @@ public class ClienteDAO extends BasicDAO {
                         break;
                     case 4:
                         pedido.setStatus("Entregue");
-                        break;                        
+                        break;
                 }
                 Endereco endereco = new Endereco();
                 endereco.setId(-1);
@@ -1066,17 +1058,17 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(300);
         }
         String sql = "SELECT COUNT(id_endereco) FROM endereco WHERE endereco.id_endereco = idendereco AND endereco.id_cliente = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
-            ResultSet rs = stmt.executeQuery();            
+            ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 sql = "UPDATE pedido SET id_endereco = null WHERE pedido.id_endereco = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                    
+                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, endereco.getId());
                     stmt2.execute();
                 }
                 sql = "DELETE FROM endereco WHERE id_endereco = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                    
+                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, endereco.getId());
                     stmt2.execute();
                 }
@@ -1085,7 +1077,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public void favoritarEndereco(Cliente cliente, Endereco endereco) throws DAOIncorrectData, DAOException {
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
@@ -1094,15 +1086,15 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(300);
         }
         String sql = "UPDATE endereco SET favorito = false WHERE id_cliente = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
-        
+
         sql = "UPDATE endereco SET favorito = true WHERE id_cliente = ? AND id_endereco = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)){            
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, endereco.getId());
             stmt.execute();

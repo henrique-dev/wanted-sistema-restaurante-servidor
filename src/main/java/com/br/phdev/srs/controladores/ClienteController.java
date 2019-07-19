@@ -435,10 +435,13 @@ public class ClienteController {
     }        
 
     @PostMapping(value = "cliente/info-item")
-    public ResponseEntity<Item> infoPrato(@RequestBody Item item) {
+    public ResponseEntity<Item> infoPrato(@RequestBody Item item, HttpSession sessao, HttpServletRequest req) {
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
-            clienteDAO.getItem(item);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                clienteDAO.getItem(item, cliente);
+            }                        
         } catch (DAOException e) {
             e.printStackTrace();
             item = null;
