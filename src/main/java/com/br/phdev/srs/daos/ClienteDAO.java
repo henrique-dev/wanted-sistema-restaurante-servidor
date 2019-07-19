@@ -924,17 +924,24 @@ public class ClienteDAO extends BasicDAO {
         }
     }
 
-    public List<Pedido2> getPedidos(Cliente cliente) throws DAOException, IOException {
+    public List<Pedido2> getPedidos(Cliente cliente, Integer pagina) throws DAOException, IOException {
         List<Pedido2> pedidos = null;
+        pagina--;
+        if (pagina == null || pagina < 1) {
+            pagina = 0;
+        } else {
+            pagina *= 10;
+        }
         String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, "
                 + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
                 + " FROM pedido "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                 + " WHERE pedido.id_cliente = ? "
-                + " ORDER BY pedido.data DESC";
+                + " ORDER BY pedido.data DESC LIMIT ?, 10";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
+            stmt.setInt(2, pagina);
             ResultSet rs = stmt.executeQuery();
             pedidos = new ArrayList<>();
             while (rs.next()) {

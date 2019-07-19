@@ -737,14 +737,14 @@ public class ClienteController {
     }
 
     @PostMapping("cliente/listar-pedidos")
-    public ResponseEntity<List<Pedido2>> listarPedidos(HttpSession sessao, HttpServletRequest req) {
+    public ResponseEntity<List<Pedido2>> listarPedidos(Integer pg, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         List<Pedido2> pedidos = null;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                pedidos = clienteDAO.getPedidos(cliente);
+                pedidos = clienteDAO.getPedidos(cliente, pg);
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }
