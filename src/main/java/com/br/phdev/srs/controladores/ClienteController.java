@@ -417,7 +417,7 @@ public class ClienteController {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                listaItens = clienteDAO.getItens(cliente, genero, pg, buscar);
+                listaItens = clienteDAO.getItens(cliente, genero, (pg == null ? 0 : pg), buscar);
                 if (listaItens != null) {
                     listaItens.setFrete(RepositorioProdutos.getInstancia().frete);
                 }
@@ -744,7 +744,7 @@ public class ClienteController {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                pedidos = clienteDAO.getPedidos(cliente, pg);
+                pedidos = clienteDAO.getPedidos(cliente, (pg == null ? 0 : pg));
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }
