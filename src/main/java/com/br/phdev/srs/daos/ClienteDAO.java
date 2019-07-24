@@ -1050,7 +1050,7 @@ public class ClienteDAO extends BasicDAO {
             stmt.setString(6, endereco.getCidade());
             stmt.setString(7, endereco.getCep());
             stmt.setString(8, endereco.getDescricao());
-            stmt.setBoolean(8, false);
+            stmt.setBoolean(9, false);
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
