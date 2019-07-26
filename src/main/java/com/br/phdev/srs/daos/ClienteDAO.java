@@ -527,7 +527,7 @@ public class ClienteDAO extends BasicDAO {
         List<Endereco> enderecos = null;
         // get_lista_enderecos
         String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
-                + " FROM endereco WHERE endereco.id_cliente = ? AND endereco.id_endereco = 0";
+                + " FROM endereco WHERE endereco.id_cliente = ? OR endereco.id_endereco = 0";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
