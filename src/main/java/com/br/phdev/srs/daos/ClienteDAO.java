@@ -552,7 +552,7 @@ public class ClienteDAO extends BasicDAO {
         }
         List<Endereco> enderecos = null;
         // get_lista_enderecos
-        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, "
+        String sql = "SELECT endereco.id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, "
                 + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
                 + " FROM endereco "
                 + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
@@ -589,7 +589,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         Endereco enderecoRetorno = null;
-        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
+        String sql = "SELECT endereco.id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
                 + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
                 + " FROM endereco "
                 + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
