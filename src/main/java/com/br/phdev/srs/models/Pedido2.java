@@ -23,6 +23,7 @@ public class Pedido2 {
     private Endereco endereco;
     private String status;
     private String observacaoEntrega;
+    private double frete;
 
     public long getId() {
         return id;
@@ -86,6 +87,14 @@ public class Pedido2 {
 
     public void setObservacaoEntrega(String observacaoEntrega) {
         this.observacaoEntrega = observacaoEntrega;
+    }        
+
+    public double getFrete() {
+        return frete;
+    }
+
+    public void setFrete(double frete) {
+        this.frete = frete;
     }        
     
 }

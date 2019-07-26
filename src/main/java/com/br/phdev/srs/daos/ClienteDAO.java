@@ -782,7 +782,7 @@ public class ClienteDAO extends BasicDAO {
     public List<ItemPedido> refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {
         List<ItemPedido> itens = null;
         // recuperar_itens_pedido
-        String sql = "SELECT itens, precototal FROM pedido WHERE id_cliente = ? AND id_pedido = ?";
+        String sql = "SELECT itens, precototal, frete FROM pedido WHERE id_cliente = ? AND id_pedido = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
@@ -862,7 +862,7 @@ public class ClienteDAO extends BasicDAO {
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
-        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?)";
+        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?, ?)";
         // inserir_pedido
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -873,6 +873,7 @@ public class ClienteDAO extends BasicDAO {
             stmt.setLong(4, cliente.getId());
             stmt.setLong(5, pedido.getEndereco().getId());
             stmt.setString(6, pedido.getObservacaoEntrega());
+            stmt.setDouble(7, pedido.getFrete());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -966,7 +967,7 @@ public class ClienteDAO extends BasicDAO {
         } else {
             pagina *= 10;
         }
-        String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, "
+        String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, pedido.frete, "
                 + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
                 + " FROM pedido "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
@@ -988,7 +989,8 @@ public class ClienteDAO extends BasicDAO {
                 Endereco endereco = new Endereco();
                 endereco.setId(rs.getObject("id_endereco") != null ? rs.getLong("id_endereco") : -1);
                 endereco.setDescricao(rs.getString("endereco_descricao"));
-                pedido.setEndereco(endereco);
+                pedido.setEndereco(endereco);      
+                pedido.setFrete(rs.getDouble("frete"));
                 switch (rs.getInt("estado")) {
                     case 1:
                         pedido.setStatus("Conferido");
@@ -1016,22 +1018,23 @@ public class ClienteDAO extends BasicDAO {
     }
 
     public void getPedido(Pedido2 pedido, Cliente cliente) throws DAOException, IOException {
-        String sql = "SELECT pedido.datapedido, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, "
+        String sql = "SELECT pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
                 + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
                 + " FROM pedido "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
-                + " WHERE pedido.id_cliente = ?AND pedido.id_pedido = ?";
+                + " WHERE pedido.id_cliente = ? AND pedido.id_pedido = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                String time = new SimpleDateFormat("dd/MM/YYYY - HH:mm").format(new Date(((Timestamp) rs.getObject("datapedido", Timestamp.class)).getTime()));
+                String time = new SimpleDateFormat("dd/MM/YYYY - HH:mm").format(new Date(((Timestamp) rs.getObject("data", Timestamp.class)).getTime()));
                 pedido.setData(time);
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setFormaPagamento(new FormaPagamento(0, rs.getString("formapagamento_descricao")));
                 pedido.setObservacaoEntrega(rs.getString("observacao_entrega"));
+                pedido.setFrete(rs.getDouble("frete"));
                 switch (rs.getInt("estado")) {
                     case 1:
                         pedido.setStatus("Conferido");

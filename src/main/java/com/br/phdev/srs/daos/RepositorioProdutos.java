@@ -59,6 +59,9 @@ public class RepositorioProdutos {
         item.setFotos(item2.getFotos());
         item.setModificavel(item2.isModificavel());
         item.setModificavelIngrediente(item2.isModificavelIngrediente());
+        item.setTempoPreparo(item2.getTempoPreparo());
+        item.setFavorito(item2.isFavorito());
+        item.setDescricao(item2.getDescricao());
     }
 
     public void preencherComplemento(Complemento complemento) {
@@ -131,9 +134,9 @@ public class RepositorioProdutos {
         this.itens.clear();
         this.complementos.clear();
         this.variacoes.clear();
-        String sql = "SELECT item.id_item, item.nome, item.preco, item.modificavel, item.modificavel_ingrediente, "
+        String sql = "SELECT item.id_item, item.descricao, item.nome, item.preco, item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, "
                         + " (select id_arquivo from item_arquivo where item_arquivo.id_item = item.id_item limit 1) id_arquivo "
-                        + " FROM item "
+                        + " FROM item "                        
                         + " ORDER BY item.id_item";
         try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -144,6 +147,8 @@ public class RepositorioProdutos {
                 item.setPreco(rs.getDouble("preco"));
                 item.setModificavel(rs.getBoolean("modificavel"));
                 item.setModificavel(rs.getBoolean("modificavel_ingrediente"));
+                item.setTempoPreparo(rs.getString("tempo_preparo"));
+                item.setDescricao(rs.getString("descricao"));
                 HashSet<Foto> fotos = new HashSet<>();
                 fotos.add(new Foto(rs.getLong("id_arquivo"), null, 0));
                 item.setFotos(fotos);
