@@ -651,6 +651,7 @@ public class ClienteController {
                 pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
                 pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
                 pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
+                pedido.setFrete(RepositorioProdutos.getInstancia().frete);
                 switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
                     case 0:
                         clienteDAO.inserirPedido(pedido, cliente);

@@ -19,6 +19,7 @@ public class Pedido {
     
     private long id;
     private double precoTotal;
+    private double frete;
     private Timestamp data;
     private List<ItemPedidoFacil> itens;
     private FormaPagamento formaPagamento;    
@@ -110,5 +111,13 @@ public class Pedido {
     public void setObservacaoEntrega(String observacaoEntrega) {
         this.observacaoEntrega = observacaoEntrega;
     }        
+
+    public void setFrete(double frete) {
+        this.frete = frete;
+    }
+
+    public double getFrete() {
+        return frete;
+    }       
     
 }
