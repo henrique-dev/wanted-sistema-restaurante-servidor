@@ -89,6 +89,32 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
+    
+    public ListaItens getItensDia(Cliente cliente) throws DAOException {
+        ListaItens listaItens = new ListaItens();        
+        String sql = " SELECT item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
+                        + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
+                        + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
+            try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
+                ResultSet rs2 = stmt2.executeQuery();
+                List<Item> itensDia = new ArrayList<>();
+                while (rs2.next()) {
+                    Item itemDia = new Item();
+                    itemDia.setId(rs2.getLong("id_item"));
+                    itemDia.setNome(rs2.getString("nome"));
+                    Set<Foto> fotos = new HashSet<>();
+                    Foto foto = new Foto();
+                    foto.setId(rs2.getLong("id_arquivo"));
+                    fotos.add(ServicoArmazenamento.setTamanho(foto));
+                    itemDia.setFotos(fotos);
+                    itensDia.add(itemDia);
+                }
+                listaItens.setItensDia(itensDia);
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return listaItens;
+    }
 
     public ListaItens getItensFavoritos(Cliente cliente) throws DAOException {
         ListaItens listaItens = new ListaItens();
