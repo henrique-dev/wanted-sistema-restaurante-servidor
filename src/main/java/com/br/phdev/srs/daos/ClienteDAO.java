@@ -1126,7 +1126,7 @@ public class ClienteDAO extends BasicDAO {
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
         }
-        if (endereco.getId() <= 0) {
+        if (endereco.getId() < 0) {
             throw new DAOIncorrectData(300);
         }
         String sql = "UPDATE enderecos_favoritos SET id_endereco=? WHERE id_cliente = ?";
