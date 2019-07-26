@@ -92,7 +92,7 @@ public class ClienteDAO extends BasicDAO {
     
     public ListaItens getItensDia(Cliente cliente) throws DAOException {
         ListaItens listaItens = new ListaItens();        
-        String sql = " SELECT item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
+        String sql = " SELECT item.id_item, item.nome, item.preco, item_arquivo.id_arquivo FROM item "
                         + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
                         + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
             try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
@@ -552,10 +552,14 @@ public class ClienteDAO extends BasicDAO {
         }
         List<Endereco> enderecos = null;
         // get_lista_enderecos
-        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
-                + " FROM endereco WHERE endereco.id_cliente = ? OR endereco.id_endereco = 0";
+        String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, "
+                + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
+                + " FROM endereco "
+                + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
+                + " WHERE endereco.id_cliente = ? OR endereco.id_endereco = 0";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
+            stmt.setLong(2, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             enderecos = new ArrayList<>();
             while (rs.next()) {
@@ -586,11 +590,15 @@ public class ClienteDAO extends BasicDAO {
         }
         Endereco enderecoRetorno = null;
         String sql = "SELECT id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
-                + " FROM endereco WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
+                + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
+                + " FROM endereco "
+                + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
+                + " WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
         // get_endereco
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
-            stmt.setLong(2, endereco.getId());
+            stmt.setLong(2, cliente.getId());
+            stmt.setLong(3, endereco.getId());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 enderecoRetorno = new Endereco();
@@ -1118,18 +1126,10 @@ public class ClienteDAO extends BasicDAO {
         if (endereco.getId() <= 0) {
             throw new DAOIncorrectData(300);
         }
-        String sql = "UPDATE endereco SET favorito = false WHERE id_cliente = ?";
+        String sql = "UPDATE enderecos_favoritos SET id_endereco=? WHERE id_cliente = ?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, cliente.getId());
-            stmt.execute();
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-
-        sql = "UPDATE endereco SET favorito = true WHERE id_cliente = ? AND id_endereco = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, cliente.getId());
-            stmt.setLong(2, endereco.getId());
+            stmt.setLong(1, endereco.getId());
+            stmt.setLong(2, cliente.getId());            
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
