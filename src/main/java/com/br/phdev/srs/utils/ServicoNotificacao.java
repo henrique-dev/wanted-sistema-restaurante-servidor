@@ -59,7 +59,8 @@ public class ServicoNotificacao implements WebSocketMessageBrokerConfigurer {
                 System.out.println("usuario GERADO: " + user);
                 return new StompPrincipal(user);
             }
-        }).setAllowedOrigins("*").withSockJS().setSessionCookieNeeded(false);
+        //}).setAllowedOrigins("*").withSockJS().setSessionCookieNeeded(false);
+        }).setAllowedOrigins("*");
     }
 
     @Override

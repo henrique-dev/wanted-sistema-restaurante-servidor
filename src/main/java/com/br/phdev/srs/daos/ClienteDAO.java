@@ -802,8 +802,8 @@ public class ClienteDAO extends BasicDAO {
                     ip.setId(ipf.getId());
                     ip.setQuantidade(ipf.getQuantidade());
                     ip.setPreco(ipf.getPreco());
-                    ip.setVariacoes(ipf.getVariacoes());
-                    ip.setIngredientes(ipf.getIngredientes());
+                    //ip.setVariacoes(ipf.getVariacoes());
+                    //ip.setIngredientes(ipf.getIngredientes());
                     Set<Complemento> complementos = new HashSet<>();
                     for (ComplementoFacil cf : ipf.getComplementos()) {
                         Complemento complemento = new Complemento();
@@ -812,9 +812,17 @@ public class ClienteDAO extends BasicDAO {
                         complemento.setPreco(cf.getPreco());
                         complemento.setCheck(true);
                         complementos.add(complemento);
+                    }                                        
+                    Item itemBase = getItem(ip, cliente);
+                    for (Complemento c : itemBase.getComplementos()) {
+                        if (!complementos.contains(c)) {
+                            complementos.add(c);
+                            System.out.println("HERE");
+                        }
                     }
                     ip.setComplementos(complementos);
-                    RepositorioProdutos.getInstancia().preencherItem(ip);
+                    
+                    //RepositorioProdutos.getInstancia().preencherItem(ip);
                     itens.add(ip);
                 }
             }
