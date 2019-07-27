@@ -800,29 +800,34 @@ public class ClienteDAO extends BasicDAO {
                 for (ItemPedidoFacil ipf : itemPedidos) {
                     ItemPedido ip = new ItemPedido();
                     ip.setId(ipf.getId());
+                    getItem(ip, cliente);
                     ip.setQuantidade(ipf.getQuantidade());
-                    ip.setPreco(ipf.getPreco());
-                    //ip.setVariacoes(ipf.getVariacoes());
-                    //ip.setIngredientes(ipf.getIngredientes());
-                    Set<Complemento> complementos = new HashSet<>();
-                    for (ComplementoFacil cf : ipf.getComplementos()) {
-                        Complemento complemento = new Complemento();
-                        complemento.setId(cf.getId());
-                        complemento.setNome(cf.getNome());
-                        complemento.setPreco(cf.getPreco());
-                        complemento.setCheck(true);
-                        complementos.add(complemento);
-                    }                                        
-                    Item itemBase = getItem(ip, cliente);
-                    for (Complemento c : itemBase.getComplementos()) {
-                        if (!complementos.contains(c)) {
-                            complementos.add(c);
-                            System.out.println("HERE");
+                    for (Complemento c : ip.getComplementos()) {
+                        for (ComplementoFacil cf : ipf.getComplementos()) {
+                            if (c.getId() == cf.getId()) {
+                                c.setCheck(true);
+                            }
                         }
                     }
-                    ip.setComplementos(complementos);
-                    
-                    //RepositorioProdutos.getInstancia().preencherItem(ip);
+                    for (GrupoVariacao gp : ip.getVariacoes()) {
+                        for (Variacao v : gp.getVariacoes()) {
+                            for (GrupoVariacao gpf : ipf.getVariacoes()) {
+                                for (Variacao vf : gpf.getVariacoes()) {
+                                    if (v.getId() == vf.getId()) {
+                                        v.setCheck(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    for (Ingrediente i : ip.getIngredientes()) {
+                        i.setCheck(false);
+                        for (Ingrediente i2 : ipf.getIngredientes()) {
+                            if (i.getId() == i2.getId()) {
+                                i.setCheck(true);
+                            }
+                        }
+                    }
                     itens.add(ip);
                 }
             }

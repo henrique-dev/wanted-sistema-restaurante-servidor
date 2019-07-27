@@ -16,6 +16,7 @@ public class Variacao {
     private String nome;
     private double preco;
     private int ordem;
+    private boolean check;
 
     public Variacao() {
     }
@@ -58,6 +59,14 @@ public class Variacao {
     public void setOrdem(int ordem) {
         this.ordem = ordem;
     }
+
+    public boolean isCheck() {
+        return check;
+    }
+
+    public void setCheck(boolean checked) {
+        this.check = checked;
+    }        
 
     @Override
     public boolean equals(Object obj) {
