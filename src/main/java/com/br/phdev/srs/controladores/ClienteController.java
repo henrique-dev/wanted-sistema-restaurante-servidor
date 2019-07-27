@@ -312,6 +312,30 @@ public class ClienteController {
         return new ResponseEntity<>(cliente, httpHeaders, httpStatus);
     }
     
+    @PostMapping(value = "cliente/principal")
+    public ResponseEntity<ListaItens> principal(HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        ListaItens listaItens = null;        
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            if (validarSessao(conexao, req)) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                listaItens = new ListaItens();
+                listaItens.setItensDia(clienteDAO.getItensDia(cliente).getItensDia());
+                listaItens.setGeneros(clienteDAO.getGeneros());
+            } else {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
+    }
+    
     @PostMapping(value = "cliente/itens-dia")
     public ResponseEntity<ListaItens> getItensDia(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;

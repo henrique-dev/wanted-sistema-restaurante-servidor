@@ -92,8 +92,7 @@ public class ClienteDAO extends BasicDAO {
     
     public ListaItens getItensDia(Cliente cliente) throws DAOException {
         ListaItens listaItens = new ListaItens();        
-        String sql = " SELECT item.id_item, item.nome, item.preco, item_arquivo.id_arquivo FROM item "
-                        + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
+        String sql = " SELECT item.id_item FROM item "
                         + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
             try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
                 ResultSet rs2 = stmt2.executeQuery();
@@ -101,12 +100,7 @@ public class ClienteDAO extends BasicDAO {
                 while (rs2.next()) {
                     Item itemDia = new Item();
                     itemDia.setId(rs2.getLong("id_item"));
-                    itemDia.setNome(rs2.getString("nome"));
-                    Set<Foto> fotos = new HashSet<>();
-                    Foto foto = new Foto();
-                    foto.setId(rs2.getLong("id_arquivo"));
-                    fotos.add(ServicoArmazenamento.setTamanho(foto));
-                    itemDia.setFotos(fotos);
+                    getItem(itemDia, cliente);
                     itensDia.add(itemDia);
                 }
                 listaItens.setItensDia(itensDia);
