@@ -63,11 +63,12 @@ public class ServicoNotificacao implements WebSocketMessageBrokerConfigurer {
                     user = sessao.getId();
                 }
                 System.out.println("usuario GERADO: " + user);
-                getUsuarios().add(user);
+                getUsuarios().clear();
+                getUsuarios().add(user);                
                 return new StompPrincipal(user);
             }
-        //}).setAllowedOrigins("*").withSockJS();
-        }).setAllowedOrigins("*");        
+        }).setAllowedOrigins("*").withSockJS();
+        //}).setAllowedOrigins("*");        
     }
 
     @Override
