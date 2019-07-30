@@ -6,6 +6,7 @@
  */
 package com.br.phdev.srs.utils;
 
+import com.br.phdev.srs.models.Cliente;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,14 +43,13 @@ public class ServicoNotificacao implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry ser) {
         //ser.addEndpoint("/chat");
-        //ser.addEndpoint("/chat").setAllowedOrigins("*").withSockJS();
-
+        //ser.addEndpoint("/chat").setAllowedOrigins("*").withSockJS();        
         ser.addEndpoint("/chat").setHandshakeHandler(new DefaultHandshakeHandler() {
             @Override
             protected Principal determineUser(ServerHttpRequest req,
                     WebSocketHandler wsHandler,
                     Map<String, Object> attributes) {                
-                HttpHeaders headers = req.getHeaders();                
+                     
                 String user = "";
                 if (req instanceof ServletServerHttpRequest) {
                     ServletServerHttpRequest serverHttpRequest = (ServletServerHttpRequest) req;
@@ -59,8 +59,8 @@ public class ServicoNotificacao implements WebSocketMessageBrokerConfigurer {
                 System.out.println("usuario GERADO: " + user);
                 return new StompPrincipal(user);
             }
-        //}).setAllowedOrigins("*").withSockJS().setSessionCookieNeeded(false);
-        }).setAllowedOrigins("*");
+        }).setAllowedOrigins("*").withSockJS();
+        //}).setAllowedOrigins("*");        
     }
 
     @Override
