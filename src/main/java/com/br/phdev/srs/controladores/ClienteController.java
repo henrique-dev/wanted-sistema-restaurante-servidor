@@ -53,6 +53,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,7 +67,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Controller
-public class ClienteController {
+public class ClienteController {       
 
     @PostMapping("cliente/autenticar")
     public ResponseEntity<Mensagem> autenticar(@RequestBody Usuario usuario, HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {

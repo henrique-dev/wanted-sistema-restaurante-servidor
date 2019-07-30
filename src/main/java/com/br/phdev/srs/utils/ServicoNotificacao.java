@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -20,6 +21,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.WebSocketHandler;
@@ -38,7 +40,11 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @EnableWebSocketMessageBroker
 public class ServicoNotificacao implements WebSocketMessageBrokerConfigurer {
 
-    public static List<String> sessoes = new ArrayList<>();
+    private static List<String> usuarios = new ArrayList();
+    
+    synchronized public static List<String> getUsuarios() {
+        return usuarios;
+    }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry ser) {
@@ -57,6 +63,7 @@ public class ServicoNotificacao implements WebSocketMessageBrokerConfigurer {
                     user = sessao.getId();
                 }
                 System.out.println("usuario GERADO: " + user);
+                getUsuarios().add(user);
                 return new StompPrincipal(user);
             }
         //}).setAllowedOrigins("*").withSockJS();
