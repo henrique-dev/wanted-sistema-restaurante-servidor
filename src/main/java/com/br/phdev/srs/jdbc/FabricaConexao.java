@@ -19,7 +19,7 @@ public class FabricaConexao {
     public Connection conectar() {
         Connection conexao = null;
         try {
-            String url = "jdbc:mysql://localhost:3306/restaurante_wanted?useTimezone=true&serverTimezone=UTC&useSSL=false";
+            String url = "jdbc:mysql://localhost:3306/restaurante_wanted?useTimezone=true&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true";
             String usuario = "root";
             String senha = "root";    
             Class.forName("com.mysql.cj.jdbc.Driver");
