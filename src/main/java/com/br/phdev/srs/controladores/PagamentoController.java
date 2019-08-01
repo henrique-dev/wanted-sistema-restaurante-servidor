@@ -41,8 +41,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class PagamentoController {
 
-    @Autowired
-    private SimpMessagingTemplate template;
+    //@Autowired
+    //private SimpMessagingTemplate template;
 
     @GetMapping("pagamentos/executar-pagamento")
     public String executarPagamento(HttpServletRequest req) {
@@ -103,7 +103,7 @@ public class PagamentoController {
                 }
                 ObjectMapper mapeador = new ObjectMapper();
                 String msg = mapeador.writeValueAsString(mensagem);                
-                this.template.convertAndSendToUser(sessaoUsuario, "/queue/reply", msg);                
+                //this.template.convertAndSendToUser(sessaoUsuario, "/queue/reply", msg);                
             }
         } catch (DAOException | SQLException | JsonProcessingException e) {
             e.printStackTrace();

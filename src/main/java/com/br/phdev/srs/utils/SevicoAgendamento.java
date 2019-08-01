@@ -14,11 +14,12 @@ import org.springframework.stereotype.Component;
  *
  * @author henrique
  */
-@Component
-@EnableScheduling
+//@Component
+//@EnableScheduling
 public class SevicoAgendamento {
 //Atributos
 
+    /*
     @Autowired
     private SimpMessagingTemplate template;
 
@@ -33,6 +34,6 @@ public class SevicoAgendamento {
             this.template.convertAndSendToUser(s, "/queue/reply", msg);
             System.out.println("Enviou msg para: " + s);
         }
-    }
+    }*/
 
 }
