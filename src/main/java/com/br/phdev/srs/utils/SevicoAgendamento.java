@@ -17,18 +17,18 @@ import org.springframework.web.socket.WebSocketSession;
  *
  * @author henrique
  */
-@Component
-@EnableScheduling
+//@Component
+//@EnableScheduling
 public class SevicoAgendamento {
 //Atributos        
 
-    @Scheduled(fixedDelay = 5000)
+    //@Scheduled(fixedDelay = 5000)
     public void verificaPorHora() throws JsonProcessingException, IOException {
-        List<WebSocketSession> sessions = ServicoNotificacao.getSessions();
-        for (WebSocketSession s : sessions) {
+        //List<WebSocketSession> sessions = ServicoNotificacao.getSessions();
+        //for (WebSocketSession s : sessions) {
             //s.sendMessage(new TextMessage("Testando envio de mensagens"));
             //System.out.println("Enviou msg para: " + s);
-        }
+        //}
     }
 
 }

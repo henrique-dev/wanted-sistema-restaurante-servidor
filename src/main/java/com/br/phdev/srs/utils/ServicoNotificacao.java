@@ -51,10 +51,10 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-@Configuration
-@EnableWebSocket
-public class ServicoNotificacao implements WebSocketConfigurer {
-        
+//@Configuration
+//@EnableWebSocket
+public class ServicoNotificacao /*implements WebSocketConfigurer*/ {
+        /*
     private static List<WebSocketSession> sessions = new ArrayList();
     
     synchronized public static List<WebSocketSession> getSessions() {
@@ -74,13 +74,13 @@ public class ServicoNotificacao implements WebSocketConfigurer {
                 throws InterruptedException, IOException {            
             
             System.out.println(message.getPayload());
-            /*
+            
             for (WebSocketSession webSocketSession : sessions) {
                 System.out.println(webSocketSession.getId());
                 System.out.println(webSocketSession.isOpen());
                 Map value = new Gson().fromJson(message.getPayload(), Map.class);
                 webSocketSession.sendMessage(new TextMessage("OLA MUNDO"));
-            }*/
+            }
         }
 
         @Override
@@ -89,6 +89,6 @@ public class ServicoNotificacao implements WebSocketConfigurer {
             sessions.add(session);
             session.sendMessage(new TextMessage(session.getId()));            
         }
-    }
+    }*/
 
 }
