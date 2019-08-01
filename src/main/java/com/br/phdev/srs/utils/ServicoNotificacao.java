@@ -34,7 +34,7 @@ public class ServicoNotificacao implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new SocketHandler(), "/chat").setAllowedOrigins("*");
+        registry.addHandler(new SocketHandler(), "/chat").setAllowedOrigins("*").withSockJS();
     }
 
     @Component
