@@ -54,37 +54,40 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 @Configuration
 @EnableWebSocket
 public class ServicoNotificacao implements WebSocketConfigurer {
+        
+    private static List<WebSocketSession> sessions = new ArrayList();
+    
+    synchronized public static List<WebSocketSession> getSessions() {
+        return sessions;
+    }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new SocketHandler(), "/chat").setAllowedOrigins("*");
+        registry.addHandler(new SocketHandler(), "/chat").setAllowedOrigins("*").withSockJS();
     }
 
     @Component
-    public class SocketHandler extends TextWebSocketHandler {
-
-        List<WebSocketSession> sessions = new ArrayList<>();
+    public class SocketHandler extends TextWebSocketHandler {        
 
         @Override
         public void handleTextMessage(WebSocketSession session, TextMessage message)
                 throws InterruptedException, IOException {            
             
-            session.sendMessage(new TextMessage("MASOQUE"));
-            
+            System.out.println(message.getPayload());
+            /*
             for (WebSocketSession webSocketSession : sessions) {
                 System.out.println(webSocketSession.getId());
                 System.out.println(webSocketSession.isOpen());
                 Map value = new Gson().fromJson(message.getPayload(), Map.class);
                 webSocketSession.sendMessage(new TextMessage("OLA MUNDO"));
-            }
+            }*/
         }
 
         @Override
         public void afterConnectionEstablished(WebSocketSession session) throws Exception {
             //the messages will be broadcasted to all users.
             sessions.add(session);
-            session.sendMessage(new TextMessage("OLA MUNDO 2"));
-            System.out.println(session.isOpen());
+            session.sendMessage(new TextMessage(session.getId()));            
         }
     }
 
