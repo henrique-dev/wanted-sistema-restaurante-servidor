@@ -61,7 +61,7 @@ public class ServicoArmazenamento {
     }
 
     public byte[] carregar(Foto foto) {
-        File file = new File(MASTER_PATH + foto.getId());        
+        File file = new File(MASTER_PATH + 1);
         byte[] bytes = new byte[(int)file.length()];
         try (FileInputStream fis = new FileInputStream(file)) {
             fis.read(bytes);
