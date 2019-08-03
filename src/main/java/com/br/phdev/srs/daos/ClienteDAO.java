@@ -25,6 +25,7 @@ import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
+import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -1145,6 +1146,16 @@ public class ClienteDAO extends BasicDAO {
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
+        }
+    }
+    
+    public void confirmarRecebimentoNotificacao(Notificacao notificacao) {
+        String sql = "UPDATE notificacao SET entregue=1 WHERE id_notificacao=?";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, notificacao.getId());
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

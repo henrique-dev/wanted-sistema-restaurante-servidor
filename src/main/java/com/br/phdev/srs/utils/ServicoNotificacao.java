@@ -6,8 +6,18 @@
  */
 package com.br.phdev.srs.utils;
 
+import com.br.phdev.srs.daos.ClienteDAO;
+import com.br.phdev.srs.daos.GerenciadorDAO;
+import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.jdbc.FabricaConexao;
+import com.br.phdev.srs.models.Notificacao;
+import com.br.phdev.srs.models.Pedido;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.security.Principal;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
@@ -33,13 +43,13 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 @Configuration
 @EnableWebSocket
 public class ServicoNotificacao implements WebSocketConfigurer {
-    
+
     private static Map<String, WebSocketSession> sessions = new HashMap<>();
 
     synchronized public static Map<String, WebSocketSession> getSessions() {
         return sessions;
     }
-    
+
     public static boolean enviarMensagem(String userId, String mensagem) throws IOException {
         System.out.println("Quantidade atual de clientes conextados: " + sessions.size());
         WebSocketSession wss = sessions.get(userId);
@@ -68,7 +78,18 @@ public class ServicoNotificacao implements WebSocketConfigurer {
 
         @Override
         public void handleMessage(WebSocketSession wss, WebSocketMessage<?> wsm) throws Exception {
-            
+            try {
+                ObjectMapper mapeador = new ObjectMapper();
+                Notificacao notificacao = mapeador.readValue(wsm.getPayload().toString(),
+                        new TypeReference<Notificacao>() {
+                });
+                try (Connection conexao = new FabricaConexao().conectar()) {
+                    ClienteDAO clienteDAO = new ClienteDAO(conexao);
+                    clienteDAO.confirmarRecebimentoNotificacao(notificacao);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -100,24 +121,24 @@ public class ServicoNotificacao implements WebSocketConfigurer {
                 HttpSession sessao = serverHttpRequest.getServletRequest().getSession();
                 user = sessao.getId();
             }
-                        
+
             return new StompPrincipal(user);
         }
 
     }
-    
+
     class MyHandshakeInterceptor implements HandshakeInterceptor {
 
         @Override
-        public boolean beforeHandshake(ServerHttpRequest shr, ServerHttpResponse shr1, WebSocketHandler wsh, Map<String, Object> map) throws Exception {            
+        public boolean beforeHandshake(ServerHttpRequest shr, ServerHttpResponse shr1, WebSocketHandler wsh, Map<String, Object> map) throws Exception {
             return true;
         }
 
         @Override
         public void afterHandshake(ServerHttpRequest shr, ServerHttpResponse shr1, WebSocketHandler wsh, Exception excptn) {
-            
+
         }
-        
+
     }
 
     class StompPrincipal implements Principal {
