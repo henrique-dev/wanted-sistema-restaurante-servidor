@@ -38,10 +38,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -58,8 +61,7 @@ public class ClienteDAO extends BasicDAO {
         if (cliente == null) {
             throw new DAOException("Erro", 300);
         }
-        String sql = "UPDATE usuario SET usuario.token_websocket = ? WHERE usuario.id_usuario = "
-                + " (SELECT cliente.id_usuario FROM cliente WHERE cliente.id_cliente = ?)";
+        String sql = "UPDATE websocket SET token=? WHERE id_cliente=?";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
             stmt.setString(1, token);
             stmt.setLong(2, cliente.getId());
@@ -989,7 +991,7 @@ public class ClienteDAO extends BasicDAO {
             while (rs.next()) {
                 Pedido2 pedido = new Pedido2();
                 pedido.setId(rs.getLong("id_pedido"));
-                String time = new SimpleDateFormat("dd/MM/YYYY - HH:mm").format(new Date(((Timestamp) rs.getObject("data", Timestamp.class)).getTime()));
+                String time = LocalDateTime.parse(rs.getString("data"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
                 pedido.setData(time);
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setFormaPagamento(new FormaPagamento(0, rs.getString("formapagamento_descricao")));
@@ -1035,8 +1037,8 @@ public class ClienteDAO extends BasicDAO {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                String time = new SimpleDateFormat("dd/MM/YYYY - HH:mm").format(new Date(((Timestamp) rs.getObject("data", Timestamp.class)).getTime()));
+            if (rs.next()) {                                
+                String time = LocalDateTime.parse(rs.getString("data"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
                 pedido.setData(time);
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setFormaPagamento(new FormaPagamento(0, rs.getString("formapagamento_descricao")));

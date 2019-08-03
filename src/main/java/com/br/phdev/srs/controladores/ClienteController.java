@@ -9,6 +9,7 @@ package com.br.phdev.srs.controladores;
 import com.br.phdev.srs.daos.AutenticaDAO;
 import com.br.phdev.srs.daos.CadastroDAO;
 import com.br.phdev.srs.daos.ClienteDAO;
+import com.br.phdev.srs.daos.GerenciadorDAO;
 import com.br.phdev.srs.daos.RepositorioProdutos;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.PaymentException;
@@ -31,7 +32,9 @@ import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.TokenAlerta;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
+import com.br.phdev.srs.utils.ServicoNotificacao;
 import com.br.phdev.srs.utils.ServicoPagamentoPayPal;
 import com.br.phdev.srs.utils.ServicoValidacaoCliente;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,11 +70,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Controller
-public class ClienteController {       
+public class ClienteController {
 
     @PostMapping("cliente/autenticar")
     public ResponseEntity<Mensagem> autenticar(@RequestBody Usuario usuario, HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {
-        Mensagem mensagem = new Mensagem();        
+        Mensagem mensagem = new Mensagem();
         try (Connection conexao = new FabricaConexao().conectar()) {
             AutenticaDAO autenticaDAO = new AutenticaDAO(conexao);
             Cliente cliente = autenticaDAO.autenticar(usuario);
@@ -144,7 +147,7 @@ public class ClienteController {
             e.printStackTrace();
             mensagem.setDescricao(e.getMessage());
             mensagem.setCodigo(200);
-        } catch (DAOException e) {            
+        } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
         }
@@ -194,6 +197,28 @@ public class ClienteController {
                 }
                 mensagem.setDescricao("O codigo foi reenviado");
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mensagem.setDescricao(e.getMessage());
+            mensagem.setCodigo(200);
+        } catch (DAOException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("cliente/enviar-mensagem")
+    public ResponseEntity<Mensagem> enviarMensagem(@RequestBody Notificacao notificacao, HttpSession sessao) {
+        Mensagem mensagem = new Mensagem();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            GerenciadorDAO dao = new GerenciadorDAO(conexao);
+            dao.adicionarNotificacao(notificacao);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("mensagem salva");
         } catch (SQLException e) {
             e.printStackTrace();
             mensagem.setDescricao(e.getMessage());
@@ -312,11 +337,11 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(cliente, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping(value = "cliente/principal")
     public ResponseEntity<ListaItens> principal(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
-        ListaItens listaItens = null;        
+        ListaItens listaItens = null;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
@@ -336,11 +361,11 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping(value = "cliente/itens-dia")
     public ResponseEntity<ListaItens> getItensDia(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
-        ListaItens listaItens = null;        
+        ListaItens listaItens = null;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
@@ -358,11 +383,11 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping(value = "cliente/listar-favoritos")
     public ResponseEntity<ListaItens> getFavoritos(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
-        ListaItens listaItens = null;        
+        ListaItens listaItens = null;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
@@ -380,7 +405,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping("cliente/cadastrar-favorito")
     public ResponseEntity<Mensagem> cadastrarEndereco(@RequestBody Item item, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
@@ -434,7 +459,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping(value = "cliente/listar-generos")
     public ResponseEntity<List<Genero>> getGeneros(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
@@ -454,7 +479,7 @@ public class ClienteController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaGeneros, httpHeaders, httpStatus);
-    }        
+    }
 
     @PostMapping("cliente/listar-itens")
     public ResponseEntity<ListaItens> getPratos(@RequestBody Genero genero, Integer pg, String buscar, HttpSession sessao, HttpServletRequest req) {
@@ -479,7 +504,7 @@ public class ClienteController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
-    }        
+    }
 
     @PostMapping(value = "cliente/info-item")
     public ResponseEntity<Item> infoPrato(@RequestBody Item item, HttpSession sessao, HttpServletRequest req) {
@@ -488,7 +513,7 @@ public class ClienteController {
             if (validarSessao(conexao, req)) {
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
                 clienteDAO.getItem(item, cliente);
-            }                        
+            }
         } catch (DAOException e) {
             e.printStackTrace();
             item = null;
@@ -605,7 +630,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(itens, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping(value = "cliente/carrinho")
     public ResponseEntity<Carrinho> carrinho(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
@@ -626,7 +651,7 @@ public class ClienteController {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
-        }        
+        }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(carrinho, httpHeaders, httpStatus);
@@ -634,7 +659,7 @@ public class ClienteController {
 
     @PostMapping(value = "cliente/pre-confirmar-pedido")
     public ResponseEntity<ConfirmaPedido> preConfirmaPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao, HttpServletRequest req) {
-        HttpStatus httpStatus = HttpStatus.OK;                                
+        HttpStatus httpStatus = HttpStatus.OK;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
@@ -906,7 +931,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
     }
-    
+
     @PostMapping("cliente/favoritar-endereco")
     public ResponseEntity<Mensagem> favoritarEndereco(@RequestBody Endereco endereco, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;

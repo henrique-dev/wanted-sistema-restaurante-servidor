@@ -7,6 +7,7 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.Genero;
@@ -14,6 +15,7 @@ import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.ListaItens;
+import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
@@ -432,6 +434,37 @@ public class GerenciadorDAO extends BasicDAO {
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
+    }
+
+    public void adicionarNotificacao(Notificacao notificacao) throws DAOException {
+        String sql = "INSERT INTO notificacao VALUES (default, ?, ?, false)";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, notificacao.getCliente().getId());
+            stmt.setString(2, notificacao.getMensagem());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public HashSet<Notificacao> listarNotificacoes() throws DAOException {
+        HashSet<Notificacao> notificacoes = new HashSet<>();
+        String sql = "SELECT * FROM notificacao "
+                        + " LEFT JOIN websocket ON notificacao.id_cliente = websocket.id_cliente "
+                        + " WHERE notificacao.entregue = 0 AND websocket.token != '' AND websocket.token IS NOT NULL";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();            
+            while(rs.next()) {
+                Notificacao notificacao = new Notificacao();
+                notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
+                notificacao.setMensagem(rs.getString("mensagem"));
+                notificacao.setWebsocketId(rs.getString("token"));
+                notificacoes.add(notificacao);
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+        return notificacoes;
     }
 
 }
