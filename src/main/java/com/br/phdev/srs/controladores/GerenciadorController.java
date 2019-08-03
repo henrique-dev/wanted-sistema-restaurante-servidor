@@ -19,6 +19,7 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
@@ -442,6 +443,28 @@ public class GerenciadorController {
         } catch (StorageException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro ao salvar o arquivo no disco");
+            e.printStackTrace();
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("gerenciador/atualizar-estado-pedido")
+    public ResponseEntity<Mensagem> atualizarEstadoPedido(@RequestBody Pedido pedido) {
+        Mensagem mensagem = new Mensagem();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
+            gerenciadorDAO.atualizarEstadoPedido(pedido);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Estado atualizado");
+        } catch (SQLException e) {
+            mensagem.setCodigo(-1);
+            mensagem.setDescricao("Erro ao abrir conexão");
+            e.printStackTrace();
+        } catch (DAOException e) {
+            mensagem.setCodigo(-1);
+            mensagem.setDescricao("Erro na atualização do estado do pedido");
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();

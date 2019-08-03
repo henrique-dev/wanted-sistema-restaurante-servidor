@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-public class Pedido {
+public class Pedido {        
     
     private long id;
     private double precoTotal;
@@ -24,20 +24,21 @@ public class Pedido {
     private List<ItemPedidoFacil> itens;
     private FormaPagamento formaPagamento;    
     private Endereco endereco;
-    private String status;
+    private int estado;
     private String observacaoEntrega;
 
     public Pedido() {
+        
     }
 
-    public Pedido(long id, double precoTotal, Timestamp data, List<ItemPedidoFacil> itens, FormaPagamento formaPagamento, Endereco endereco, String status, String observacaoEntrega) {
+    public Pedido(long id, double precoTotal, Timestamp data, List<ItemPedidoFacil> itens, FormaPagamento formaPagamento, Endereco endereco, int estado, String observacaoEntrega) {
         this.id = id;
         this.precoTotal = precoTotal;
         this.data = data;
         this.itens = itens;
         this.formaPagamento = formaPagamento;
         this.endereco = endereco;
-        this.status = status;
+        this.estado = estado;
         this.observacaoEntrega = observacaoEntrega;
     }         
 
@@ -88,13 +89,13 @@ public class Pedido {
         this.endereco = endereco;
     }        
 
-    public String getStatus() {
-        return status;
+    public int getEstado() {
+        return estado;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }      
+    public void setEstado(int estado) {
+        this.estado = estado;
+    }
 
     public double getPrecoTotal() {
         return precoTotal;

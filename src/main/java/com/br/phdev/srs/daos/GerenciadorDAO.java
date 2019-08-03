@@ -16,6 +16,7 @@ import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Notificacao;
+import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
@@ -436,6 +437,29 @@ public class GerenciadorDAO extends BasicDAO {
         }
     }
 
+    public void atualizarEstadoPedido(Pedido pedido) throws DAOException {
+        String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            stmt.setInt(1, pedido.getEstado());
+            stmt.setLong(2, pedido.getId());
+            stmt.execute();
+
+            sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
+            try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                stmt2.setLong(1, pedido.getId());
+                ResultSet rs = stmt2.executeQuery();
+                if (rs.next()) {
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
+                    notificacao.setMensagem("{'tipo':'atualizacao_estado_pedido', 'id_pedido':" + pedido.getId() + ", 'estado':" + pedido.getEstado() + "}");
+                    this.adicionarNotificacao(notificacao);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+
     public void adicionarNotificacao(Notificacao notificacao) throws DAOException {
         String sql = "INSERT INTO notificacao VALUES (default, ?, ?, false)";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
@@ -446,15 +470,15 @@ public class GerenciadorDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public HashSet<Notificacao> listarNotificacoes() throws DAOException {
         HashSet<Notificacao> notificacoes = new HashSet<>();
         String sql = "SELECT * FROM notificacao "
-                        + " LEFT JOIN websocket ON notificacao.id_cliente = websocket.id_cliente "
-                        + " WHERE notificacao.entregue = 0 AND websocket.token != '' AND websocket.token IS NOT NULL";
+                + " LEFT JOIN websocket ON notificacao.id_cliente = websocket.id_cliente "
+                + " WHERE notificacao.entregue = 0 AND websocket.token != '' AND websocket.token IS NOT NULL";
         try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();            
-            while(rs.next()) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
                 Notificacao notificacao = new Notificacao();
                 notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
                 notificacao.setMensagem(rs.getString("mensagem"));
