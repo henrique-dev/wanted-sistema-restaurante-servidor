@@ -451,8 +451,7 @@ public class GerenciadorDAO extends BasicDAO {
                 if (rs.next()) {
                     Notificacao notificacao = new Notificacao();
                     notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                    notificacao.setMensagem("{\"id\":?, \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + pedido.getEstado() + "}");
-                    System.out.println(notificacao.getMensagem());
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + pedido.getEstado() + "}");
                     this.adicionarNotificacao(notificacao);
                 }
             }
@@ -484,7 +483,7 @@ public class GerenciadorDAO extends BasicDAO {
                 notificacao.setId(rs.getLong("id_notificacao"));
                 notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
                 String mensagem = rs.getString("mensagem");
-                mensagem = mensagem.replace("?", String.valueOf(notificacao.getId()));
+                mensagem = mensagem.replace("\"?\"", String.valueOf(notificacao.getId()));
                 notificacao.setMensagem(mensagem);
                 notificacao.setWebsocketId(rs.getString("token"));
                 notificacoes.add(notificacao);
