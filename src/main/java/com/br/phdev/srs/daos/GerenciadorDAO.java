@@ -451,7 +451,7 @@ public class GerenciadorDAO extends BasicDAO {
                 if (rs.next()) {
                     Notificacao notificacao = new Notificacao();
                     notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                    notificacao.setMensagem("{'id':?, 'tipo':'atualizacao_estado_pedido', 'id_pedido':" + pedido.getId() + ", 'estado':" + pedido.getEstado() + "}");
+                    notificacao.setMensagem("{\"id\":?, \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + pedido.getEstado() + "}");
                     this.adicionarNotificacao(notificacao);
                 }
             }

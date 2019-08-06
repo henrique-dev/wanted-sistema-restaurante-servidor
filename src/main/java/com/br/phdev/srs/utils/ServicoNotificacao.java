@@ -69,7 +69,7 @@ public class ServicoNotificacao implements WebSocketConfigurer {
         @Override
         public void afterConnectionEstablished(WebSocketSession wss) throws Exception {
             sessions.put(wss.getPrincipal().getName(), wss);
-            wss.sendMessage(new TextMessage("{'id':0, 'tipo':'conexao_estabelecida', 'token':" + wss.getPrincipal().getName() + "}"));            
+            wss.sendMessage(new TextMessage("{\"id\":0, \"tipo\":\"conexao_estabelecida\", \"token\":\"" + wss.getPrincipal().getName() + "\"}"));
         }
 
         @Override
