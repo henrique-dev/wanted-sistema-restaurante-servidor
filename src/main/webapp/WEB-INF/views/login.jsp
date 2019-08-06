@@ -5,74 +5,78 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/main.css"/>
-        <title>Entrar</title>        
-        <style>                
-            .caixa-login {
-                display: block;
-                border-radius: 25px;                
-                background: #ffebcc;
-                margin: auto;         
-                opacity: 0.95;
-                position: relative;
-                top: calc(50% - 175px);
-                width: 500px;
-                height: 350px;
-                text-align: center;
-            }            
 
-            img {
-                position: fixed;
-                width: 100%;
-                height: 100%;
-                filter: blur(5px);
-                opacity: 0.8;
-            }
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-            form {
-                position: relative;
-                top: calc(50% - 55px);
-            }
+        <title>SB Admin 2 - Login</title>
 
-            label {
-                display: inline-block;
-                width: 25%;
-                height: 30px;
-            }
+        <!-- Custom fonts for this template-->
+        <link href="${pageContext.request.contextPath}/resources/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-            input {
-                display: inline-block;
-                width: 65%;
-                height: 30px;
-            }
+        <!-- Custom styles for this template-->
+        <link href="${pageContext.request.contextPath}/resources/css/sb-admin-2.min.css" rel="stylesheet">
 
-            button {
-                margin-top: 1rem;
-                margin-left: 5px;
-                margin-right: 5px;
-                display: inline-block;
-                background: #ff9c33;
-                border-bottom-color: #000;
-                font-size: 18px;
-                width: 40%;
-                height: 40px;
-            }
-        </style>
-    </head>    
-    <body>
-        <img src="${pageContext.request.contextPath}/resources/img/wp.jpg"/>
-        <div class="caixa-login">
-            <form id="formLogin"method="POST" action="autenticar">
-                <label>Usuário</label>
-                <input id="nome" type="text" name="nomeUsuario"><br>
-                <label>Senha</label>
-                <input id="senha" type="password" name="senhaUsuario"><br>        
-                <button form="formLogin">Entrar</button>
-                <button>Esqueci minha senha</button>
-            </form>        
-        </div>        
+    </head>
+
+    <body class="bg-gradient-primary">
+
+        <div class="container">
+
+            <!-- Outer Row -->
+            <div class="row justify-content-center">
+
+                <div class="col-lg-6">
+
+                    <div class="card o-hidden border-0 shadow-lg my-5">
+                        <div class="card-body p-0">
+                            <!-- Nested Row within Card Body -->
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="p-5">
+                                        <div class="text-center">
+                                            <h1 class="h4 text-gray-900 mb-4">Wanted Admin</h1>
+                                        </div>
+                                        <form class="user" id="formLogin" method="POST" action="${pageContext.request.contextPath}/gerenciador/autenticar">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control form-control-user" id="nome" name="nomeUsuario" aria-describedby="emailHelp" placeholder="Usuário">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="password" class="form-control form-control-user" id="senha" name="senhaUsuario" placeholder="Senha">
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="submit" class="btn btn-primary btn-user btn-block" value="Entrar">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Bootstrap core JavaScript-->
+        <script src="vendor/jquery/jquery.min.js"></script>
+        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Core plugin JavaScript-->
+        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+        <!-- Custom scripts for all pages-->
+        <script src="js/sb-admin-2.min.js"></script>
+
     </body>
+
 </html>

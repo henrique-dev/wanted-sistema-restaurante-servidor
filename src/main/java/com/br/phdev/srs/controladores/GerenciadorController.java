@@ -56,19 +56,21 @@ public class GerenciadorController {
 
     @PostMapping("gerenciador/autenticar")
     public String autenticar(String nomeUsuario, String senhaUsuario,
-            HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {
+            HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {        
+        System.out.println(senhaUsuario);
         Mensagem mensagem = new Mensagem();
         Usuario usuario = new Usuario(0, nomeUsuario, senhaUsuario);
         try (Connection conexao = new FabricaConexao().conectar()) {
             AutenticaDAO autenticaDAO = new AutenticaDAO(conexao);
             Cliente cliente = autenticaDAO.autenticar(usuario);
-            if (cliente != null) {
+            if (cliente != null) {                
                 autenticaDAO.gerarSessao(usuario, sessao.getId());
                 mensagem.setCodigo(100);
                 sessao.setAttribute("usuario", usuario);
                 sessao.setAttribute("cliente", cliente);
                 return "redirect:main";
             } else {
+                System.out.println("HERE3");
                 mensagem.setCodigo(101);
                 mensagem.setDescricao("Usuário ou senha inválidos");
             }

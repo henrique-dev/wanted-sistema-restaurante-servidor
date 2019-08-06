@@ -659,6 +659,20 @@ public class ClienteDAO extends BasicDAO {
         }
         return foto;
     }
+    
+    public boolean existePedidoAberto(Cliente cliente) throws DAOException {
+        String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 4";
+        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Falha ao adquirir informações do arquivo", e, 200);
+        }
+        return false;
+    }
 
     public ConfirmaPedido inserirPrecos(ConfirmaPedido confirmaPedido) throws DAOException, DAOIncorrectData {
         if (confirmaPedido.getItens() == null) {

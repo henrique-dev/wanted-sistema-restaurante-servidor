@@ -12,7 +12,6 @@ import com.br.phdev.srs.daos.ClienteDAO;
 import com.br.phdev.srs.daos.GerenciadorDAO;
 import com.br.phdev.srs.daos.RepositorioProdutos;
 import com.br.phdev.srs.exceptions.DAOException;
-import com.br.phdev.srs.exceptions.PaymentException;
 import com.br.phdev.srs.jdbc.FabricaConexao;
 import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Carrinho;
@@ -34,11 +33,7 @@ import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
-import com.br.phdev.srs.utils.ServicoNotificacao;
-import com.br.phdev.srs.utils.ServicoPagamentoPayPal;
 import com.br.phdev.srs.utils.ServicoValidacaoCliente;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.paypal.api.payments.Payment;
 import com.twilio.exception.ApiException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,7 +51,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -662,37 +656,14 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             if (validarSessao(conexao, req)) {
-                //Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                clienteDAO.inserirPrecos(confirmaPedido);
-                //List<Endereco> enderecos = clienteDAO.getEnderecos(cliente);
-                //List<FormaPagamento> formaPagamentos = clienteDAO.getFormasPagamento(cliente);
-                //confirmaPedido.setFormaPagamentos(formaPagamentos);
-                //confirmaPedido.setEnderecos(enderecos);
-                confirmaPedido.calcularPrecoTotal(RepositorioProdutos.getInstancia().frete);
-
-                {
-                    String codigo = confirmaPedido.getCodigoPromocional();
-                    if (codigo != null) {
-                        if (codigo.equals("teste")) {
-                            BigDecimal precoTotal = new BigDecimal(String.valueOf(confirmaPedido.getPrecoTotal()));
-                            BigDecimal desconto = precoTotal.multiply(new BigDecimal(String.valueOf("0.05")));
-                            BigDecimal resultado = precoTotal.subtract(desconto);
-                            resultado = resultado.setScale(2, BigDecimal.ROUND_HALF_EVEN);
-                            desconto = desconto.setScale(2, BigDecimal.ROUND_HALF_EVEN);
-                            System.out.println(resultado);
-                            System.out.println(desconto);
-                            confirmaPedido.setCodigoPromocional(desconto.toString());
-                            confirmaPedido.setPrecoTotal(resultado.doubleValue());
-                        } else {
-                            confirmaPedido.setCodigoPromocional(null);
-                        }
-                    }
-                }
-
-                sessao.setAttribute("pre-pedido-itens", confirmaPedido.getItens());
-                sessao.setAttribute("pre-pedido-preco", confirmaPedido.getPrecoTotal());
-
+                if (!clienteDAO.existePedidoAberto(cliente)) {
+                    clienteDAO.inserirPrecos(confirmaPedido);
+                    confirmaPedido.calcularPrecoTotal(RepositorioProdutos.getInstancia().frete);
+                    sessao.setAttribute("pre-pedido-itens", confirmaPedido.getItens());
+                    sessao.setAttribute("pre-pedido-preco", confirmaPedido.getPrecoTotal());
+                }                
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }
@@ -730,65 +701,13 @@ public class ClienteController {
                         confirmacaoPedido.setStatus(0);
                         break;
                     case 1:
-                        if (!clienteDAO.possuiPrePredido(cliente)) {
-                            ServicoPagamentoPayPal servicoPagamento = new ServicoPagamentoPayPal();
-                            Payment pagamentoCriado = servicoPagamento.criarPagamento(String.valueOf(pedido.getPrecoTotal()));
-                            clienteDAO.inserirPrePedido(pedido, cliente, pagamentoCriado.getId());
-                            confirmacaoPedido.setStatus(1);
-                            confirmacaoPedido.setLink(pagamentoCriado.getLinks().get(1).getHref());
-                        } else {
-                            confirmacaoPedido.setStatus(-2);
-                        }
+                        
                         break;
                     case 2:
-                        /*
-                        if (!clienteDAO.possuiPrePredido(cliente)) {
-                            String tokenSessao;
-                            if (sessao.getAttribute("token_sessao_pagseguro") == null) {
-                                ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
-                                tokenSessao = servicoPagamento.criarTokenPagamento();
-                                if (tokenSessao == null) {
-                                    throw new PaymentException();
-                                }
-                                sessao.setAttribute("token_sessao_pagseguro", tokenSessao);
-                            } else {
-                                tokenSessao = (String) sessao.getAttribute("token_sessao_pagseguro");
-                            }
-                            System.out.println("Gerando pagamento pagseguro com token: " + tokenSessao);
-                            ExecutarPagamento pagamento = new ExecutarPagamento();
-                            pagamento.setCliente(cliente);
-                            pagamento.setPedido(pedido);
-                            pagamento.setEndereco(confirmaPedido.getEnderecos().get(0));
-                            sessao.setAttribute("executar-pagamento", pagamento);
-                            clienteDAO.inserirPrePedido(pedido, cliente, tokenSessao);
-                            confirmacaoPedido.setStatus(2);
-                            confirmacaoPedido.setLink(tokenSessao);
-                        } else {
-                            confirmacaoPedido.setStatus(-2);
-                        }*/
+                        
                         break;
                     case 3:
-                        /*
-                        if (!clienteDAO.possuiPrePredido(cliente)) {
-                            String tokenSessao;
-                            if (sessao.getAttribute("token_sessao_pagseguro") == null) {
-                                ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
-                                tokenSessao = servicoPagamento.criarTokenPagamento();
-                                sessao.setAttribute("token_sessao_pagseguro", tokenSessao);
-                            } else {
-                                tokenSessao = (String) sessao.getAttribute("token_sessao_pagseguro");
-                            }
-                            ExecutarPagamento pagamento = new ExecutarPagamento();
-                            pagamento.setCliente(cliente);
-                            pagamento.setPedido(pedido);
-                            pagamento.setEndereco(confirmaPedido.getEnderecos().get(0));
-                            sessao.setAttribute("executar-pagamento", pagamento);
-                            clienteDAO.inserirPrePedido(pedido, cliente, tokenSessao);
-                            confirmacaoPedido.setStatus(3);
-                            confirmacaoPedido.setLink(tokenSessao);
-                        } else {
-                            confirmacaoPedido.setStatus(-2);
-                        }*/
+                        
                         break;
                     default:
                         confirmacaoPedido.setStatus(-1);
@@ -801,9 +720,7 @@ public class ClienteController {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
-        } catch (PaymentException e) {
-            e.printStackTrace();
-        }
+        } 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(confirmacaoPedido, httpHeaders, httpStatus);
