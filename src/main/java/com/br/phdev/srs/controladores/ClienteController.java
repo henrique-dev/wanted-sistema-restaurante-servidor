@@ -204,7 +204,7 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
     }
-    
+
     @PostMapping("cliente/enviar-mensagem")
     public ResponseEntity<Mensagem> enviarMensagem(@RequestBody Notificacao notificacao, HttpSession sessao) {
         Mensagem mensagem = new Mensagem();
@@ -690,31 +690,35 @@ public class ClienteController {
         try (Connection conexao = new FabricaConexao().conectar()) {
             ClienteDAO clienteDAO = new ClienteDAO(conexao);
             if (validarSessao(conexao, req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                pedido = new Pedido();
-                pedido.setEndereco(confirmaPedido.getEnderecos().get(0));
-                pedido.setFormaPagamento(confirmaPedido.getFormaPagamentos().get(0));
-                pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
-                pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
-                pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
-                pedido.setFrete(RepositorioProdutos.getInstancia().frete);
-                switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
-                    case 0:
-                        clienteDAO.inserirPedido(pedido, cliente);
-                        confirmacaoPedido.setStatus(0);
-                        break;
-                    case 1:
-                        
-                        break;
-                    case 2:
-                        
-                        break;
-                    case 3:
-                        
-                        break;
-                    default:
-                        confirmacaoPedido.setStatus(-1);
-                        break;
+                if (sessao.getAttribute("pre-pedido-preco") != null && sessao.getAttribute("pre-pedido-itens") != null) {
+                    Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                    pedido = new Pedido();
+                    pedido.setEndereco(confirmaPedido.getEnderecos().get(0));
+                    pedido.setFormaPagamento(confirmaPedido.getFormaPagamentos().get(0));
+                    pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
+                    pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
+                    pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
+                    pedido.setFrete(RepositorioProdutos.getInstancia().frete);
+                    switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
+                        case 0:
+                            clienteDAO.inserirPedido(pedido, cliente);
+                            confirmacaoPedido.setStatus(0);
+                            sessao.setAttribute("pre-pedido-itens", null);
+                            sessao.setAttribute("pre-pedido-preco", null);
+                            break;
+                        case 1:
+
+                            break;
+                        case 2:
+
+                            break;
+                        case 3:
+
+                            break;
+                        default:
+                            confirmacaoPedido.setStatus(-1);
+                            break;
+                    }
                 }
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
@@ -723,7 +727,7 @@ public class ClienteController {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
-        } 
+        }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(confirmacaoPedido, httpHeaders, httpStatus);
