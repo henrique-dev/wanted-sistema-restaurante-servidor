@@ -27,7 +27,7 @@ public class SevicoAgendamento {
 
     @Scheduled(fixedDelay = 10000)
     public void verificaPorHora() throws JsonProcessingException, IOException {
-        System.out.println("Executando servico de agendamento");
+        //System.out.println("Executando servico de agendamento");
         try (Connection conexao = new FabricaConexao().conectar()) {
             GerenciadorDAO dao = new GerenciadorDAO(conexao);
             HashSet notificacoes = dao.listarNotificacoes();
