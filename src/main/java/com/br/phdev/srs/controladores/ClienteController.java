@@ -663,7 +663,10 @@ public class ClienteController {
                     confirmaPedido.calcularPrecoTotal(RepositorioProdutos.getInstancia().frete);
                     sessao.setAttribute("pre-pedido-itens", confirmaPedido.getItens());
                     sessao.setAttribute("pre-pedido-preco", confirmaPedido.getPrecoTotal());
-                }                
+                    confirmaPedido.setMensagem(new Mensagem(100, "Pedido pré-confirmado"));
+                } else {
+                    confirmaPedido.setMensagem(new Mensagem(101, "Já existe um pedido em andamento"));
+                }
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }

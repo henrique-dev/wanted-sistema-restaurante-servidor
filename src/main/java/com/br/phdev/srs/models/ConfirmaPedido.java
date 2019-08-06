@@ -20,6 +20,7 @@ public class ConfirmaPedido {
     private String codigoPromocional;
     private double precoTotal;
     private String observacaoEntrega;
+    private Mensagem mensagem;
 
     public ConfirmaPedido() {
     }
@@ -82,6 +83,14 @@ public class ConfirmaPedido {
     public void setObservacaoEntrega(String observacaoEntrega) {
         this.observacaoEntrega = observacaoEntrega;
     }        
+
+    public Mensagem getMensagem() {
+        return mensagem;
+    }
+
+    public void setMensagem(Mensagem mensagem) {
+        this.mensagem = mensagem;
+    }
 
     @Override
     public String toString() {
