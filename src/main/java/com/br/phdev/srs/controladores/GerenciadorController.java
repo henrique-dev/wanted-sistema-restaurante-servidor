@@ -69,8 +69,7 @@ public class GerenciadorController {
                 sessao.setAttribute("usuario", usuario);
                 sessao.setAttribute("cliente", cliente);
                 return "redirect:main";
-            } else {
-                System.out.println("HERE3");
+            } else {                
                 mensagem.setCodigo(101);
                 mensagem.setDescricao("Usuário ou senha inválidos");
             }

@@ -7,17 +7,13 @@
 package com.br.phdev.srs.utils;
 
 import com.br.phdev.srs.daos.ClienteDAO;
-import com.br.phdev.srs.daos.GerenciadorDAO;
-import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.jdbc.FabricaConexao;
 import com.br.phdev.srs.models.Notificacao;
-import com.br.phdev.srs.models.Pedido;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
@@ -73,7 +69,7 @@ public class ServicoNotificacao implements WebSocketConfigurer {
         @Override
         public void afterConnectionEstablished(WebSocketSession wss) throws Exception {
             sessions.put(wss.getPrincipal().getName(), wss);
-            wss.sendMessage(new TextMessage(wss.getPrincipal().getName()));
+            wss.sendMessage(new TextMessage("{'id':0, 'tipo':'conexao_estabelecida', 'token':" + wss.getPrincipal().getName() + "}"));            
         }
 
         @Override
