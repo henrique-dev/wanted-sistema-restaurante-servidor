@@ -21,6 +21,10 @@ public class MensagemCadastro extends Mensagem{
     public MensagemCadastro(String opcional) {
         this.opcional = opcional;
     }
+    
+    public MensagemCadastro(int codigo, String descricao) {
+        super(codigo, descricao);
+    }
 
     public MensagemCadastro(int codigo, String descricao, String opcional) {
         super(codigo, descricao);

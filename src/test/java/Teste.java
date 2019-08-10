@@ -28,20 +28,8 @@ public class Teste {
 
     public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
-        String alvo = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadadadadaaaaaaaaddddddddddddddddddddddddddddddaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-        String chave = "ZXDas79mby@";
-        String textoParaHash = alvo
-                + Calendar.getInstance().getTime().toString() + chave;
-        MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
-        byte textoDigerido[] = algoritmo.digest(textoParaHash.getBytes("UTF-8"));
-        int tamanho = 5;
-        {
-            StringBuilder token = new StringBuilder();
-            for (int i = 0; i < textoDigerido.length; i = i + (64 / tamanho)) {
-                token.append(String.format("%02X", 0xFF & textoDigerido[i]));
-            }            
-            System.out.println(token.toString().substring(0, tamanho));
-        }
+        String nome = "josé henrique";
+        System.out.println(nome.matches("^[a-zà-ÿ']+(\\s([a-zà-ÿ']\\s?)*[a-zà-ÿ][A-zà-ÿ']+)*$"));
 
     }
 

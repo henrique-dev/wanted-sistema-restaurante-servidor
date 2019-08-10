@@ -9,6 +9,7 @@ package com.br.phdev.srs.daos;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Cadastro;
+import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.MensagemCadastro;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
@@ -153,40 +154,25 @@ public class CadastroDAO {
     }
 
     public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
-        MensagemCadastro
-                mensagem = this.verificarNumero(cadastro);
+        MensagemCadastro mensagem = this.verificarNumero(cadastro);        
         if (mensagem.getCodigo() != 104) {
             return mensagem;
         }
+        mensagem.setCodigo(101);
         if (cadastro == null) {
-            throw new DAOIncorrectData(300);
+            return new MensagemCadastro(101, "Forneça informaçoes válidas para o cadastro");
         }
-        if (cadastro.getNome() == null || cadastro.getCpf() == null || cadastro.getEmail() == null
-                 || cadastro.getSenhaUsuario() == null) {
-            throw new DAOIncorrectData(300);
+        if (cadastro.getNome() == null || cadastro.getNome().trim().isEmpty() || !cadastro.getNome().matches("^[a-zà-ÿ']+(\\s([a-zà-ÿ']\\s?)*[a-zà-ÿ][A-zà-ÿ']+)*$")) {
+            return new MensagemCadastro(101, "Forneça um nome válido");
         }
-        if (cadastro.getNome().trim().isEmpty() || cadastro.getCpf().trim().isEmpty() || cadastro.getEmail().trim().isEmpty()
-                || cadastro.getTelefone().trim().isEmpty() || cadastro.getSenhaUsuario().trim().isEmpty()) {
-            throw new DAOIncorrectData(301);
+        if (cadastro.getEmail() != null && cadastro.getEmail().trim().isEmpty() && !cadastro.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")) {
+            return new MensagemCadastro(101, "Formato de email não suportado");
         }
-        for (char c : cadastro.getNome().toCharArray()) {
-            if (!(((int) c > 64 && (int) c < 91) || ((int) c > 96 && (int) c < 123)
-                    || ((int) c > 191 && (int) c < 198) || ((int) c > 198 && (int) c < 215)
-                    || ((int) c > 215 && (int) c < 222) || ((int) c > 223 && (int) c < 230)
-                    || ((int) c > 230 && (int) c < 247) || ((int) c > 248 && (int) c < 257)) && (int) c != 32) {
-                throw new DAOIncorrectData(302);
-            }
+        if (cadastro.getCpf() == null || cadastro.getCpf().isEmpty() || !cadastro.getCpf().matches("[0-9]+") || !Util.validarCPF(cadastro.getCpf())) {
+            return new MensagemCadastro(101, "Forneça um CPF válido");
         }
-        if (!cadastro.getEmail().contains("@")) {
-            throw new DAOIncorrectData(303);
-        }
-        for (char c : cadastro.getCpf().toCharArray()) {
-            if (!((int) c > 47 && (int) c < 58)) {
-                throw new DAOIncorrectData(304);
-            }
-        }
-        if (!Util.validarCPF(cadastro.getCpf())) {
-            throw new DAOIncorrectData(306);
+        if (cadastro.getSenhaUsuario() == null || cadastro.getSenhaUsuario().isEmpty()) {
+            return new MensagemCadastro(101, "Forneça uma senha válida");
         }
         
         try {
