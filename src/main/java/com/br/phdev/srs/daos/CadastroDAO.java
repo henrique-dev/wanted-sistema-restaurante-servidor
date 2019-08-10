@@ -79,6 +79,7 @@ public class CadastroDAO {
                     mensagem.setDescricao("Número de telefone não cadastrado");
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
                 throw new DAOException(e, 200);
             }
         }
@@ -117,7 +118,7 @@ public class CadastroDAO {
                     break;
             }
             
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | SQLException e) {
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | SQLException e) {            
             e.printStackTrace();
             throw new DAOException(e, 200);
         }
@@ -128,7 +129,6 @@ public class CadastroDAO {
         if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
             return null;
         }
-        Mensagem mensagem = new Mensagem();
         String sql = "SELECT id_usuario FROM usuario WHERE nome=? AND token_cadastro=?";        
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
             stmt.setString(1, cadastro.getTelefone());
@@ -141,9 +141,13 @@ public class CadastroDAO {
                     stmt2.setLong(2, rs.getLong("id_usuario"));
                     stmt2.execute();
                 }
-                return new Usuario(rs.getLong("id_usuario"));
+                Usuario usuario = new Usuario();
+                usuario.setIdUsuario(rs.getLong("id_usuario"));
+                usuario.setNomeUsuario(cadastro.getTelefone());
+                return usuario;
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
         return null;
@@ -208,6 +212,7 @@ public class CadastroDAO {
             }
             
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
         return null;

@@ -80,7 +80,7 @@ public class CadastroController {
         HttpHeaders httpHeaders = new HttpHeaders();
         try {
             Usuario usuario = this.dao.validarCodigoAtivacao(cadastro, sessao.getId());
-            if (usuario != null) {
+            if (usuario != null) {                
                 sessao.setAttribute("usuario", usuario);                                
                 httpHeaders.add("session-id", sessao.getId());
                 mensagem.setCodigo(100);
@@ -110,7 +110,6 @@ public class CadastroController {
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
             }            
         } catch (DAOException e) {
-            e.printStackTrace();
             mensagem.setCodigo(e.codigo);
         }        
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
