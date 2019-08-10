@@ -7,23 +7,19 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
-import com.br.phdev.srs.exceptions.DAOExpectedException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Cadastro;
-import com.br.phdev.srs.models.Codigo;
-import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.MensagemCadastro;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import com.br.phdev.srs.utils.Util;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -46,10 +42,10 @@ public class CadastroDAO {
         }
     }
 
-    public Mensagem verificarNumero(Cadastro cadastro) throws DAOException {
-        Mensagem mensagem = new Mensagem();
+    public MensagemCadastro verificarNumero(Cadastro cadastro) throws DAOException {
+        MensagemCadastro mensagem = new MensagemCadastro();
         if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
-            return new Mensagem(101, "Número de telefone inválido");
+            return new MensagemCadastro(101, "Número de telefone inválido", null);
         } else {
             try {
                 String sql = "SELECT nome, ativo, verificado, token_cadastro, token_cadastro_data, "
@@ -86,8 +82,8 @@ public class CadastroDAO {
         return mensagem;
     }
 
-    public Mensagem enviarCodigoAtivacao(Cadastro cadastro) throws DAOException {
-        Mensagem mensagem = null;
+    public MensagemCadastro enviarCodigoAtivacao(Cadastro cadastro) throws DAOException {
+        MensagemCadastro mensagem = null;
         try {
             mensagem = this.verificarNumero(cadastro);
             String sql = "";
@@ -101,6 +97,7 @@ public class CadastroDAO {
                         stmt.execute();
                         mensagem.setCodigo(100);
                         mensagem.setDescricao(token);
+                        mensagem.setOpcional(String.valueOf(60 * 10));
                     }
                     break;
 
@@ -114,6 +111,7 @@ public class CadastroDAO {
                         stmt.execute();
                         mensagem.setCodigo(100);
                         mensagem.setDescricao(token);
+                        mensagem.setOpcional(String.valueOf(60 * 10));
                     }
                     break;
             }
@@ -153,8 +151,9 @@ public class CadastroDAO {
         return null;
     }
 
-    public Mensagem cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
-        Mensagem mensagem = this.verificarNumero(cadastro);
+    public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
+        MensagemCadastro
+                mensagem = this.verificarNumero(cadastro);
         if (mensagem.getCodigo() != 104) {
             return mensagem;
         }
@@ -220,7 +219,7 @@ public class CadastroDAO {
             e.printStackTrace();
             throw new DAOException(e, 200);
         }
-        return null;
+        return mensagem;
     }    
 
 }
