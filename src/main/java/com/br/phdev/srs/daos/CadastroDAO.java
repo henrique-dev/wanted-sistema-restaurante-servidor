@@ -181,11 +181,6 @@ public class CadastroDAO {
                 throw new DAOIncorrectData(304);
             }
         }
-        for (char c : cadastro.getTelefone().toCharArray()) {
-            if (!((int) c > 47 && (int) c < 58)) {
-                throw new DAOIncorrectData(305);
-            }
-        }
         if (!Util.validarCPF(cadastro.getCpf())) {
             throw new DAOIncorrectData(306);
         }
@@ -200,7 +195,7 @@ public class CadastroDAO {
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
-                stmt.setString(3, cadastro.getTelefone());
+                stmt.setString(3, usuario.getNomeUsuario());
                 stmt.setString(4, cadastro.getEmail());                
                 stmt.setLong(5, usuario.getIdUsuario());
                 stmt.execute();
