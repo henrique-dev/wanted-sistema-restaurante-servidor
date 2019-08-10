@@ -5,10 +5,8 @@
  */
 package com.br.phdev.srs.interceptors;
 
-import com.br.phdev.srs.utils.HttpUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -24,14 +22,17 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
         //new HttpUtils().showHeaders(request);
         if (request.getSession().getAttribute("usuario") != null) {
             return true;
-        } else {            
-            if (uri.endsWith("autenticar") || uri.endsWith("cliente/sem-autorizacao") || uri.contains("cliente/teste")
-                    || uri.contains("imagens") || uri.contains("validar-cadastro") || uri.endsWith("cliente/cadastrar")
-                    || uri.endsWith("cliente/sair") || uri.endsWith("cliente/verificar-numero") || uri.endsWith("cliente/validar-numero")
-                    || uri.endsWith("pagamentos/criar-pagamento") || uri.endsWith("pagamentos/executar-pagamento") || uri.contains("pagamento-efetuado")
-                    || uri.contains("notificacao") || uri.contains("notificar") || uri.contains("teste") || uri.contains("resources")
-                    || uri.contains("cliente/verificar-sessao") || uri.contains("pagamentos") 
-                    || uri.contains("entrar")) {
+        } else {
+            if (uri.endsWith("cadastro/verificar-numero")
+                    || uri.endsWith("cadastro/enviar-sms")
+                    || uri.endsWith("cadastro/validar-codigo")
+                    || uri.endsWith("sessao/entrar")
+                    || uri.endsWith("sessao/autenticar")
+                    || uri.contains("imagens")
+                    || uri.contains("notificacao")
+                    || uri.contains("notificar")
+                    || uri.contains("resources")                    
+                    ) {
                 return true;
             } else {
                 if (uri.contains("cliente"))

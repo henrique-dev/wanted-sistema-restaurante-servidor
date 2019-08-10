@@ -471,27 +471,4 @@ public class GerenciadorDAO extends BasicDAO {
         }
     }
 
-    public HashSet<Notificacao> listarNotificacoes() throws DAOException {
-        HashSet<Notificacao> notificacoes = new HashSet<>();
-        String sql = "SELECT * FROM notificacao "
-                + " LEFT JOIN websocket ON notificacao.id_cliente = websocket.id_cliente "
-                + " WHERE notificacao.entregue = 0 AND websocket.token != '' AND websocket.token IS NOT NULL";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Notificacao notificacao = new Notificacao();
-                notificacao.setId(rs.getLong("id_notificacao"));
-                notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                String mensagem = rs.getString("mensagem");
-                mensagem = mensagem.replace("\"?\"", String.valueOf(notificacao.getId()));
-                notificacao.setMensagem(mensagem);
-                notificacao.setWebsocketId(rs.getString("token"));
-                notificacoes.add(notificacao);
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-        return notificacoes;
-    }
-
 }

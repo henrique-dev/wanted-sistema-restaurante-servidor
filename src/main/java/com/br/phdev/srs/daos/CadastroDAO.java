@@ -12,6 +12,7 @@ import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Codigo;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,20 +21,136 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-public class CadastroDAO extends BasicDAO {
+@Repository
+public class CadastroDAO {
+    
+    private final Connection conexao;    
 
-    private final String chave = "ZXDas7966mby@";
-
-    public CadastroDAO(Connection conexao) {
-        super(conexao);
+    @Autowired
+    CadastroDAO(DataSource dataSource) {
+        try {
+            this.conexao = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    synchronized public String cadastrarCliente(Cadastro cadastro) throws DAOException {
+    public Mensagem verificarNumero(Cadastro cadastro) throws DAOException {
+        Mensagem mensagem = new Mensagem();
+        if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
+            return new Mensagem(101, "Número de telefone inválido");
+        } else {
+            try {
+                String sql = "SELECT nome, ativo, verificado, token_cadastro, token_cadastro_data, "
+                        + " (MINUTE(TIMEDIFF(now(), token_cadastro_data)) * 60 + SECOND(TIMEDIFF(now(), token_cadastro_data))) tempo_atual "
+                        + " FROM usuario WHERE nome=?";
+                PreparedStatement stmt = this.conexao.prepareStatement(sql);
+                stmt.setString(1, cadastro.getTelefone());
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    if (!rs.getBoolean("verificado")) {
+                        if (rs.getInt("tempo_atual") / 60 < 10) {
+                            mensagem.setCodigo(102);
+                            mensagem.setDescricao(String.valueOf(rs.getInt("tempo_atual")));
+                        } else {
+                            mensagem.setCodigo(103);
+                            mensagem.setDescricao("Pode enviar sms");
+                        }
+                    } else if (!rs.getBoolean("ativo")) {
+                        mensagem.setCodigo(104);
+                        mensagem.setDescricao("Número de telefone verificado, porém o cadastro não foi concluído");
+                    } else {
+                        mensagem.setCodigo(100);
+                        mensagem.setDescricao("Número de telefone ativo");
+                    }
+                } else {
+                    mensagem.setCodigo(105);
+                    mensagem.setDescricao("Número de telefone não cadastrado");
+                }
+            } catch (SQLException e) {
+                throw new DAOException(e, 200);
+            }
+        }
+        return mensagem;
+    }
+
+    public Mensagem enviarCodigoAtivacao(Cadastro cadastro) throws DAOException {
+        Mensagem mensagem = null;
+        try {
+            mensagem = this.verificarNumero(cadastro);            
+            String sql = "";
+            switch (mensagem.getCodigo()) {
+                case 105:                    
+                    sql = "INSERT INTO usuario VALUES (default, ?, '', null, ?, 0, 0, now())";
+                    try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+                        String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
+                        stmt.setString(1, cadastro.getTelefone());                        
+                        stmt.setString(2, token);
+                        stmt.execute();
+                        mensagem.setCodigo(100);
+                        mensagem.setDescricao(token);
+                    }
+                    break;
+
+                case 103:                    
+                    sql = "UPDATE usuario set token_cadastro=?, token_cadastro_data=now() WHERE nome=?";
+                    try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+                        String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
+                        System.out.println(token);
+                        stmt.setString(1, token);
+                        stmt.setString(2, cadastro.getTelefone());
+                        stmt.execute();
+                        mensagem.setCodigo(100);
+                        mensagem.setDescricao(token);
+                    }
+                    break;
+            }
+            
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return mensagem;
+    }
+    
+    public Mensagem validarCodigoAtivacao(Cadastro cadastro, String tokenSessao) throws DAOException {
+        if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
+            return new Mensagem(101, "Número de telefone inválido");
+        }
+        Mensagem mensagem = new Mensagem();
+        String sql = "SELECT id_usuario FROM usuario WHERE nome=? AND token_cadastro=?";        
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
+            stmt.setString(1, cadastro.getTelefone());
+            stmt.setString(2, cadastro.getCodigo());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                sql = "UPDATE usuario SET verificado=1, token_sessao=? WHERE id_usuario=?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setString(1, tokenSessao);
+                    stmt2.setLong(2, rs.getLong("id_usuario"));
+                    stmt2.execute();
+                }
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Número de telefone verificado. Pode prosseguir com o cadastro");
+            } else {
+                mensagem.setCodigo(101);
+                mensagem.setDescricao("Código de ativação inválido");
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+        return mensagem;
+    }
+
+    public String cadastrarCliente(Cadastro cadastro) throws DAOException {
         if (cadastro == null) {
             throw new DAOIncorrectData(300);
         }
@@ -100,7 +217,7 @@ public class CadastroDAO extends BasicDAO {
             String sql = "SELECT usuario.id_usuario "
                     + " FROM usuario "
                     + " WHERE usuario.nome = ? AND usuario.token_cadastro = ? AND usuario.ativo = false AND usuario.verificado = true";
-            PreparedStatement stmt = super.conexao.prepareStatement(sql);
+            PreparedStatement stmt = this.conexao.prepareStatement(sql);
             stmt.setString(1, cadastro.getTelefone());
             stmt.setString(2, cadastro.getCodigo());
             ResultSet rs = stmt.executeQuery();
@@ -108,13 +225,13 @@ public class CadastroDAO extends BasicDAO {
                 long idUsuario = rs.getInt("id_usuario");
                 stmt.close();
                 sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true WHERE usuario.id_usuario = ?";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setString(1, cadastro.getSenhaUsuario());
                 stmt.setLong(2, idUsuario);
                 stmt.execute();
                 stmt.close();
-                sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";                
-                stmt = super.conexao.prepareStatement(sql);
+                sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, cadastro.getTelefone());
@@ -129,116 +246,6 @@ public class CadastroDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
         return null;
-    }
-
-    synchronized public String preCadastrar(String usuario) throws DAOException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        try {
-            PreparedStatement stmt = super.conexao.prepareStatement("SELECT usuario.ativo FROM usuario WHERE usuario.nome = ?");
-            stmt.setString(1, usuario);
-            ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                stmt.close();
-                stmt = super.conexao.prepareStatement("INSERT INTO usuario VALUES (default, ?, '', null, ?, 0, 0, null, now())");
-                stmt.setString(1, usuario);
-                StringBuilder token = new StringBuilder();
-                String textoParaHash = usuario
-                        + Calendar.getInstance().getTime().toString() + this.chave;
-                MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
-                byte textoDigerido[] = algoritmo.digest(textoParaHash.getBytes("UTF-8"));
-                for (int i = 0; i < textoDigerido.length; i = i + 14) {
-                    token.append(String.format("%02X", 0xFF & textoDigerido[i]));
-                }
-                stmt.setString(2, token.toString());
-                stmt.execute();
-                return token.toString();
-            } else {
-                if(rs.getBoolean("ativo")) {
-                    throw new DAOException(500);
-                } else {
-                    throw new DAOException(501);
-                }
-            }            
-        } catch (SQLException e) {            
-            throw new DAOException(e, 200);
-        }
-    }
-
-    public Mensagem reenviarCodigo(String usuario) throws DAOException {
-        Mensagem mensagem = new Mensagem();
-        String sql = "SELECT id_usuario, ativo, verificado, token_cadastro_data, "
-                        + " (MINUTE(TIMEDIFF(now(), token_cadastro_data)) * 60 + SECOND(TIMEDIFF(now(), token_cadastro_data))) tempo_atual "
-                        + " FROM usuario WHERE usuario.nome = ?";
-        try {
-            PreparedStatement stmt = super.conexao.prepareStatement(sql);
-            stmt.setString(1, usuario);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                boolean ativo = rs.getBoolean("ativo");
-                boolean verificado = rs.getBoolean("verificado");
-                if (!ativo && !verificado) {
-                    long segundos = rs.getInt("tempo_atual");
-                    if (segundos > 300) {
-                        sql = "UPDATE usuario SET token_cadastro = ?, token_cadastro_data = NOW() WHERE usuario.nome = ?";
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                            
-                            StringBuilder token = new StringBuilder();
-                            String textoParaHash = usuario
-                                    + Calendar.getInstance().getTime().toString() + this.chave;
-                            MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
-                            byte textoDigerido[] = algoritmo.digest(textoParaHash.getBytes("UTF-8"));
-                            for (int i = 0; i < textoDigerido.length; i = i + 14) {
-                                token.append(String.format("%02X", 0xFF & textoDigerido[i]));
-                            }
-                            stmt2.setString(1, token.toString());
-                            stmt2.setString(2, usuario);
-                            stmt2.execute();
-                            mensagem.setCodigo(100);
-                            mensagem.setDescricao(token.toString());
-                        }
-                    } else {
-                        mensagem.setCodigo(101);
-                        mensagem.setDescricao(String.valueOf(segundos));
-                    }
-                } else {
-                    mensagem.setCodigo(200);
-                    mensagem.setDescricao("Usuário já ativo ou verificado");
-                }
-            } else {
-                mensagem.setCodigo(200);
-                mensagem.setDescricao(rs.getString("Usuário não pré cadastrado"));
-            }
-        } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw new DAOException(e, 200);
-        }
-        return mensagem;
-    }
-
-    public boolean validarNumero(Codigo codigo) throws DAOException {
-        if (codigo == null) {
-            throw new DAOIncorrectData(300);
-        }
-        if (codigo.getCodigo() == null) {
-            throw new DAOIncorrectData(300);
-        }
-        if (codigo.getCodigo().isEmpty()) {
-            throw new DAOIncorrectData(301);
-        }
-        try {
-            PreparedStatement stmt = super.conexao.prepareStatement("SELECT id_usuario FROM usuario WHERE usuario.nome = ? AND usuario.token_cadastro = ?");
-            stmt.setString(1, codigo.getTelefone());
-            stmt.setString(2, codigo.getCodigo());
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                long idUsuario = rs.getInt("id_usuario");
-                stmt.close();
-                stmt = super.conexao.prepareStatement("UPDATE usuario SET  usuario.verificado = true WHERE usuario.id_usuario = ?");
-                stmt.setLong(1, idUsuario);
-                stmt.execute();
-                return true;
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-        return false;
-    }
+    }    
 
 }

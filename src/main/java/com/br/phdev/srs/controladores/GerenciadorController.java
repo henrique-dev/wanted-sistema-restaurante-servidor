@@ -6,41 +6,7 @@
  */
 package com.br.phdev.srs.controladores;
 
-import com.br.phdev.srs.daos.AutenticaDAO;
-import com.br.phdev.srs.daos.ClienteDAO;
-import com.br.phdev.srs.daos.GerenciadorDAO;
-import com.br.phdev.srs.exceptions.DAOException;
-import com.br.phdev.srs.exceptions.StorageException;
-import com.br.phdev.srs.jdbc.FabricaConexao;
-import com.br.phdev.srs.models.Cliente;
-import com.br.phdev.srs.models.Complemento;
-import com.br.phdev.srs.models.Foto;
-import com.br.phdev.srs.models.Genero;
-import com.br.phdev.srs.models.Ingrediente;
-import com.br.phdev.srs.models.Item;
-import com.br.phdev.srs.models.Mensagem;
-import com.br.phdev.srs.models.Pedido;
-import com.br.phdev.srs.models.Tipo;
-import com.br.phdev.srs.models.Usuario;
-import com.br.phdev.srs.utils.ServicoArmazenamento;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -48,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 public class GerenciadorController {
-
+/*
     @GetMapping("gerenciador/entrar")
     public String entrar() {
         return "login";
@@ -61,7 +27,7 @@ public class GerenciadorController {
         Mensagem mensagem = new Mensagem();
         Usuario usuario = new Usuario(0, nomeUsuario, senhaUsuario);
         try (Connection conexao = new FabricaConexao().conectar()) {
-            AutenticaDAO autenticaDAO = new AutenticaDAO(conexao);
+            SessaoDAO autenticaDAO = new SessaoDAO(conexao);
             Cliente cliente = autenticaDAO.autenticar(usuario);
             if (cliente != null) {                
                 autenticaDAO.gerarSessao(usuario, sessao.getId());
@@ -472,5 +438,27 @@ public class GerenciadorController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
     }
+    
+    @PostMapping("gerenciador/enviar-mensagem")
+    public ResponseEntity<Mensagem> enviarMensagem(@RequestBody Notificacao notificacao, HttpSession sessao) {
+        Mensagem mensagem = new Mensagem();
+        try (Connection conexao = new FabricaConexao().conectar()) {
+            GerenciadorDAO dao = new GerenciadorDAO(conexao);
+            dao.adicionarNotificacao(notificacao);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("mensagem salva");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mensagem.setDescricao(e.getMessage());
+            mensagem.setCodigo(200);
+        } catch (DAOException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }*/
 
 }

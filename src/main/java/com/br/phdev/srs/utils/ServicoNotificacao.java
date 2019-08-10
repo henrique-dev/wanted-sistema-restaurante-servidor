@@ -6,17 +6,16 @@
  */
 package com.br.phdev.srs.utils;
 
-import com.br.phdev.srs.daos.ClienteDAO;
-import com.br.phdev.srs.jdbc.FabricaConexao;
+import com.br.phdev.srs.daos.ServicoDAO;
 import com.br.phdev.srs.models.Notificacao;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.security.Principal;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -44,6 +43,13 @@ public class ServicoNotificacao implements WebSocketConfigurer {
 
     synchronized public static Map<String, WebSocketSession> getSessions() {
         return sessions;
+    }
+    
+    private final ServicoDAO dao;
+    
+    @Autowired
+    public ServicoNotificacao(ServicoDAO dao) {
+        this.dao = dao;
     }
 
     public static boolean enviarMensagem(String userId, String mensagem) throws IOException {
@@ -79,10 +85,7 @@ public class ServicoNotificacao implements WebSocketConfigurer {
                 Notificacao notificacao = mapeador.readValue(wsm.getPayload().toString(),
                         new TypeReference<Notificacao>() {
                 });
-                try (Connection conexao = new FabricaConexao().conectar()) {
-                    ClienteDAO clienteDAO = new ClienteDAO(conexao);
-                    clienteDAO.confirmarRecebimentoNotificacao(notificacao);
-                }
+                ServicoNotificacao.this.dao.confirmarRecebimentoNotificacao(notificacao);
             } catch (IOException e) {
                 e.printStackTrace();
             }

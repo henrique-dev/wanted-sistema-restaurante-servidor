@@ -47,15 +47,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-public class ClienteDAO extends BasicDAO {
+@Repository
+public class ClienteDAO {
 
-    public ClienteDAO(Connection conexao) {
-        super(conexao);
+    private final Connection conexao;
+    
+    @Autowired
+    ClienteDAO(DataSource dataSource) {
+        try {
+            this.conexao = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); 
+        }
     }
 
     public void cadastrarTokenAlerta(Cliente cliente, String token) throws DAOException {
@@ -63,7 +74,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException("Erro", 300);
         }
         String sql = "UPDATE websocket SET token=? WHERE id_cliente=?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token);
             stmt.setLong(2, cliente.getId());
             stmt.execute();
@@ -76,7 +87,7 @@ public class ClienteDAO extends BasicDAO {
         String sql = "SELECT nome, cpf, telefone, email"
                 + " FROM cliente"
                 + " WHERE cliente.id_cliente = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -97,7 +108,7 @@ public class ClienteDAO extends BasicDAO {
         ListaItens listaItens = new ListaItens();        
         String sql = " SELECT item.id_item FROM item "
                         + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
-            try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {                
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {                
                 ResultSet rs2 = stmt2.executeQuery();
                 List<Item> itensDia = new ArrayList<>();
                 while (rs2.next()) {
@@ -124,7 +135,7 @@ public class ClienteDAO extends BasicDAO {
                 + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
                 + " WHERE itens_favoritos.id_cliente = ? "
                 + " order by item.id_item, genero.nome, tipo.id_tipo";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             List<Item> itens = new ArrayList<>();
@@ -144,7 +155,7 @@ public class ClienteDAO extends BasicDAO {
                                 + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
                                 + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
                                 + " WHERE item.id_item = ?";
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                             stmt2.setLong(1, pratoAtual);
                             ResultSet rs2 = stmt2.executeQuery();
                             fotos = new HashSet<>();
@@ -183,7 +194,7 @@ public class ClienteDAO extends BasicDAO {
                         + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
                         + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, pratoAtual);
                     ResultSet rs2 = stmt2.executeQuery();
                     fotos = new HashSet<>();
@@ -221,7 +232,7 @@ public class ClienteDAO extends BasicDAO {
                 + " (SELECT id_cliente FROM itens_favoritos i_f WHERE i_f.id_item = ? AND i_f.id_cliente = ?) id_cliente FROM item "
                 + " LEFT JOIN itens_favoritos ON item.id_item = itens_favoritos.id_item "
                 + " WHERE item.id_item = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, item.getId());
             stmt.setLong(2, cliente.getId());
             stmt.setLong(3, item.getId());
@@ -229,7 +240,7 @@ public class ClienteDAO extends BasicDAO {
             if (rs.next()) {
                 if (rs.getString("id_cliente") == null) {
                     sql = "INSERT INTO itens_favoritos VALUES (?,?)";
-                    try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, cliente.getId());
                         stmt2.setLong(2, item.getId());
                         stmt2.execute();
@@ -251,7 +262,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(300);
         }
         String sql = "DELETE FROM itens_favoritos WHERE id_cliente = ? AND id_item = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, item.getId());
             stmt.execute();
@@ -267,7 +278,7 @@ public class ClienteDAO extends BasicDAO {
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                 + " GROUP BY id_genero ORDER BY genero.nome";
         System.out.println(sql);
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Genero genero = new Genero();
@@ -308,7 +319,7 @@ public class ClienteDAO extends BasicDAO {
             }
         }
         sql += " order by item.id_item, genero.nome LIMIT ?, 10";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             int index = 1;
             stmt.setLong(index++, cliente.getId());
             if (genero != null && genero.getId() > 0) {
@@ -346,7 +357,7 @@ public class ClienteDAO extends BasicDAO {
                         + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
                         + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Foto> fotos = new HashSet<>();
@@ -364,7 +375,7 @@ public class ClienteDAO extends BasicDAO {
                         + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Tipo> tipos = new HashSet<>();
@@ -405,7 +416,7 @@ public class ClienteDAO extends BasicDAO {
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                 + " LEFT JOIN itens_favoritos ON itens_favoritos.id_item = item.id_item AND itens_favoritos.id_cliente = ? "
                 + " WHERE item.id_item = ? ";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, item.getId());
             ResultSet rs = stmt.executeQuery();
@@ -428,7 +439,7 @@ public class ClienteDAO extends BasicDAO {
                         + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
                         + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Foto> fotos = new HashSet<>();
@@ -446,7 +457,7 @@ public class ClienteDAO extends BasicDAO {
                         + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Tipo> tipos = new HashSet<>();
@@ -466,7 +477,7 @@ public class ClienteDAO extends BasicDAO {
                             + " FROM complemento "
                             + " LEFT JOIN item_complemento ON complemento.id_complemento = item_complemento.id_complemento "
                             + " WHERE item_complemento.id_item = ?";
-                    try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, item.getId());
                         ResultSet rs2 = stmt2.executeQuery();
                         complementos = new HashSet<>();
@@ -487,7 +498,7 @@ public class ClienteDAO extends BasicDAO {
                             + " FROM ingrediente "
                             + " LEFT JOIN item_ingrediente ON ingrediente.id_ingrediente = item_ingrediente.id_ingrediente "
                             + " WHERE item_ingrediente.id_item = ?";
-                    try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, item.getId());
                         ResultSet rs2 = stmt2.executeQuery();
                         ingredientes = new HashSet<>();
@@ -506,7 +517,7 @@ public class ClienteDAO extends BasicDAO {
                         + " FROM variacao "
                         + " LEFT JOIN grupo_variacao ON variacao.id_grupo_variacao = grupo_variacao.id_grupo_variacao "
                         + " WHERE id_item = ? ORDER BY grupo, ordem ASC";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, item.getId());
                     ResultSet rs2 = stmt2.executeQuery();
                     variacoes = new ArrayList<>();
@@ -554,7 +565,7 @@ public class ClienteDAO extends BasicDAO {
                 + " FROM endereco "
                 + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
                 + " WHERE endereco.id_cliente = ? OR endereco.id_endereco = 0";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, cliente.getId());
             ResultSet rs = stmt.executeQuery();
@@ -592,7 +603,7 @@ public class ClienteDAO extends BasicDAO {
                 + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
                 + " WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
         // get_endereco
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, cliente.getId());
             stmt.setLong(3, endereco.getId());
@@ -625,7 +636,7 @@ public class ClienteDAO extends BasicDAO {
         List<FormaPagamento> formaPagamentos = null;
         String sql = "SELECT id_formapagamento, descricao FROM formapagamento";
         // get_lista_formaspagamento
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             formaPagamentos = new ArrayList<>();
             while (rs.next()) {
@@ -647,7 +658,7 @@ public class ClienteDAO extends BasicDAO {
         Foto foto = null;
         String sql = "SELECT arquivo.caminho FROM arquivo WHERE arquivo.id_arquivo = ?";
         // get_arquivo
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setInt(1, idArquivo);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -662,7 +673,7 @@ public class ClienteDAO extends BasicDAO {
     
     public boolean existePedidoAberto(Cliente cliente) throws DAOException {
         String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 4";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -682,7 +693,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         RepositorioProdutos repositorioPrecos = RepositorioProdutos.getInstancia();
-        repositorioPrecos.carregar(super.conexao);
+        repositorioPrecos.carregar(this.conexao);
         BigDecimal valorTotal = new BigDecimal("0.00");
         for (ItemPedido ip : confirmaPedido.getItens()) {
             repositorioPrecos.preencherItem(ip);
@@ -715,7 +726,7 @@ public class ClienteDAO extends BasicDAO {
     public List<ItemPedido> recuperarPrePredido(Cliente cliente) throws DAOException {
         List<ItemPedido> itens = null;
         // recuperar_pre_pedido
-        try (PreparedStatement stmt = super.conexao.prepareStatement("SELECT itens, precototal FROM pre_pedido WHERE id_cliente = ?")) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement("SELECT itens, precototal FROM pre_pedido WHERE id_cliente = ?")) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             List<ItemPedidoFacil> itemPedidos = new ArrayList<>();
@@ -726,7 +737,7 @@ public class ClienteDAO extends BasicDAO {
                 });
             }
             if (!itemPedidos.isEmpty()) {
-                RepositorioProdutos.getInstancia().carregar(super.conexao);
+                RepositorioProdutos.getInstancia().carregar(this.conexao);
                 itens = new ArrayList<>();
                 for (ItemPedidoFacil ipf : itemPedidos) {
                     ItemPedido ip = new ItemPedido();
@@ -758,7 +769,7 @@ public class ClienteDAO extends BasicDAO {
     public boolean possuiPrePredido(Cliente cliente) throws DAOException {
         String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
         // existe_pre_pedido
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -774,14 +785,14 @@ public class ClienteDAO extends BasicDAO {
         try {
             // invalidar_pre_pedido
             String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
-            PreparedStatement stmt = super.conexao.prepareStatement(sql);
+            PreparedStatement stmt = this.conexao.prepareStatement(sql);
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 long idPrePedido = rs.getLong("id_pre_pedido");
                 stmt.close();
                 sql = "DELETE FROM pre_pedido WHERE id_pre_pedido = ?";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setLong(1, idPrePedido);
                 stmt.execute();
             }
@@ -794,7 +805,7 @@ public class ClienteDAO extends BasicDAO {
         List<ItemPedido> itens = null;
         // recuperar_itens_pedido
         String sql = "SELECT itens, precototal, frete FROM pedido WHERE id_cliente = ? AND id_pedido = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
             ResultSet rs = stmt.executeQuery();
@@ -806,7 +817,7 @@ public class ClienteDAO extends BasicDAO {
                 });
             }
             if (!itemPedidos.isEmpty()) {
-                RepositorioProdutos.getInstancia().carregar(super.conexao);
+                RepositorioProdutos.getInstancia().carregar(this.conexao);
                 itens = new ArrayList<>();
                 for (ItemPedidoFacil ipf : itemPedidos) {
                     ItemPedido ip = new ItemPedido();
@@ -855,13 +866,13 @@ public class ClienteDAO extends BasicDAO {
         // inserir_pre_pedido
         try {
             String sql = "SELECT pre_pedido.id_cliente FROM pre_pedido WHERE pre_pedido.id_cliente = ?";
-            PreparedStatement stmt = super.conexao.prepareStatement(sql);
+            PreparedStatement stmt = this.conexao.prepareStatement(sql);
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 stmt.close();
                 sql = "INSERT INTO pre_pedido values (default, now(), ?, ?, ?, ?, ?, ?, ?)";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writeValueAsString(pedido.getItens());
                 stmt.setString(1, json);
@@ -888,7 +899,7 @@ public class ClienteDAO extends BasicDAO {
         }
         String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?, ?)";
         // inserir_pedido
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(pedido.getItens());
             stmt.setString(1, json);
@@ -913,14 +924,14 @@ public class ClienteDAO extends BasicDAO {
         // atualizar_tokem_pre_pedido        
         try {
             String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
-            PreparedStatement stmt = super.conexao.prepareStatement(sql);
+            PreparedStatement stmt = this.conexao.prepareStatement(sql);
             stmt.setString(1, idPagamento);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 long idPrePedido = rs.getLong("id_pre_pedido");
                 stmt.close();
                 sql = "UPDATE pre_pedido SET token = ? WHERE id_pre_pedido = ?";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setString(1, idComprador);
                 stmt.setLong(2, idPrePedido);
                 stmt.execute();
@@ -938,7 +949,7 @@ public class ClienteDAO extends BasicDAO {
                 + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
                 + " LEFT JOIN pre_pedido ON cliente.id_cliente = pre_pedido.id_cliente "
                 + " WHERE pre_pedido.token = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, idComprador);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -957,7 +968,7 @@ public class ClienteDAO extends BasicDAO {
         // inserir_pedido_de_pre_pedido
         try {
             String sql = "SELECT pre_pedido.id_cliente, pre_pedido.id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
-            PreparedStatement stmt = super.conexao.prepareStatement(sql);
+            PreparedStatement stmt = this.conexao.prepareStatement(sql);
             stmt.setString(1, idPagamento);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -967,13 +978,13 @@ public class ClienteDAO extends BasicDAO {
                 sql = "INSERT INTO pedido (data, itens, precototal, id_formapagamento, id_cliente, id_endereco, pagamentoefetuado, estado, observacao_entrega) "
                         + " (SELECT datapedido, itens, precototal, id_formapagamento, id_cliente, id_endereco, true, 1, observacao_entrega "
                         + " FROM pre_pedido WHERE pre_pedido.id_cliente = ?)";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setLong(1, idCliente);
                 stmt.execute();
                 // remover_pre_pedido
                 stmt.close();
                 sql = "DELETE FROM pre_pedido WHERE id_pre_pedido = ?";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setLong(1, idPrePedido);
                 stmt.execute();
             }
@@ -998,7 +1009,7 @@ public class ClienteDAO extends BasicDAO {
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                 + " WHERE pedido.id_cliente = ? "
                 + " ORDER BY pedido.data DESC LIMIT ?, 10";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setInt(2, pagina);
             ResultSet rs = stmt.executeQuery();
@@ -1048,7 +1059,7 @@ public class ClienteDAO extends BasicDAO {
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                 + " WHERE pedido.id_cliente = ? AND pedido.id_pedido = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
             ResultSet rs = stmt.executeQuery();
@@ -1102,7 +1113,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         String sql = "INSERT INTO endereco VALUES (default, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setString(2, endereco.getLogradouro());
             stmt.setString(3, endereco.getBairro());
@@ -1126,17 +1137,17 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(300);
         }
         String sql = "SELECT COUNT(id_endereco) FROM endereco WHERE endereco.id_endereco = idendereco AND endereco.id_cliente = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 sql = "UPDATE pedido SET id_endereco = null WHERE pedido.id_endereco = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, endereco.getId());
                     stmt2.execute();
                 }
                 sql = "DELETE FROM endereco WHERE id_endereco = ?";
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, endereco.getId());
                     stmt2.execute();
                 }
@@ -1154,22 +1165,12 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(300);
         }
         String sql = "UPDATE enderecos_favoritos SET id_endereco=? WHERE id_cliente = ?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, endereco.getId());
             stmt.setLong(2, cliente.getId());            
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
-        }
-    }
-    
-    public void confirmarRecebimentoNotificacao(Notificacao notificacao) {
-        String sql = "UPDATE notificacao SET entregue=1 WHERE id_notificacao=?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, notificacao.getId());
-            stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
