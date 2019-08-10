@@ -188,13 +188,12 @@ public class CadastroDAO {
         try {
             String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true WHERE usuario.id_usuario = ?";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setLong(1, usuario.getIdUsuario());
+                stmt.setString(1, cadastro.getSenhaUsuario());
+                stmt.setLong(2, usuario.getIdUsuario());                
                 stmt.execute();
             }
             sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                System.out.println(cadastro);
-                System.out.println(usuario);
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, usuario.getNomeUsuario());
