@@ -89,7 +89,7 @@ public class CadastroDAO {
     public Mensagem enviarCodigoAtivacao(Cadastro cadastro) throws DAOException {
         Mensagem mensagem = null;
         try {
-            mensagem = this.verificarNumero(cadastro);            
+            mensagem = this.verificarNumero(cadastro);
             String sql = "";
             switch (mensagem.getCodigo()) {
                 case 105:
@@ -153,7 +153,11 @@ public class CadastroDAO {
         return null;
     }
 
-    public String cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
+    public Mensagem cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
+        Mensagem mensagem = this.verificarNumero(cadastro);
+        if (mensagem.getCodigo() != 104) {
+            return mensagem;
+        }
         if (cadastro == null) {
             throw new DAOIncorrectData(300);
         }
@@ -202,9 +206,14 @@ public class CadastroDAO {
                 stmt.execute();
                 ResultSet rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
-                    Long id = rs.getLong(1);
-                    System.out.println(id);
+                    sql = "INSERT INTO enderecos_favoritos VALUES (?,0)";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, rs.getLong(1));
+                        stmt2.execute();
+                    }
                 }
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Cadastro concluído");
             }
             
         } catch (SQLException e) {

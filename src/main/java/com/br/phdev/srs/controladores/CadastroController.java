@@ -104,7 +104,7 @@ public class CadastroController {
         try {
             Usuario usuario = (Usuario) sessao.getAttribute("usuario");
             if (usuario != null) {
-                this.dao.cadastrarCliente(usuario, cadastro);
+                mensagem = this.dao.cadastrarCliente(usuario, cadastro);
             } else {
                 mensagem.setCodigo(101);
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
