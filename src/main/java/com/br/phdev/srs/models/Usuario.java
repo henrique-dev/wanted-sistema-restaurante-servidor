@@ -19,6 +19,10 @@ public class Usuario {
     public Usuario() {
     }        
 
+    public Usuario(long idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
     public Usuario(long idUsuario, String nomeUsuario, String senha) {
         this.idUsuario = idUsuario;
         this.nomeUsuario = nomeUsuario;

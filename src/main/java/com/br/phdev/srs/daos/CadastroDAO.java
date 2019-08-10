@@ -12,7 +12,9 @@ import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Codigo;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
+import com.br.phdev.srs.utils.Util;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +91,7 @@ public class CadastroDAO {
             mensagem = this.verificarNumero(cadastro);            
             String sql = "";
             switch (mensagem.getCodigo()) {
-                case 105:                    
+                case 105:
                     sql = "INSERT INTO usuario VALUES (default, ?, '', null, ?, 0, 0, now())";
                     try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                         String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
@@ -121,9 +124,9 @@ public class CadastroDAO {
         return mensagem;
     }
     
-    public Mensagem validarCodigoAtivacao(Cadastro cadastro, String tokenSessao) throws DAOException {
+    public Usuario validarCodigoAtivacao(Cadastro cadastro, String tokenSessao) throws DAOException {
         if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
-            return new Mensagem(101, "Número de telefone inválido");
+            return null;
         }
         Mensagem mensagem = new Mensagem();
         String sql = "SELECT id_usuario FROM usuario WHERE nome=? AND token_cadastro=?";        
@@ -138,19 +141,15 @@ public class CadastroDAO {
                     stmt2.setLong(2, rs.getLong("id_usuario"));
                     stmt2.execute();
                 }
-                mensagem.setCodigo(100);
-                mensagem.setDescricao("Número de telefone verificado. Pode prosseguir com o cadastro");
-            } else {
-                mensagem.setCodigo(101);
-                mensagem.setDescricao("Código de ativação inválido");
+                return new Usuario(rs.getLong("id_usuario"));
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
-        return mensagem;
+        return null;
     }
 
-    public String cadastrarCliente(Cadastro cadastro) throws DAOException {
+    public String cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
         if (cadastro == null) {
             throw new DAOIncorrectData(300);
         }
@@ -183,65 +182,31 @@ public class CadastroDAO {
                 throw new DAOIncorrectData(305);
             }
         }
-
-        StringBuilder ultimosDigitos = new StringBuilder();
-        int soma = 0;
-        int fator = 10;
-        for (int i = 0; i < cadastro.getCpf().length() - 2; i++) {
-            soma += Integer.parseInt(String.valueOf(cadastro.getCpf().charAt(i))) * fator--;
-        }
-        int resto = soma % 11;
-        if (resto == 0 || resto == 1) {
-            ultimosDigitos.append(0);
-        } else {
-            ultimosDigitos.append((11 - resto));
-        }
-        soma = 0;
-        fator = 11;
-        for (int i = 0; i < cadastro.getCpf().length() - 2; i++) {
-            soma += Integer.parseInt(String.valueOf(cadastro.getCpf().charAt(i))) * fator--;
-        }
-        soma += Integer.parseInt(String.valueOf(ultimosDigitos.toString())) * 2;
-        resto = soma % 11;
-        if (resto == 0 || resto == 1) {
-            ultimosDigitos.append(0);
-        } else {
-            ultimosDigitos.append((11 - resto));
-        }
-
-        if (!cadastro.getCpf().endsWith(ultimosDigitos.toString())) {
+        if (!Util.validarCPF(cadastro.getCpf())) {
             throw new DAOIncorrectData(306);
         }
-
+        
         try {
-            String sql = "SELECT usuario.id_usuario "
-                    + " FROM usuario "
-                    + " WHERE usuario.nome = ? AND usuario.token_cadastro = ? AND usuario.ativo = false AND usuario.verificado = true";
-            PreparedStatement stmt = this.conexao.prepareStatement(sql);
-            stmt.setString(1, cadastro.getTelefone());
-            stmt.setString(2, cadastro.getCodigo());
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                long idUsuario = rs.getInt("id_usuario");
-                stmt.close();
-                sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true WHERE usuario.id_usuario = ?";
-                stmt = this.conexao.prepareStatement(sql);
-                stmt.setString(1, cadastro.getSenhaUsuario());
-                stmt.setLong(2, idUsuario);
+            String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true WHERE usuario.id_usuario = ?";
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+                stmt.setLong(1, usuario.getIdUsuario());
                 stmt.execute();
-                stmt.close();
-                sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
-                stmt = this.conexao.prepareStatement(sql);
+            }
+            sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, cadastro.getTelefone());
-                stmt.setString(4, cadastro.getEmail());
-                stmt.setLong(5, idUsuario);
+                stmt.setString(4, cadastro.getEmail());                
+                stmt.setLong(5, usuario.getIdUsuario());
                 stmt.execute();
-                stmt.close();
-            } else {
-                throw new DAOExpectedException("Não foi possível realizar o cadastro", 400);
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    Long id = rs.getLong(1);
+                    System.out.println(id);
+                }
             }
+            
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }

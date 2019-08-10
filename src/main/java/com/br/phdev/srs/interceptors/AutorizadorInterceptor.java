@@ -24,7 +24,7 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
             return true;
         } else {
             if (uri.endsWith("cadastro/verificar-numero")
-                    || uri.endsWith("cadastro/enviar-sms")
+                    || uri.endsWith("cadastro/enviar-codigo")
                     || uri.endsWith("cadastro/validar-codigo")
                     || uri.endsWith("sessao/entrar")
                     || uri.endsWith("sessao/autenticar")

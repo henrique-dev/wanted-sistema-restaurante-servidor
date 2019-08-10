@@ -11,6 +11,7 @@ import com.br.phdev.srs.daos.CadastroDAO;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoSms;
 import com.twilio.exception.ApiException;
 import java.io.UnsupportedEncodingException;
@@ -78,8 +79,36 @@ public class CadastroController {
         Mensagem mensagem = new Mensagem();
         HttpHeaders httpHeaders = new HttpHeaders();
         try {
-            mensagem = this.dao.validarCodigoAtivacao(cadastro, sessao.getId());
-            httpHeaders.add("session-id", sessao.getId());
+            Usuario usuario = this.dao.validarCodigoAtivacao(cadastro, sessao.getId());
+            if (usuario != null) {
+                sessao.setAttribute("usuario", usuario);                                
+                httpHeaders.add("session-id", sessao.getId());
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Número de telefone verificado. Pode prosseguir com o cadastro");
+            } else {
+                mensagem.setDescricao("Código inválido");
+                mensagem.setCodigo(101);
+            }            
+        } catch (DAOException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(e.codigo);
+        }        
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("cadastro/finalizar-cadastro")
+    public ResponseEntity<Mensagem> finalizarCadastro(@RequestBody Cadastro cadastro, HttpSession sessao) {
+        Mensagem mensagem = new Mensagem();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            Usuario usuario = (Usuario) sessao.getAttribute("usuario");
+            if (usuario != null) {
+                this.dao.cadastrarCliente(usuario, cadastro);
+            } else {
+                mensagem.setCodigo(101);
+                mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
+            }            
         } catch (DAOException e) {
             e.printStackTrace();
             mensagem.setCodigo(e.codigo);
