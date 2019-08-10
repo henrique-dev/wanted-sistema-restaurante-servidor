@@ -65,5 +65,10 @@ public class Cadastro {
     public void setCodigo(String codigo) {
         this.codigo = codigo;
     }        
+
+    @Override
+    public String toString() {
+        return "Cadastro{" + "nome=" + nome + ", cpf=" + cpf + ", telefone=" + telefone + ", email=" + email + ", senhaUsuario=" + senhaUsuario + ", codigo=" + codigo + '}';
+    }
     
 }

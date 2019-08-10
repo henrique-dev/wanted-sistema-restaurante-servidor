@@ -158,7 +158,7 @@ public class CadastroDAO {
             throw new DAOIncorrectData(300);
         }
         if (cadastro.getNome() == null || cadastro.getCpf() == null || cadastro.getEmail() == null
-                || cadastro.getTelefone() == null || cadastro.getSenhaUsuario() == null) {
+                 || cadastro.getSenhaUsuario() == null) {
             throw new DAOIncorrectData(300);
         }
         if (cadastro.getNome().trim().isEmpty() || cadastro.getCpf().trim().isEmpty() || cadastro.getEmail().trim().isEmpty()
@@ -193,6 +193,8 @@ public class CadastroDAO {
             }
             sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                System.out.println(cadastro);
+                System.out.println(usuario);
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, usuario.getNomeUsuario());
