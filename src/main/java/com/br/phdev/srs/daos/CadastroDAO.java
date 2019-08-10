@@ -59,6 +59,7 @@ public class CadastroDAO {
                         if (rs.getInt("tempo_atual") / 60 < 10) {
                             mensagem.setCodigo(102);
                             mensagem.setDescricao(String.valueOf(rs.getInt("tempo_atual")));
+                            mensagem.setOpcional(String.valueOf(60 * 10));
                         } else {
                             mensagem.setCodigo(103);
                             mensagem.setDescricao("Pode enviar sms");
