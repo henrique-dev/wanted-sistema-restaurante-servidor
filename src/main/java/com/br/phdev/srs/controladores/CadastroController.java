@@ -101,7 +101,7 @@ public class CadastroController {
             if (usuario != null) {
                 mensagem = this.dao.cadastrarCliente(usuario, cadastro, sessao);
             } else {
-                mensagem.setCodigo(101);
+                mensagem.setCodigo(102);
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
             }
         } catch (DAOException e) {
