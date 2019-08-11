@@ -201,6 +201,11 @@ public class CadastroDAO {
                         stmt2.setLong(1, rs.getLong(1));
                         stmt2.execute();
                     }
+                    sql = "INSERT INTO websocket VALUES (?,null)";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, rs.getLong(1));
+                        stmt2.execute();
+                    }
                 }
                 mensagem.setCodigo(100);
                 mensagem.setDescricao("Cadastro concluído");
