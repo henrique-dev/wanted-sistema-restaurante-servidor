@@ -6,7 +6,33 @@
  */
 package com.br.phdev.srs.controladores;
 
+import com.br.phdev.srs.daos.GerenciadorDAO;
+import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.exceptions.StorageException;
+import com.br.phdev.srs.models.Complemento;
+import com.br.phdev.srs.models.Genero;
+import com.br.phdev.srs.models.Ingrediente;
+import com.br.phdev.srs.models.Item;
+import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Notificacao;
+import com.br.phdev.srs.models.Pedido;
+import com.br.phdev.srs.models.Tipo;
+import com.br.phdev.srs.utils.ServicoArmazenamento;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
+import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -14,42 +40,18 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 public class GerenciadorController {
-/*
+    
+    private final GerenciadorDAO dao;    
+    
+    @Autowired
+    public GerenciadorController(GerenciadorDAO dao) {
+        this.dao = dao;
+    }
+
     @GetMapping("gerenciador/entrar")
     public String entrar() {
         return "login";
-    }
-
-    @PostMapping("gerenciador/autenticar")
-    public String autenticar(String nomeUsuario, String senhaUsuario,
-            HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {        
-        System.out.println(senhaUsuario);
-        Mensagem mensagem = new Mensagem();
-        Usuario usuario = new Usuario(0, nomeUsuario, senhaUsuario);
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            SessaoDAO autenticaDAO = new SessaoDAO(conexao);
-            Cliente cliente = autenticaDAO.autenticar(usuario);
-            if (cliente != null) {                
-                autenticaDAO.gerarSessao(usuario, sessao.getId());
-                mensagem.setCodigo(100);
-                sessao.setAttribute("usuario", usuario);
-                sessao.setAttribute("cliente", cliente);
-                return "redirect:main";
-            } else {                
-                mensagem.setCodigo(101);
-                mensagem.setDescricao("Usuário ou senha inválidos");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            mensagem.setCodigo(200);
-            mensagem.setDescricao(e.getMessage());
-        } catch (DAOException e) {
-            e.printStackTrace();
-            mensagem.setCodigo(e.codigo);
-            mensagem.setDescricao(e.getMessage());
-        }
-        return "login";
-    }
+    }    
 
     @GetMapping("gerenciador/main")
     public String main() {
@@ -58,10 +60,10 @@ public class GerenciadorController {
 
     @GetMapping("gerenciador/complementos")
     public String complementos(Model modelo) {
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            List<Complemento> complementos = new GerenciadorDAO(conexao).getComplementos();
+        try {
+            List<Complemento> complementos = this.dao.getComplementos();
             modelo.addAttribute("listaComplementos", complementos);
-        } catch (DAOException | SQLException e) {
+        } catch (DAOException e) {
             e.printStackTrace();
         }
         return "admin/pre/complemento";
@@ -69,10 +71,10 @@ public class GerenciadorController {
     
     @GetMapping("gerenciador/generos")
     public String generos(Model modelo) {
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            List<Genero> generos = new GerenciadorDAO(conexao).getGeneros();
+        try {
+            List<Genero> generos = this.dao.getGeneros();
             modelo.addAttribute("listaGeneros", generos);            
-        } catch (DAOException | SQLException e) {
+        } catch (DAOException e) {
             e.printStackTrace();
         }
         return "admin/pre/genero";
@@ -80,10 +82,10 @@ public class GerenciadorController {
     
     @GetMapping("gerenciador/itens")
     public String itens(Model modelo) {
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            List<Item> itens = new GerenciadorDAO(conexao).getItens();
+        try {
+            List<Item> itens = this.dao.getItens();
             modelo.addAttribute("listaItens", itens);            
-        } catch (DAOException | SQLException e) {
+        } catch (DAOException e) {
             e.printStackTrace();
         }
         return "admin/pre/item";
@@ -92,12 +94,9 @@ public class GerenciadorController {
     @PostMapping("gerenciador/listar-generos")
     public ResponseEntity<List<Genero>> listarGeneros(HttpSession sessao) {
         List<Genero> generos = null;
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            generos = gerenciadorDAO.getGeneros();
+        try {            
+            generos = this.dao.getGeneros();
         } catch (DAOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -108,18 +107,13 @@ public class GerenciadorController {
     @PostMapping("gerenciador/cadastrar-generos")
     public ResponseEntity<Mensagem> cadastrarGeneros(@RequestBody List<Genero> generos) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            gerenciadorDAO.adicionarGeneros(generos);
+        try {            
+            this.dao.adicionarGeneros(generos);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Generos inseridos com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na inserção dos generos");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -130,24 +124,14 @@ public class GerenciadorController {
     @PostMapping("gerenciador/remover-generos")
     public ResponseEntity<Mensagem> removerGeneros(@RequestBody List<Genero> generos) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            gerenciadorDAO.removerGeneros(generos);
+        try {            
+            this.dao.removerGeneros(generos);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Generos removidos com sucesso");
-        } catch (DAOException e) {
+        } catch (DAOException | SQLIntegrityConstraintViolationException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na remoção dos generos");
             e.printStackTrace();
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Alguns gêneros estão sendo utilizados e não podem ser excluídos");
-            } else {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Erro ao abrir conexão");
-                e.printStackTrace();
-            }
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -157,12 +141,10 @@ public class GerenciadorController {
     @PostMapping("gerenciador/listar-tipos")
     public ResponseEntity<List<Tipo>> listarTipos(HttpSession sessao) {
         List<Tipo> tipos = null;
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            tipos = gerenciadorDAO.getTipos();
+        try {
+            
+            tipos = this.dao.getTipos();
         } catch (DAOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -173,18 +155,14 @@ public class GerenciadorController {
     @PostMapping("gerenciador/cadastrar-tipos")
     public ResponseEntity<Mensagem> cadastrarTipos(@RequestBody List<Tipo> tipos) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            gerenciadorDAO.adicionarTipos(tipos);
+        try {
+            
+            this.dao.adicionarTipos(tipos);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Tipos inseridos com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na inserção dos tipos");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -195,24 +173,15 @@ public class GerenciadorController {
     @PostMapping("gerenciador/remover-tipos")
     public ResponseEntity<Mensagem> removerTipos(@RequestBody List<Tipo> tipos) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            gerenciadorDAO.removerTipos(tipos);
+        try {
+            
+            this.dao.removerTipos(tipos);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Tipos removidos com sucesso");
-        } catch (DAOException e) {
+        } catch (DAOException | SQLIntegrityConstraintViolationException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na remoção dos tipos");
             e.printStackTrace();
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Alguns tipos estão sendo utilizados e não podem ser excluídos");
-            } else {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Erro ao abrir conexão");
-                e.printStackTrace();
-            }
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -222,12 +191,10 @@ public class GerenciadorController {
     @PostMapping("gerenciador/listar-complementos")
     public ResponseEntity<List<Complemento>> listarComplementos(HttpSession sessao) {
         List<Complemento> complementos = null;
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            complementos = gerenciadorDAO.getComplementos();
+        try {
+            
+            complementos = this.dao.getComplementos();
         } catch (DAOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -238,18 +205,14 @@ public class GerenciadorController {
     @PostMapping("gerenciador/cadastrar-complemento")
     public ResponseEntity<Mensagem> cadastrarComplemento(@RequestBody Complemento complemento) {
         Mensagem mensagem = new Mensagem();                 
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);            
-            gerenciadorDAO.adicionarComplemento(complemento);
+        try {
+                        
+            this.dao.adicionarComplemento(complemento);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Complementos inseridos com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na inserção dos complementos");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -260,26 +223,16 @@ public class GerenciadorController {
     @PostMapping("gerenciador/remover-complementos")
     public ResponseEntity<Mensagem> removerComplementos(@RequestBody List<Complemento> complementos) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
+        try {
             ServicoArmazenamento servicoArmazenamento = new ServicoArmazenamento();
-            gerenciadorDAO.removerComplementos(complementos);
+            this.dao.removerComplementos(complementos);
             servicoArmazenamento.excluir(complementos);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Tipos removidos com sucesso");
-        } catch (DAOException e) {
+        } catch (DAOException | SQLIntegrityConstraintViolationException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na remoção dos tipos");
             e.printStackTrace();
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Alguns tipos estão sendo utilizados e não podem ser excluídos");
-            } else {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Erro ao abrir conexão");
-                e.printStackTrace();
-            }
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -289,12 +242,10 @@ public class GerenciadorController {
     @PostMapping("gerenciador/listar-ingredientes")
     public ResponseEntity<List<Ingrediente>> listarIngredientes(HttpSession sessao) {
         List<Ingrediente> ingredientes = null;
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            ingredientes = gerenciadorDAO.getIngredientes();
+        try {
+            
+            ingredientes = this.dao.getIngredientes();
         } catch (DAOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -305,18 +256,14 @@ public class GerenciadorController {
     @PostMapping("gerenciador/cadastrar-ingrediente")
     public ResponseEntity<Mensagem> cadastrarIngrediente(@RequestBody List<Ingrediente> ingredientes) {
         Mensagem mensagem = new Mensagem();                 
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);            
-            gerenciadorDAO.adicionarIngrediente(ingredientes);
+        try {
+                        
+            this.dao.adicionarIngrediente(ingredientes);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Ingredientes inseridos com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na inserção dos complementos");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -327,24 +274,15 @@ public class GerenciadorController {
     @PostMapping("gerenciador/remover-ingredientes")
     public ResponseEntity<Mensagem> removerIngrediente(@RequestBody List<Ingrediente> ingredientes) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);            
-            gerenciadorDAO.removerIngredientes(ingredientes);            
+        try {
+                        
+            this.dao.removerIngredientes(ingredientes);            
             mensagem.setCodigo(0);
             mensagem.setDescricao("Ingredientes removidos com sucesso");
-        } catch (DAOException e) {
+        } catch (DAOException | SQLIntegrityConstraintViolationException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na remoção dos tipos");
             e.printStackTrace();
-        } catch (SQLException e) {
-            if (e instanceof SQLIntegrityConstraintViolationException) {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Alguns tipos estão sendo utilizados e não podem ser excluídos");
-            } else {
-                mensagem.setCodigo(-1);
-                mensagem.setDescricao("Erro ao abrir conexão");
-                e.printStackTrace();
-            }
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -354,12 +292,10 @@ public class GerenciadorController {
     @PostMapping("gerenciador/listar-itens")
     public ResponseEntity<List<Item>> listarItens() {
         List<Item> itens = null;
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            itens = gerenciadorDAO.getItens();
+        try {
+            
+            itens = this.dao.getItens();
         } catch (DAOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -370,18 +306,14 @@ public class GerenciadorController {
     @PostMapping("gerenciador/cadastrar-item")
     public ResponseEntity<Mensagem> cadastrarItem(@RequestBody Item item) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            gerenciadorDAO.adicionarItem(item);
+        try {
+            
+            this.dao.adicionarItem(item);
             mensagem.setCodigo(0);
             mensagem.setDescricao("Item inserido com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na inserção do item");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -392,9 +324,9 @@ public class GerenciadorController {
     @PostMapping("gerenciador/salvar-imagem")
     public ResponseEntity<Mensagem> salvarImagem(MultipartFile arquivo) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            long id = gerenciadorDAO.adicionarArquivo();
+        try {
+            
+            long id = this.dao.adicionarArquivo();
             ServicoArmazenamento sa = new ServicoArmazenamento();
             sa.salvar(arquivo, id);
             mensagem.setCodigo(0);
@@ -402,10 +334,6 @@ public class GerenciadorController {
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na inserção dos complementos");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
             e.printStackTrace();
         } catch (StorageException e) {
             mensagem.setCodigo(-1);
@@ -420,15 +348,10 @@ public class GerenciadorController {
     @PostMapping("gerenciador/atualizar-estado-pedido")
     public ResponseEntity<Mensagem> atualizarEstadoPedido(@RequestBody Pedido pedido) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO gerenciadorDAO = new GerenciadorDAO(conexao);
-            gerenciadorDAO.atualizarEstadoPedido(pedido);
+        try {            
+            this.dao.atualizarEstadoPedido(pedido);
             mensagem.setCodigo(100);
             mensagem.setDescricao("Estado atualizado");
-        } catch (SQLException e) {
-            mensagem.setCodigo(-1);
-            mensagem.setDescricao("Erro ao abrir conexão");
-            e.printStackTrace();
         } catch (DAOException e) {
             mensagem.setCodigo(-1);
             mensagem.setDescricao("Erro na atualização do estado do pedido");
@@ -442,15 +365,10 @@ public class GerenciadorController {
     @PostMapping("gerenciador/enviar-mensagem")
     public ResponseEntity<Mensagem> enviarMensagem(@RequestBody Notificacao notificacao, HttpSession sessao) {
         Mensagem mensagem = new Mensagem();
-        try (Connection conexao = new FabricaConexao().conectar()) {
-            GerenciadorDAO dao = new GerenciadorDAO(conexao);
-            dao.adicionarNotificacao(notificacao);
+        try {            
+            this.dao.adicionarNotificacao(notificacao);
             mensagem.setCodigo(100);
             mensagem.setDescricao("mensagem salva");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            mensagem.setDescricao(e.getMessage());
-            mensagem.setCodigo(200);
         } catch (DAOException e) {
             e.printStackTrace();
             mensagem.setCodigo(e.codigo);
@@ -459,6 +377,6 @@ public class GerenciadorController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
-    }*/
+    }
 
 }

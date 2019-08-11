@@ -23,11 +23,18 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
         if (request.getSession().getAttribute("usuario") != null) {
             return true;
         } else {
-            if (uri.endsWith("cadastro/verificar-numero")
+            if (
+                       uri.endsWith("cadastro/verificar-numero")
                     || uri.endsWith("cadastro/enviar-codigo")
                     || uri.endsWith("cadastro/validar-codigo")
+                    
                     || uri.endsWith("sessao/entrar")
                     || uri.endsWith("sessao/autenticar")
+                    
+                    || uri.endsWith("sessao/autenticar-2")
+                    
+                    || uri.endsWith("gerenciador/entrar")                    
+                    
                     || uri.contains("imagens")
                     || uri.contains("notificacao")
                     || uri.contains("notificar")

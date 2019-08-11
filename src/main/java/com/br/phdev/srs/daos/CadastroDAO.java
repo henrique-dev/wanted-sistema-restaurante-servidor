@@ -7,9 +7,7 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
-import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Cadastro;
-import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.MensagemCadastro;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
@@ -21,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -49,7 +48,7 @@ public class CadastroDAO {
             return new MensagemCadastro(101, "Número de telefone inválido", null);
         } else {
             try {
-                String sql = "SELECT nome, ativo, verificado, token_cadastro, token_cadastro_data, "
+                String sql = "SELECT nome, ativo, verificado, cadastrado, token_cadastro, token_cadastro_data, "
                         + " (MINUTE(TIMEDIFF(now(), token_cadastro_data)) * 60 + SECOND(TIMEDIFF(now(), token_cadastro_data))) tempo_atual "
                         + " FROM usuario WHERE nome=?";
                 PreparedStatement stmt = this.conexao.prepareStatement(sql);
@@ -66,8 +65,14 @@ public class CadastroDAO {
                             mensagem.setDescricao("Pode enviar sms");
                         }
                     } else if (!rs.getBoolean("ativo")) {
-                        mensagem.setCodigo(104);
-                        mensagem.setDescricao("Número de telefone verificado, porém o cadastro não foi concluído");
+                        if (rs.getInt("tempo_atual") / 60 < 10) {
+                            mensagem.setCodigo(106);
+                            mensagem.setDescricao(String.valueOf(rs.getInt("tempo_atual")));
+                            mensagem.setOpcional(String.valueOf(60 * 10));
+                        } else {
+                            mensagem.setCodigo(104);
+                            mensagem.setDescricao("Número de telefone verificado, porém o cadastro não foi concluído");
+                        }                        
                     } else {
                         mensagem.setCodigo(100);
                         mensagem.setDescricao("Número de telefone ativo");
@@ -102,12 +107,11 @@ public class CadastroDAO {
                         mensagem.setOpcional(String.valueOf(60 * 10));
                     }
                     break;
-
+                case 104:
                 case 103:                    
                     sql = "UPDATE usuario set token_cadastro=?, token_cadastro_data=now() WHERE nome=?";
                     try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                         String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
-                        System.out.println(token);
                         stmt.setString(1, token);
                         stmt.setString(2, cadastro.getTelefone());
                         stmt.execute();
@@ -153,9 +157,9 @@ public class CadastroDAO {
         return null;
     }
 
-    public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
-        MensagemCadastro mensagem = this.verificarNumero(cadastro);        
-        if (mensagem.getCodigo() != 104) {
+    public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro, HttpSession sessao) throws DAOException {
+        MensagemCadastro mensagem = this.verificarNumero(cadastro);
+        if (!(mensagem.getCodigo() == 104 || mensagem.getCodigo() == 106)) {
             return mensagem;
         }
         mensagem.setCodigo(101);

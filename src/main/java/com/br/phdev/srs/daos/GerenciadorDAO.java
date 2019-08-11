@@ -14,7 +14,6 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
-import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
@@ -29,21 +28,32 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-public class GerenciadorDAO extends BasicDAO {
-
-    public GerenciadorDAO(Connection conexao) {
-        super(conexao);
+@Repository
+public class GerenciadorDAO {
+    
+    private final Connection conexao;
+    
+    @Autowired
+    GerenciadorDAO(DataSource dataSource) {
+        try {
+            this.conexao = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); 
+        }
     }
 
     public List<Genero> getGeneros() throws DAOException {
         List<Genero> generos = null;
         String sql = "CALL gerenciador_get_lista_generos";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             generos = new ArrayList<>();
             while (rs.next()) {
@@ -61,7 +71,7 @@ public class GerenciadorDAO extends BasicDAO {
     public void adicionarGeneros(List<Genero> generos) throws DAOException {
         String sql = "CALL gerenciador_inserir_genero(?)";
         for (Genero genero : generos) {
-            try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setString(1, genero.getNome());
                 stmt.execute();
             } catch (SQLException e) {
@@ -73,7 +83,7 @@ public class GerenciadorDAO extends BasicDAO {
     public void removerGeneros(List<Genero> generos) throws DAOException, SQLIntegrityConstraintViolationException {
         String sql = "CALL gerenciador_remover_genero(?)";
         for (Genero genero : generos) {
-            try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setLong(1, genero.getId());
                 stmt.execute();
             } catch (SQLException e) {
@@ -89,7 +99,7 @@ public class GerenciadorDAO extends BasicDAO {
     public List<Tipo> getTipos() throws DAOException {
         List<Tipo> tipos = null;
         String sql = "CALL gerenciador_get_lista_tipos";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             tipos = new ArrayList<>();
             while (rs.next()) {
@@ -107,7 +117,7 @@ public class GerenciadorDAO extends BasicDAO {
     public void adicionarTipos(List<Tipo> tipos) throws DAOException {
         String sql = "CALL gerenciador_inserir_tipo(?)";
         for (Tipo tipo : tipos) {
-            try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setString(1, tipo.getNome());
                 stmt.execute();
             } catch (SQLException e) {
@@ -119,7 +129,7 @@ public class GerenciadorDAO extends BasicDAO {
     public void removerTipos(List<Tipo> tipos) throws DAOException, SQLIntegrityConstraintViolationException {
         String sql = "CALL gerenciador_remover_tipo(?)";
         for (Tipo tipo : tipos) {
-            try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setLong(1, tipo.getId());
                 stmt.execute();
             } catch (SQLException e) {
@@ -135,7 +145,7 @@ public class GerenciadorDAO extends BasicDAO {
     public List<Complemento> getComplementos() throws DAOException {
         List<Complemento> complementos = null;
         String sql = "CALL gerenciador_get_lista_complementos";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             complementos = new ArrayList<>();
             while (rs.next()) {
@@ -156,7 +166,7 @@ public class GerenciadorDAO extends BasicDAO {
 
     public void adicionarComplemento(Complemento complemento) throws DAOException {
         String sql = "CALL gerenciador_inserir_complemento(?,?,?)";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql.toString())) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql.toString())) {
             stmt.setString(1, complemento.getNome());
             stmt.setDouble(2, complemento.getPreco());
             stmt.setDouble(3, complemento.getFoto().getId());
@@ -171,12 +181,12 @@ public class GerenciadorDAO extends BasicDAO {
         for (Complemento complemento : complementos) {
             try {
                 String sql = "CALL gerenciador_remover_complemento(?)";
-                PreparedStatement stmt = super.conexao.prepareStatement(sql);
+                PreparedStatement stmt = this.conexao.prepareStatement(sql);
                 stmt.setLong(1, complemento.getFoto().getId());
                 stmt.execute();
                 stmt.close();
                 sql = "CALL gerenciador_remover_arquivo(?)";
-                stmt = super.conexao.prepareStatement(sql);
+                stmt = this.conexao.prepareStatement(sql);
                 stmt.setLong(1, complemento.getId());
                 stmt.execute();
                 stmt.close();
@@ -195,7 +205,7 @@ public class GerenciadorDAO extends BasicDAO {
     public List<Ingrediente> getIngredientes() throws DAOException {
         List<Ingrediente> ingredientes = null;
         String sql = "CALL gerenciador_get_lista_ingredientes";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             ingredientes = new ArrayList<>();
             while (rs.next()) {
@@ -213,7 +223,7 @@ public class GerenciadorDAO extends BasicDAO {
     public void adicionarIngrediente(List<Ingrediente> ingredientes) throws DAOException {
         String sql = "CALL gerenciador_inserir_ingrediente(?)";
         for (Ingrediente ingrediente : ingredientes) {
-            try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setString(1, ingrediente.getNome());
                 stmt.execute();
             } catch (SQLException e) {
@@ -225,7 +235,7 @@ public class GerenciadorDAO extends BasicDAO {
     public void removerIngredientes(List<Ingrediente> ingredientes) throws DAOException, SQLIntegrityConstraintViolationException {
         String sql = "CALL gerenciador_remover_ingrediente(?)";
         for (Ingrediente ingrediente : ingredientes) {
-            try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setLong(1, ingrediente.getId());
                 stmt.execute();
             } catch (SQLException e) {
@@ -240,7 +250,7 @@ public class GerenciadorDAO extends BasicDAO {
 
     public List<Item> getItens() throws DAOException {
         List<Item> itens = null;
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL gerenciador_get_lista_itens")) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_get_lista_itens")) {
             ResultSet rs = stmt.executeQuery();
             itens = new ArrayList<>();
             Set<Tipo> tipos = new HashSet<>();
@@ -254,7 +264,7 @@ public class GerenciadorDAO extends BasicDAO {
                     if (pratoAtual != -1) {
                         item.setTipos(tipos);
 
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_get_lista_arquivos(?)")) {
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_arquivos(?)")) {
                             stmt2.setLong(1, pratoAtual);
                             ResultSet rs2 = stmt2.executeQuery();
                             fotos = new HashSet<>();
@@ -267,7 +277,7 @@ public class GerenciadorDAO extends BasicDAO {
                             e.printStackTrace();
                         }
 
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_get_lista_complementos_item(?)")) {
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_complementos_item(?)")) {
                             stmt2.setLong(1, idPrato);
                             ResultSet rs2 = stmt2.executeQuery();
                             complementos = new HashSet<>();
@@ -302,7 +312,7 @@ public class GerenciadorDAO extends BasicDAO {
             if (pratoAtual != -1) {
                 item.setTipos(tipos);
 
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_get_lista_arquivos(?)")) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_arquivos(?)")) {
                     stmt2.setLong(1, pratoAtual);
                     ResultSet rs2 = stmt2.executeQuery();
                     fotos = new HashSet<>();
@@ -314,7 +324,7 @@ public class GerenciadorDAO extends BasicDAO {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_get_lista_complementos_item(?)")) {
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_complementos_item(?)")) {
                     stmt2.setLong(1, item.getId());
                     ResultSet rs2 = stmt2.executeQuery();
                     complementos = new HashSet<>();
@@ -340,7 +350,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void adicionarItem(Item item) throws DAOException {
-        try (PreparedStatement stmt = super.conexao.prepareStatement("CALL gerenciador_inserir_item(?,?,?,?,?,?)")) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_inserir_item(?,?,?,?,?,?)")) {
             stmt.setString(1, item.getNome());
             stmt.setDouble(2, item.getPreco());
             stmt.setString(3, item.getDescricao());
@@ -351,7 +361,7 @@ public class GerenciadorDAO extends BasicDAO {
             if (rs.next()) {
                 item.setId(rs.getLong("id"));
                 for (Tipo tipo : item.getTipos()) {
-                    try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_inserir_item_tipo(?,?)")) {
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_tipo(?,?)")) {
                         stmt2.setLong(1, item.getId());
                         stmt2.setLong(2, tipo.getId());
                         stmt2.execute();
@@ -359,7 +369,7 @@ public class GerenciadorDAO extends BasicDAO {
                 }
                 if (item.isModificavel()) {
                     for (Complemento complemento : item.getComplementos()) {
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_inserir_item_complemento(?,?)")) {
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_complemento(?,?)")) {
                             stmt2.setLong(1, item.getId());
                             stmt2.setLong(2, complemento.getId());
                             stmt2.execute();
@@ -368,7 +378,7 @@ public class GerenciadorDAO extends BasicDAO {
                 }
                 if (item.isModificavelIngrediente()) {
                     for (Ingrediente ingrediente : item.getIngredientes()) {
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_inserir_item_ingrediente(?,?)")) {
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_ingrediente(?,?)")) {
                             stmt2.setLong(1, item.getId());
                             stmt2.setLong(2, ingrediente.getId());
                             stmt2.execute();
@@ -378,7 +388,7 @@ public class GerenciadorDAO extends BasicDAO {
                 if (item.getVariacoes() != null && !item.getVariacoes().isEmpty()) {
                     for (int i = 0; i < item.getVariacoes().size(); i++) {
                         GrupoVariacao gv = item.getVariacoes().get(i);
-                        try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_inserir_grupo_variacao(?,?,?,?)")) {
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_grupo_variacao(?,?,?,?)")) {
                             stmt2.setString(1, gv.getNome());
                             stmt2.setInt(2, i);
                             stmt2.setInt(3, gv.getMax());
@@ -387,7 +397,7 @@ public class GerenciadorDAO extends BasicDAO {
                             if (rs2.next()) {
                                 long idGrupoVariacao = rs2.getLong("id");
                                 for (Variacao v : gv.getVariacoes()) {
-                                    try (PreparedStatement stmt3 = super.conexao.prepareStatement("CALL gerenciador_inserir_variacao(?,?,?,?)")) {
+                                    try (PreparedStatement stmt3 = this.conexao.prepareStatement("CALL gerenciador_inserir_variacao(?,?,?,?)")) {
                                         stmt3.setString(1, v.getNome());
                                         stmt3.setDouble(2, v.getPreco());
                                         stmt3.setInt(3, v.getOrdem());
@@ -402,7 +412,7 @@ public class GerenciadorDAO extends BasicDAO {
                     }
                 }
                 for (Foto foto : item.getFotos()) {
-                    try (PreparedStatement stmt2 = super.conexao.prepareStatement("CALL gerenciador_inserir_item_arquivo(?,?)")) {
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_arquivo(?,?)")) {
                         stmt2.setLong(1, item.getId());
                         stmt2.setLong(2, foto.getId());
                         stmt2.execute();
@@ -416,7 +426,7 @@ public class GerenciadorDAO extends BasicDAO {
 
     public long adicionarArquivo() throws DAOException {
         String sql = "CALL gerenciador_inserir_arquivo";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getLong("id");
@@ -429,7 +439,7 @@ public class GerenciadorDAO extends BasicDAO {
 
     public void removerArquivo(Foto foto) throws DAOException {
         String sql = "CALL gerenciador_remover_arquivo(?)";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, foto.getId());
             stmt.execute();
         } catch (SQLException e) {
@@ -439,13 +449,13 @@ public class GerenciadorDAO extends BasicDAO {
 
     public void atualizarEstadoPedido(Pedido pedido) throws DAOException {
         String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setInt(1, pedido.getEstado());
             stmt.setLong(2, pedido.getId());
             stmt.execute();
 
             sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
-            try (PreparedStatement stmt2 = super.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                 stmt2.setLong(1, pedido.getId());
                 ResultSet rs = stmt2.executeQuery();
                 if (rs.next()) {
@@ -462,7 +472,7 @@ public class GerenciadorDAO extends BasicDAO {
 
     public void adicionarNotificacao(Notificacao notificacao) throws DAOException {
         String sql = "INSERT INTO notificacao VALUES (default, ?, ?, false)";
-        try (PreparedStatement stmt = super.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, notificacao.getCliente().getId());
             stmt.setString(2, notificacao.getMensagem());
             stmt.execute();

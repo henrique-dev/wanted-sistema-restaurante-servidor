@@ -13,11 +13,6 @@ import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoSms;
-import com.twilio.exception.ApiException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -104,14 +99,14 @@ public class CadastroController {
         try {
             Usuario usuario = (Usuario) sessao.getAttribute("usuario");
             if (usuario != null) {
-                mensagem = this.dao.cadastrarCliente(usuario, cadastro);
+                mensagem = this.dao.cadastrarCliente(usuario, cadastro, sessao);
             } else {
                 mensagem.setCodigo(101);
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
-            }            
+            }
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
-        }        
+        }
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
     }

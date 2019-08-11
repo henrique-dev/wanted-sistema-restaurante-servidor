@@ -86,6 +86,32 @@ public class SessaoController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
     }
+    
+    @PostMapping("sessao/autenticar-2")
+    public String autenticar(String nomeUsuario, String senhaUsuario,
+            HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {        
+        System.out.println(senhaUsuario);
+        Mensagem mensagem = new Mensagem();
+        Usuario usuario = new Usuario(0, nomeUsuario, senhaUsuario);
+        try {
+            Cliente cliente = this.dao.autenticar(usuario);
+            if (cliente != null) {                
+                this.dao.gerarSessao(usuario, sessao.getId());
+                mensagem.setCodigo(100);
+                sessao.setAttribute("usuario", usuario);
+                sessao.setAttribute("cliente", cliente);
+                return "redirect:main";
+            } else {                
+                mensagem.setCodigo(101);
+                mensagem.setDescricao("Usuário ou senha inválidos");
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        return "login";
+    }
 
     @PostMapping("sessao/sair")
     public ResponseEntity<Mensagem> sair(HttpSession sessao, HttpServletRequest request) {
