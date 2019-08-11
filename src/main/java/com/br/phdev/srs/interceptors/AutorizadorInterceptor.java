@@ -35,6 +35,8 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                     
                     || uri.endsWith("gerenciador/entrar")                    
                     
+                    || uri.endsWith("sem-autorizacao")
+                    
                     || uri.contains("imagens")
                     || uri.contains("notificacao")
                     || uri.contains("notificar")
