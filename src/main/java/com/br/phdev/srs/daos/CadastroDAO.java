@@ -48,7 +48,7 @@ public class CadastroDAO {
             return new MensagemCadastro(101, "Número de telefone inválido", null);
         } else {
             try {
-                String sql = "SELECT nome, ativo, verificado, cadastrado, token_cadastro, token_cadastro_data, "
+                String sql = "SELECT nome, ativo, verificado, token_cadastro, token_cadastro_data, "
                         + " (MINUTE(TIMEDIFF(now(), token_cadastro_data)) * 60 + SECOND(TIMEDIFF(now(), token_cadastro_data))) tempo_atual "
                         + " FROM usuario WHERE nome=?";
                 PreparedStatement stmt = this.conexao.prepareStatement(sql);
