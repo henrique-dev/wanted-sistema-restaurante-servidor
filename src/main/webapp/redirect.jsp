@@ -4,4 +4,4 @@
     Author     : Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<% response.sendRedirect("gerenciador/entrar"); %>
+<% response.sendRedirect("sessao/entrar"); %>

@@ -17,7 +17,11 @@ public class Genero {
     private Foto foto;
 
     public Genero() {
-    }        
+    }
+
+    public Genero(long id) {
+        this.id = id;
+    }
 
     public Genero(long id, String nome) {
         this.id = id;

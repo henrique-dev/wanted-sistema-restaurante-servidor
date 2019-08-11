@@ -14,6 +14,7 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
+import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
@@ -49,24 +50,113 @@ public class GerenciadorDAO {
             throw new RuntimeException(e); 
         }
     }
+    
+    public List<Item> getItens() throws DAOException {
+        List<Item> itens = new ArrayList<>();
+        String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
+                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
+                + " FROM item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero order by item.id_item, genero.nome";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Item item = new Item();
+                item.setId(rs.getLong("id_item"));
+                item.setNome(rs.getString("nome"));
+                item.setPreco(rs.getDouble("preco"));
+                item.setTempoPreparo(rs.getString("tempo_preparo"));
+                item.setModificavel(rs.getBoolean("modificavel"));
+                item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
+                Genero genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
+                item.setGenero(genero);
 
+                sql = "SELECT arquivo.id_arquivo "
+                        + " FROM arquivo "
+                        + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                        + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                        + " WHERE item.id_item = ?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, rs.getLong("id_item"));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    Set<Foto> fotos = new HashSet<>();
+                    while (rs2.next()) {
+                        Foto foto = new Foto();
+                        foto.setId(rs2.getLong("id_arquivo"));
+                        fotos.add(ServicoArmazenamento.setTamanho(foto));
+                    }
+                    item.setFotos(fotos);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
+                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
+                        + " WHERE item.id_item = ?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, rs.getLong("id_item"));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    Set<Tipo> tipos = new HashSet<>();
+                    while (rs2.next()) {
+                        Tipo tipo = new Tipo();
+                        tipo.setId(rs2.getLong("id_tipo"));
+                        tipo.setNome(rs2.getString("nome"));
+                        tipos.add(tipo);
+                    }
+                    item.setTipos(tipos);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                itens.add(item);
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return itens;
+    }
+    
     public List<Genero> getGeneros() throws DAOException {
-        List<Genero> generos = null;
-        String sql = "CALL gerenciador_get_lista_generos";
+        List<Genero> generos = new ArrayList<>();
+        String sql = "SELECT genero.id_genero, genero.nome, item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
+                + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                + " GROUP BY id_genero ORDER BY genero.nome";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            generos = new ArrayList<>();
             while (rs.next()) {
                 Genero genero = new Genero();
                 genero.setId(rs.getLong("id_genero"));
                 genero.setNome(rs.getString("nome"));
+                Foto foto = new Foto();
+                foto.setId(rs.getLong("id_arquivo"));
+                genero.setFoto(ServicoArmazenamento.setTamanho(foto));
                 generos.add(genero);
             }
         } catch (SQLException e) {
-            throw new DAOException(e, 200);
+            throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return generos;
-    }
+    }    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public void adicionarGeneros(List<Genero> generos) throws DAOException {
         String sql = "CALL gerenciador_inserir_genero(?)";
@@ -246,108 +336,7 @@ public class GerenciadorDAO {
                 }
             }
         }
-    }
-
-    public List<Item> getItens() throws DAOException {
-        List<Item> itens = null;
-        try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_get_lista_itens")) {
-            ResultSet rs = stmt.executeQuery();
-            itens = new ArrayList<>();
-            Set<Tipo> tipos = new HashSet<>();
-            Set<Foto> fotos = null;
-            Set<Complemento> complementos = null;
-            Item item = new Item();
-            long pratoAtual = -1;
-            while (rs.next()) {
-                long idPrato = rs.getLong("id_item");
-                if (idPrato != pratoAtual) {
-                    if (pratoAtual != -1) {
-                        item.setTipos(tipos);
-
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_arquivos(?)")) {
-                            stmt2.setLong(1, pratoAtual);
-                            ResultSet rs2 = stmt2.executeQuery();
-                            fotos = new HashSet<>();
-                            while (rs2.next()) {
-                                Foto foto = new Foto();
-                                foto.setId(rs2.getLong("id_arquivo"));
-                                fotos.add(ServicoArmazenamento.setTamanho(foto));
-                            }
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_complementos_item(?)")) {
-                            stmt2.setLong(1, idPrato);
-                            ResultSet rs2 = stmt2.executeQuery();
-                            complementos = new HashSet<>();
-                            while (rs2.next()) {
-                                complementos.add(new Complemento(
-                                        rs2.getLong("id_complemento"),
-                                        rs2.getString("nome"),
-                                        0,
-                                        null));
-                            }
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        item.setComplementos(complementos);
-                        item.setFotos(fotos);
-                        itens.add(item);
-                    }
-                    pratoAtual = idPrato;
-                    item = new Item();
-                    tipos = new HashSet<>();
-                    fotos = new HashSet<>();
-                    item.setId(rs.getLong("id_item"));
-                    item.setNome(rs.getString("nome"));
-                    item.setPreco(rs.getDouble("preco"));
-                    item.setDescricao(rs.getString("descricao"));
-                    item.setModificavel(rs.getBoolean("modificavel"));
-                    Genero genero = new Genero(rs.getLong("id_genero"), rs.getString("genero"));
-                    item.setGenero(genero);
-                }
-                tipos.add(new Tipo(rs.getLong("id_tipo"), rs.getString("tipo_nome")));
-            }
-            if (pratoAtual != -1) {
-                item.setTipos(tipos);
-
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_arquivos(?)")) {
-                    stmt2.setLong(1, pratoAtual);
-                    ResultSet rs2 = stmt2.executeQuery();
-                    fotos = new HashSet<>();
-                    while (rs2.next()) {
-                        Foto foto = new Foto();
-                        foto.setId(rs2.getLong("id_arquivo"));
-                        fotos.add(ServicoArmazenamento.setTamanho(foto));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_get_lista_complementos_item(?)")) {
-                    stmt2.setLong(1, item.getId());
-                    ResultSet rs2 = stmt2.executeQuery();
-                    complementos = new HashSet<>();
-                    while (rs2.next()) {
-                        complementos.add(new Complemento(
-                                rs2.getLong("id_complemento"),
-                                rs2.getString("nome"),
-                                0,
-                                null));
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                item.setComplementos(complementos);
-                item.setFotos(fotos);
-
-                itens.add(item);
-            }
-        } catch (SQLException e) {
-            throw new DAOException("Erro ao recuperar informações", e, 200);
-        }
-        return itens;
-    }
+    }    
 
     public void adicionarItem(Item item) throws DAOException {
         try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_inserir_item(?,?,?,?,?,?)")) {

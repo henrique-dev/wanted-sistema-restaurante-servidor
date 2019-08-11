@@ -8,6 +8,7 @@ package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
+import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Usuario;
 import java.sql.Connection;
@@ -73,9 +74,49 @@ public class SessaoDAO {
         }
         return cliente;
     }
+    
+    public Admin autenticar2(Usuario usuario) throws DAOException {
+        if (usuario == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (usuario.getNomeUsuario() == null || usuario.getSenhaUsuario() == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (usuario.getNomeUsuario().isEmpty() || usuario.getSenhaUsuario().isEmpty()) {
+            throw new DAOIncorrectData(301);
+        }
+        Admin admin = null;
+        String sql = "SELECT * FROM usuario_admin WHERE nome=? AND senha=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
+            stmt.setString(1, usuario.getNomeUsuario());
+            stmt.setString(2, usuario.getSenhaUsuario());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                usuario.setIdUsuario(rs.getLong("id_usuario"));
+                usuario.setNomeUsuario(null);
+                usuario.setSenhaUsuario(null);
+                admin = new Admin();
+                admin.setIdUsuario(rs.getLong("id_usuario"));
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+        return admin;
+    }
 
     public void gerarSessao(Usuario usuario, String token1) throws DAOException {
         String sql = "UPDATE usuario SET token_sessao = ? WHERE usuario.id_usuario = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setString(1, token1);
+            stmt.setLong(2, usuario.getIdUsuario());            
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public void gerarSessao2(Usuario usuario, String token1) throws DAOException {
+        String sql = "UPDATE usuario_admin SET token_sessao = ? WHERE usuario_admin.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token1);
             stmt.setLong(2, usuario.getIdUsuario());            

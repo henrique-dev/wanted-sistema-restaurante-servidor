@@ -59,6 +59,7 @@ public class ClienteDAO {
     ClienteDAO(DataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
+            System.out.println(this.conexao.isClosed());
         } catch (SQLException e) {
             throw new RuntimeException(e); 
         }
@@ -330,7 +331,6 @@ public class ClienteDAO {
                 stmt.setInt(index++, pagina);
             }
             ResultSet rs = stmt.executeQuery();
-            System.out.println(rs.getStatement());
             List<Item> itens = new ArrayList<>();
             Set<Genero> generos = new HashSet<>();
             List<Genero> generos2 = new ArrayList<>();

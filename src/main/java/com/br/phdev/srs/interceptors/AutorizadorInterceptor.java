@@ -22,6 +22,8 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
         //new HttpUtils().showHeaders(request);
         if (request.getSession().getAttribute("usuario") != null) {
             return true;
+        } else if (request.getSession().getAttribute("admin") != null) {
+            return true;
         } else {
             if (
                        uri.endsWith("cadastro/verificar-numero")
@@ -33,7 +35,7 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                     
                     || uri.endsWith("sessao/autenticar-2")
                     
-                    || uri.endsWith("gerenciador/entrar")                    
+                    || uri.endsWith("sessao/entrar")                    
                     
                     || uri.endsWith("sem-autorizacao")
                     
@@ -46,8 +48,9 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
             } else {
                 if (uri.contains("cliente"))
                     response.sendRedirect("sem-autorizacao");
-                else
-                    response.sendRedirect("entrar");
+                else {                    
+                    response.sendRedirect("../sessao/entrar");
+                }                    
                 return false;
             }
         }

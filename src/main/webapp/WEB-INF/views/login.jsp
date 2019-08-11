@@ -4,8 +4,9 @@
     Author     : Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
     <head>
 
@@ -15,7 +16,7 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <title>SB Admin 2 - Login</title>
+        <title>WantedAdmin - Login</title>
 
         <!-- Custom fonts for this template-->
         <link href="${pageContext.request.contextPath}/resources/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -42,7 +43,7 @@
                                         <div class="text-center">
                                             <h1 class="h4 text-gray-900 mb-4">Wanted Admin</h1>
                                         </div>
-                                        <form class="user" id="formLogin" method="POST" action="${pageContext.request.contextPath}/gerenciador/autenticar">
+                                        <form class="user" id="formLogin" method="POST" action="${pageContext.request.contextPath}/sessao/autenticar-2">
                                             <div class="form-group">
                                                 <input type="text" class="form-control form-control-user" id="nome" name="nomeUsuario" aria-describedby="emailHelp" placeholder="Usuário">
                                             </div>
@@ -66,14 +67,14 @@
         </div>
 
         <!-- Bootstrap core JavaScript-->
-        <script src="vendor/jquery/jquery.min.js"></script>
-        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="${pageContext.request.contextPath}/resources/vendor/jquery/jquery.min.js"></script>
+        <script src="${pageContext.request.contextPath}/resources/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
         <!-- Core plugin JavaScript-->
-        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+        <script src="${pageContext.request.contextPath}/resources/vendor/jquery-easing/jquery.easing.min.js"></script>
 
         <!-- Custom scripts for all pages-->
-        <script src="js/sb-admin-2.min.js"></script>
+        <script src="${pageContext.request.contextPath}/resources/js/sb-admin-2.min.js"></script>
 
     </body>
 

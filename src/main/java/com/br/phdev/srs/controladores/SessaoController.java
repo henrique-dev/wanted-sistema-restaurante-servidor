@@ -9,6 +9,7 @@ package com.br.phdev.srs.controladores;
 
 import com.br.phdev.srs.daos.SessaoDAO;
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Usuario;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -37,6 +39,11 @@ public class SessaoController {
     public SessaoController(SessaoDAO dao) {
         this.dao = dao;
     }
+    
+    @GetMapping("sessao/entrar")
+    public String entrar() {
+        return "login";
+    }    
     
     @PostMapping("sessao/verificar-sessao")
     public ResponseEntity<Mensagem> verificarSessao(HttpServletRequest req) {
@@ -89,28 +96,24 @@ public class SessaoController {
     
     @PostMapping("sessao/autenticar-2")
     public String autenticar(String nomeUsuario, String senhaUsuario,
-            HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {        
-        System.out.println(senhaUsuario);
-        Mensagem mensagem = new Mensagem();
-        Usuario usuario = new Usuario(0, nomeUsuario, senhaUsuario);
+            HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {
+        Mensagem mensagem = new Mensagem();        
         try {
-            Cliente cliente = this.dao.autenticar(usuario);
-            if (cliente != null) {                
-                this.dao.gerarSessao(usuario, sessao.getId());
+            Admin admin = this.dao.autenticar2(new Usuario(0, nomeUsuario, senhaUsuario));
+            if (admin != null) {                
+                this.dao.gerarSessao2(admin, sessao.getId());
                 mensagem.setCodigo(100);
-                sessao.setAttribute("usuario", usuario);
-                sessao.setAttribute("cliente", cliente);
-                return "redirect:main";
-            } else {                
+                sessao.setAttribute("admin", admin);
+                return "redirect:../gerenciador/index";
+            } else {
                 mensagem.setCodigo(101);
                 mensagem.setDescricao("Usuário ou senha inválidos");
             }
         } catch (DAOException e) {
-            e.printStackTrace();
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
         }
-        return "login";
+        return "redirect:login";
     }
 
     @PostMapping("sessao/sair")
