@@ -36,7 +36,7 @@ public class SevicoAgendamento {
             while(iterator.hasNext()) {
                 Notificacao notificacao = iterator.next();
                 if (ServicoNotificacao.enviarMensagem(notificacao.getWebsocketId(), notificacao.getMensagem())){
-                    //System.out.println("Mensagem enviada");
+                    System.out.println("Mensagem enviada");
                 }                
             }
         } catch (DAOException e) {

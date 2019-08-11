@@ -18,7 +18,6 @@ import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
-import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
