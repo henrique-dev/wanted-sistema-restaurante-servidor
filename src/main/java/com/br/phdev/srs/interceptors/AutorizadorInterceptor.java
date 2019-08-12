@@ -18,7 +18,7 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();        
-        System.out.println(uri);
+        System.out.println(uri + " - " + request.getSession().getId());
         //new HttpUtils().showHeaders(request);
         if (request.getSession().getAttribute("usuario") != null) {
             return true;
