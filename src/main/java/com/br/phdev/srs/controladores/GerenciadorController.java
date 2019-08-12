@@ -8,11 +8,14 @@ package com.br.phdev.srs.controladores;
 
 import com.br.phdev.srs.daos.GerenciadorDAO;
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Genero;
+import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
+import com.br.phdev.srs.models.Tipo;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -60,6 +63,39 @@ public class GerenciadorController {
         return "admin/produtos/itens";
     }
     
+    @GetMapping("gerenciador/generos")
+    public String generos(Model modelo) {
+        try {
+            List<Item> itens = this.dao.getItens();
+            modelo.addAttribute("itens", itens);            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/generos";
+    }
+    
+    @GetMapping("gerenciador/complementos")
+    public String complementos(Model modelo) {
+        try {
+            List<Item> itens = this.dao.getItens();
+            modelo.addAttribute("itens", itens);            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/complementos";
+    }
+    
+    @GetMapping("gerenciador/ingredientes")
+    public String ingredientes(Model modelo) {
+        try {
+            List<Item> itens = this.dao.getItens();
+            modelo.addAttribute("itens", itens);            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/ingredientes";
+    }
+    
     @GetMapping("gerenciador/item")
     public String item(String opcao, Integer id, Model modelo) {        
         try {
@@ -70,7 +106,13 @@ public class GerenciadorController {
                     break;
                 case "NOVO":
                     List<Genero> generos = this.dao.getGeneros();
+                    List<Tipo> tipos = this.dao.getTipos();
+                    List<Complemento> complementos = this.dao.getComplementos();
+                    List<Ingrediente> ingredientes = this.dao.getIngredientes();                    
                     modelo.addAttribute("generos", generos);
+                    modelo.addAttribute("tipos", tipos);
+                    modelo.addAttribute("complementos", complementos);
+                    modelo.addAttribute("ingredientes", ingredientes);
                     break;
             }            
         } catch (DAOException e) {

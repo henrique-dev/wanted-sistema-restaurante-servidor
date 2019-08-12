@@ -138,6 +138,58 @@ public class GerenciadorDAO {
         return generos;
     }    
     
+    public List<Tipo> getTipos() throws DAOException {
+        List<Tipo> tipos = new ArrayList<>();
+        String sql = "SELECT * FROM tipo ORDER BY nome";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Tipo tipo = new Tipo();
+                tipo.setId(rs.getLong("id_tipo"));
+                tipo.setNome(rs.getString("nome"));
+                tipos.add(tipo);
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return tipos;
+    }    
+    
+    public List<Complemento> getComplementos() throws DAOException {
+        List<Complemento> complementos = new ArrayList<>();
+        String sql = "SELECT * FROM complemento ORDER BY nome";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Complemento complemento = new Complemento();
+                complemento.setId(rs.getLong("id_complemento"));
+                complemento.setNome(rs.getString("nome"));
+                complemento.setPreco(rs.getDouble("preco"));
+                complementos.add(complemento);
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return complementos;
+    }    
+    
+    public List<Ingrediente> getIngredientes() throws DAOException {
+        List<Ingrediente> ingredientes = new ArrayList<>();
+        String sql = "SELECT * FROM ingrediente ORDER BY nome";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Ingrediente ingrediente = new Ingrediente();
+                ingrediente.setId(rs.getLong("id_ingrediente"));
+                ingrediente.setNome(rs.getString("nome"));
+                ingredientes.add(ingrediente);
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return ingredientes;
+    }    
+    
     
     
     
@@ -184,25 +236,7 @@ public class GerenciadorDAO {
                 }
             }
         }
-    }
-
-    public List<Tipo> getTipos() throws DAOException {
-        List<Tipo> tipos = null;
-        String sql = "CALL gerenciador_get_lista_tipos";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            tipos = new ArrayList<>();
-            while (rs.next()) {
-                Tipo tipo = new Tipo();
-                tipo.setId(rs.getLong("id_tipo"));
-                tipo.setNome(rs.getString("nome"));
-                tipos.add(tipo);
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-        return tipos;
-    }
+    }    
 
     public void adicionarTipos(List<Tipo> tipos) throws DAOException {
         String sql = "CALL gerenciador_inserir_tipo(?)";
@@ -230,29 +264,7 @@ public class GerenciadorDAO {
                 }
             }
         }
-    }
-
-    public List<Complemento> getComplementos() throws DAOException {
-        List<Complemento> complementos = null;
-        String sql = "CALL gerenciador_get_lista_complementos";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            complementos = new ArrayList<>();
-            while (rs.next()) {
-                Complemento complemento = new Complemento();
-                complemento.setId(rs.getLong("id_complemento"));
-                complemento.setNome(rs.getString("nome"));
-                complemento.setPreco(rs.getDouble("preco"));
-                Foto foto = new Foto();
-                foto.setId(rs.getLong("id_arquivo"));
-                complemento.setFoto(ServicoArmazenamento.setTamanho(foto));
-                complementos.add(complemento);
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-        return complementos;
-    }
+    }    
 
     public void adicionarComplemento(Complemento complemento) throws DAOException {
         String sql = "CALL gerenciador_inserir_complemento(?,?,?)";
@@ -290,25 +302,7 @@ public class GerenciadorDAO {
         }
         complementos.clear();
         complementos.addAll(complementosParaApagarFoto);
-    }
-
-    public List<Ingrediente> getIngredientes() throws DAOException {
-        List<Ingrediente> ingredientes = null;
-        String sql = "CALL gerenciador_get_lista_ingredientes";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            ingredientes = new ArrayList<>();
-            while (rs.next()) {
-                Ingrediente ingrediente = new Ingrediente();
-                ingrediente.setId(rs.getLong("id_ingrediente"));
-                ingrediente.setNome(rs.getString("nome"));
-                ingredientes.add(ingrediente);
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-        return ingredientes;
-    }
+    }    
 
     public void adicionarIngrediente(List<Ingrediente> ingredientes) throws DAOException {
         String sql = "CALL gerenciador_inserir_ingrediente(?)";
