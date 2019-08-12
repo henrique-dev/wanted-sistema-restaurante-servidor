@@ -54,14 +54,14 @@ import org.springframework.stereotype.Repository;
 public class ClienteDAO {
 
     private final Connection conexao;
-    
+
     @Autowired
     ClienteDAO(DataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
             System.out.println(this.conexao.isClosed());
         } catch (SQLException e) {
-            throw new RuntimeException(e); 
+            throw new RuntimeException(e);
         }
     }
 
@@ -99,21 +99,21 @@ public class ClienteDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public ListaItens getItensDia(Cliente cliente) throws DAOException {
-        ListaItens listaItens = new ListaItens();        
+        ListaItens listaItens = new ListaItens();
         String sql = " SELECT item.id_item FROM item "
-                        + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
-            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {                
-                ResultSet rs2 = stmt2.executeQuery();
-                List<Item> itensDia = new ArrayList<>();
-                while (rs2.next()) {
-                    Item itemDia = new Item();
-                    itemDia.setId(rs2.getLong("id_item"));
-                    getItem(itemDia, cliente);
-                    itensDia.add(itemDia);
-                }
-                listaItens.setItensDia(itensDia);
+                + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
+        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+            ResultSet rs2 = stmt2.executeQuery();
+            List<Item> itensDia = new ArrayList<>();
+            while (rs2.next()) {
+                Item itemDia = new Item();
+                itemDia.setId(rs2.getLong("id_item"));
+                getItem(itemDia, cliente);
+                itensDia.add(itemDia);
+            }
+            listaItens.setItensDia(itensDia);
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
@@ -665,7 +665,7 @@ public class ClienteDAO {
         }
         return foto;
     }
-    
+
     public boolean existePedidoAberto(Cliente cliente) throws DAOException {
         String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 4";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -777,19 +777,18 @@ public class ClienteDAO {
     }
 
     public void removerPrepedido(Cliente cliente) throws DAOException {
-        try {
-            // invalidar_pre_pedido
-            String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
-            PreparedStatement stmt = this.conexao.prepareStatement(sql);
+        String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            // invalidar_pre_pedido            
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 long idPrePedido = rs.getLong("id_pre_pedido");
-                stmt.close();
                 sql = "DELETE FROM pre_pedido WHERE id_pre_pedido = ?";
-                stmt = this.conexao.prepareStatement(sql);
-                stmt.setLong(1, idPrePedido);
-                stmt.execute();
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, idPrePedido);
+                    stmt2.execute();
+                }
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -859,26 +858,25 @@ public class ClienteDAO {
             throw new DAOIncorrectData(300);
         }
         // inserir_pre_pedido
-        try {
-            String sql = "SELECT pre_pedido.id_cliente FROM pre_pedido WHERE pre_pedido.id_cliente = ?";
-            PreparedStatement stmt = this.conexao.prepareStatement(sql);
+        String sql = "SELECT pre_pedido.id_cliente FROM pre_pedido WHERE pre_pedido.id_cliente = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
-                stmt.close();
                 sql = "INSERT INTO pre_pedido values (default, now(), ?, ?, ?, ?, ?, ?, ?)";
-                stmt = this.conexao.prepareStatement(sql);
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(pedido.getItens());
-                stmt.setString(1, json);
-                stmt.setDouble(2, pedido.getPrecoTotal());
-                stmt.setLong(3, pedido.getFormaPagamento().getId());
-                stmt.setLong(4, cliente.getId());
-                stmt.setLong(5, pedido.getEndereco().getId());
-                stmt.setString(6, token);
-                stmt.setString(7, pedido.getObservacaoEntrega());
-                stmt.execute();
-                return true;
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String json = objectMapper.writeValueAsString(pedido.getItens());
+                    stmt2.setString(1, json);
+                    stmt2.setDouble(2, pedido.getPrecoTotal());
+                    stmt2.setLong(3, pedido.getFormaPagamento().getId());
+                    stmt2.setLong(4, cliente.getId());
+                    stmt2.setLong(5, pedido.getEndereco().getId());
+                    stmt2.setString(6, token);
+                    stmt2.setString(7, pedido.getObservacaoEntrega());
+                    stmt2.execute();
+                    return true;
+                }
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -917,19 +915,18 @@ public class ClienteDAO {
             throw new DAOIncorrectData(300);
         }
         // atualizar_tokem_pre_pedido        
-        try {
-            String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
-            PreparedStatement stmt = this.conexao.prepareStatement(sql);
+        String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, idPagamento);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 long idPrePedido = rs.getLong("id_pre_pedido");
-                stmt.close();
                 sql = "UPDATE pre_pedido SET token = ? WHERE id_pre_pedido = ?";
-                stmt = this.conexao.prepareStatement(sql);
-                stmt.setString(1, idComprador);
-                stmt.setLong(2, idPrePedido);
-                stmt.execute();
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setString(1, idComprador);
+                    stmt2.setLong(2, idPrePedido);
+                    stmt2.execute();
+                }
             }
 
         } catch (SQLException e) {
@@ -961,29 +958,27 @@ public class ClienteDAO {
             throw new DAOIncorrectData(300);
         }
         // inserir_pedido_de_pre_pedido
-        try {
-            String sql = "SELECT pre_pedido.id_cliente, pre_pedido.id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
-            PreparedStatement stmt = this.conexao.prepareStatement(sql);
+        String sql = "SELECT pre_pedido.id_cliente, pre_pedido.id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
             stmt.setString(1, idPagamento);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 long idCliente = rs.getLong("id_cliente");
-                long idPrePedido = rs.getLong("id_pre_pedido");
-                stmt.close();
+                long idPrePedido = rs.getLong("id_pre_pedido");                
                 sql = "INSERT INTO pedido (data, itens, precototal, id_formapagamento, id_cliente, id_endereco, pagamentoefetuado, estado, observacao_entrega) "
                         + " (SELECT datapedido, itens, precototal, id_formapagamento, id_cliente, id_endereco, true, 1, observacao_entrega "
                         + " FROM pre_pedido WHERE pre_pedido.id_cliente = ?)";
-                stmt = this.conexao.prepareStatement(sql);
-                stmt.setLong(1, idCliente);
-                stmt.execute();
-                // remover_pre_pedido
-                stmt.close();
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, idCliente);
+                    stmt2.execute();
+                }                
+                // remover_pre_pedido                
                 sql = "DELETE FROM pre_pedido WHERE id_pre_pedido = ?";
-                stmt = this.conexao.prepareStatement(sql);
-                stmt.setLong(1, idPrePedido);
-                stmt.execute();
-            }
-            stmt.execute();
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt.setLong(1, idPrePedido);
+                    stmt.execute();
+                }                
+            }            
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
@@ -1019,7 +1014,7 @@ public class ClienteDAO {
                 Endereco endereco = new Endereco();
                 endereco.setId(rs.getObject("id_endereco") != null ? rs.getLong("id_endereco") : -1);
                 endereco.setDescricao(rs.getString("endereco_descricao"));
-                pedido.setEndereco(endereco);      
+                pedido.setEndereco(endereco);
                 pedido.setFrete(rs.getDouble("frete"));
                 switch (rs.getInt("estado")) {
                     case 1:
@@ -1058,7 +1053,7 @@ public class ClienteDAO {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {                                
+            if (rs.next()) {
                 String time = LocalDateTime.parse(rs.getString("data"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
                 pedido.setData(time);
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
@@ -1162,7 +1157,7 @@ public class ClienteDAO {
         String sql = "UPDATE enderecos_favoritos SET id_endereco=? WHERE id_cliente = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, endereco.getId());
-            stmt.setLong(2, cliente.getId());            
+            stmt.setLong(2, cliente.getId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
