@@ -8,6 +8,7 @@ package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Cadastro;
+import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.MensagemCadastro;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
@@ -188,6 +189,7 @@ public class CadastroDAO {
             }
             sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                Cliente cliente = null;
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, usuario.getNomeUsuario());
@@ -217,5 +219,21 @@ public class CadastroDAO {
         }
         return mensagem;
     }    
+    
+    public Cliente getCliente(Usuario usuario) throws DAOException {
+        Cliente cliente = null;
+        String sql = "SELECT * FROM cliente WHERE id_usuario=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, usuario.getIdUsuario());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                cliente = new Cliente();
+                cliente.setId(rs.getLong("id_cliente"));
+            }
+        } catch (SQLException e) {
+            throw new DAOException(200);
+        }
+        return cliente;
+    }
 
 }

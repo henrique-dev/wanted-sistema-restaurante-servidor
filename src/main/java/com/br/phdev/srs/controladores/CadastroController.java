@@ -10,6 +10,7 @@ package com.br.phdev.srs.controladores;
 import com.br.phdev.srs.daos.CadastroDAO;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Cadastro;
+import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoSms;
@@ -100,6 +101,12 @@ public class CadastroController {
             Usuario usuario = (Usuario) sessao.getAttribute("usuario");
             if (usuario != null) {
                 mensagem = this.dao.cadastrarCliente(usuario, cadastro, sessao);
+                if (mensagem.getCodigo() == 100) {
+                    Cliente cliente = this.dao.getCliente(usuario);
+                    if (cliente != null) {
+                        sessao.setAttribute("cliente", cliente);
+                    }                    
+                }
             } else {
                 mensagem.setCodigo(102);
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
