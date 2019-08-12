@@ -27,6 +27,7 @@ import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -522,7 +523,7 @@ public class ClienteController {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }
         } catch (DAOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

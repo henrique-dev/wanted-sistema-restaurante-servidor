@@ -547,13 +547,10 @@ public class ClienteDAO {
     }
 
     public List<Endereco> getEnderecos(Cliente cliente) throws DAOException {
+        List<Endereco> enderecos = new ArrayList<>();
         if (cliente == null) {
-            throw new DAOIncorrectData(300);
+            return enderecos;
         }
-        if (cliente.getId() == 0) {
-            throw new DAOIncorrectData(301);
-        }
-        List<Endereco> enderecos = null;
         // get_lista_enderecos
         String sql = "SELECT endereco.id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, "
                 + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
