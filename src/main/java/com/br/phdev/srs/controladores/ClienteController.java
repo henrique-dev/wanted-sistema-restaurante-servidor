@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class ClienteController {
     
-    private final ClienteDAO dao;
+    private ClienteDAO dao;
     
     @Autowired
     public ClienteController(ClienteDAO dao) {

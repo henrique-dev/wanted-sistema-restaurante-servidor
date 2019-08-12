@@ -40,7 +40,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class GerenciadorDAO {
     
-    private final Connection conexao;
+    private Connection conexao;
     
     @Autowired
     GerenciadorDAO(DataSource dataSource) {

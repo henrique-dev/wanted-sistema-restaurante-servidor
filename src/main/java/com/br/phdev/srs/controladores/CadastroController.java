@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class CadastroController {
     
-    private final CadastroDAO dao;
+    private CadastroDAO dao;
     
     @Autowired
     public CadastroController(CadastroDAO dao) {

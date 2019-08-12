@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class SessaoController {
     
-    private final SessaoDAO dao;
+    private SessaoDAO dao;
     
     @Autowired
     public SessaoController(SessaoDAO dao) {

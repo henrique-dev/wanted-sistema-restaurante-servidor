@@ -31,7 +31,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CadastroDAO {
     
-    private final Connection conexao;    
+    private Connection conexao;    
 
     @Autowired
     CadastroDAO(DataSource dataSource) {

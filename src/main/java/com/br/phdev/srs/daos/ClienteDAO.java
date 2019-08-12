@@ -53,7 +53,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ClienteDAO {
 
-    private final Connection conexao;
+    private Connection conexao;
 
     @Autowired
     ClienteDAO(DataSource dataSource) {

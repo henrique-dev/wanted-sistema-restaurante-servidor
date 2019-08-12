@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SessaoDAO {
     
-    private final Connection conexao;
+    private Connection conexao;
     
     @Autowired
     SessaoDAO(DataSource dataSource) {

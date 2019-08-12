@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class GerenciadorController {
     
-    private final GerenciadorDAO dao;    
+    private GerenciadorDAO dao;    
     
     @Autowired
     public GerenciadorController(GerenciadorDAO dao) {
