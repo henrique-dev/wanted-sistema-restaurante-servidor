@@ -25,7 +25,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -189,6 +192,51 @@ public class GerenciadorDAO {
         }
         return ingredientes;
     }    
+    
+    public List<Cliente> getClientes() throws DAOException {
+        List<Cliente> clientes = new ArrayList<>();
+        String sql = "SELECT * FROM cliente "
+                    + " LEFT JOIN usuario ON cliente.id_usuario = usuario.id_usuario "
+                    + " WHERE cliente.telefone = usuario.nome AND id_cliente != 0"
+                    + " ORDER BY id_cliente";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Cliente cliente = new Cliente();
+                cliente.setId(rs.getLong("id_cliente"));
+                cliente.setNome(rs.getString("nome"));
+                cliente.setTelefone(rs.getString("telefone"));
+                cliente.setEmail(rs.getString("email"));
+                clientes.add(cliente);
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return clientes;
+    }
+    
+    public void removerCliente(Cliente cliente) throws DAOException {
+        String sql = "SELECT usuario.id_usuario, usuario.nome, now() data FROM usuario "
+                    + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
+                    + " WHERE id_cliente=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                sql = "UPDATE usuario set nome=? WHERE id_usuario=?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    String time = LocalDateTime.parse(rs.getString("data"), 
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));                    
+                    stmt2.setString(1, rs.getString("nome") + "?" + time);
+                    stmt2.setLong(2, rs.getLong("id_usuario"));
+                    stmt2.execute();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(200);
+        }
+    }
     
     
     

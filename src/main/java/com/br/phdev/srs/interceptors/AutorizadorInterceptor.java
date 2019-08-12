@@ -49,7 +49,7 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                 if (uri.contains("cliente"))
                     response.sendRedirect("sem-autorizacao");
                 else {                    
-                    response.sendRedirect("../sessao/entrar");
+                    response.sendRedirect("/wanted/sessao/entrar");
                 }                    
                 return false;
             }

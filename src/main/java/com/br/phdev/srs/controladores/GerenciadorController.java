@@ -8,6 +8,7 @@ package com.br.phdev.srs.controladores;
 
 import com.br.phdev.srs.daos.GerenciadorDAO;
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -121,20 +123,28 @@ public class GerenciadorController {
         return "admin/produtos/item";
     }
     
-    @GetMapping("gerenciador/salvar-item")
-    public String salvarItem(@Valid @ModelAttribute("item")Item item, 
-      BindingResult result, ModelMap model) {
-        if (result.hasErrors()) {
-            System.out.println(result);
-        }
+    @GetMapping("gerenciador/clientes")
+    public String clientes(Model modelo) {
         try {
-            System.out.println(item);
-            List<Item> itens = this.dao.getItens();
-            //modelo.addAttribute("itens", itens);            
+            List<Cliente> clientes = this.dao.getClientes();
+            modelo.addAttribute("clientes", clientes);
         } catch (DAOException e) {
             e.printStackTrace();
         }
-        return "admin/produtos/itens";
+        return "admin/clientes/todos";
+    }
+    
+    @PostMapping("gerenciador/remover-cliente")
+    @ResponseBody
+    public void removerCliente(Integer id, Model modelo) {
+        List<Cliente> clientes = null;
+        try {
+            this.dao.removerCliente(new Cliente(id));
+            clientes = this.dao.getClientes();
+            modelo.addAttribute("clientes", clientes);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
     }
     
     @PostMapping("gerenciador/atualizar-estado-pedido")

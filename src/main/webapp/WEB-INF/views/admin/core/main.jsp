@@ -98,6 +98,27 @@
                     </div>
                 </li>
 
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Clientes
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#menu_clientes" aria-expanded="true" aria-controls="menu_clientes">
+                        <i class="fas fa-fw fa-book"></i>
+                        <span>Gerenciar</span>
+                    </a>
+                    <div id="menu_clientes" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a id="menu_cliente_todos" class="collapse-item" href="clientes">Todos</a>
+                        </div>
+                    </div>
+                </li>
+
             </ul>
             <!-- End of Sidebar -->
 
