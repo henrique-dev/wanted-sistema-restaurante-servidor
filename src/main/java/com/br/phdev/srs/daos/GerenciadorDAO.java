@@ -226,7 +226,7 @@ public class GerenciadorDAO {
                 sql = "UPDATE usuario set nome=? WHERE id_usuario=?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     String time = LocalDateTime.parse(rs.getString("data"), 
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));                    
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH:mm"));
                     stmt2.setString(1, rs.getString("nome") + "?" + time);
                     stmt2.setLong(2, rs.getLong("id_usuario"));
                     stmt2.execute();
