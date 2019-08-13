@@ -322,6 +322,17 @@ public class GerenciadorDAO {
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             stmt.execute();
+            sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                stmt2.setLong(1, pedido.getId());
+                ResultSet rs = stmt2.executeQuery();
+                if (rs.next()) {
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + pedido.getEstado() + "}");
+                    this.adicionarNotificacao(notificacao);
+                }
+            }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
