@@ -46,11 +46,13 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                     ) {
                 return true;
             } else {
-                if (uri.contains("cliente"))
+                if (uri.contains("cliente")) {
+                    System.out.println("HERE");
                     response.sendRedirect("sem-autorizacao");
-                else {                    
+                } else {                    
                     response.sendRedirect("/wanted/sessao/entrar");
-                }                    
+                }
+                System.out.println("HERE2");
                 return false;
             }
         }

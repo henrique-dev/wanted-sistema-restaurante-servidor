@@ -8,6 +8,7 @@ package com.br.phdev.srs.controladores;
 
 import com.br.phdev.srs.daos.GerenciadorDAO;
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Genero;
@@ -17,9 +18,9 @@ import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
+import com.br.phdev.srs.models.TokenAlerta;
 import java.util.List;
 import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -142,6 +140,17 @@ public class GerenciadorController {
             this.dao.removerCliente(new Cliente(id));
             clientes = this.dao.getClientes();
             modelo.addAttribute("clientes", clientes);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @PostMapping("gerenciador/cadastrar-token-alerta")
+    @ResponseBody
+    public void cadastrarWebToken(String token, Model modelo, HttpSession sessao) {
+        try {
+            Admin admin = (Admin) sessao.getAttribute("admin");
+            this.dao.cadastrarTokenAlerta(admin, token);
         } catch (DAOException e) {
             e.printStackTrace();
         }

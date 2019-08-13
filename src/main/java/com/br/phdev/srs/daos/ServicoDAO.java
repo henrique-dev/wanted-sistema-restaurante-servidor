@@ -8,14 +8,20 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Notificacao;
+import com.br.phdev.srs.models.NotificacaoPedido;
+import com.br.phdev.srs.models.Pedido;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -29,7 +35,7 @@ public class ServicoDAO {
     private Connection conexao;
     
     @Autowired
-    ServicoDAO(DataSource dataSource) {
+    ServicoDAO(BasicDataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
         } catch (SQLException e) {
@@ -68,6 +74,34 @@ public class ServicoDAO {
             throw new DAOException(e, 200);
         }
         return notificacoes;
+    }
+    
+    public NotificacaoPedido listarPedidos() throws DAOException {
+        NotificacaoPedido notificacaoPedido = new NotificacaoPedido();
+        notificacaoPedido.setTipo("atualizacao");
+        String sql = "SELECT * FROM pedido WHERE estado != 4";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            List<Pedido> pedidos = new ArrayList<>();
+            while (rs.next()) {
+                Pedido pedido = new Pedido();
+                pedido.setId(rs.getLong("id_pedido"));
+                pedido.setPrecoTotal(rs.getDouble("precototal"));
+                pedidos.add(pedido);
+            }
+            notificacaoPedido.setPedidos(pedidos);
+            sql = "SELECT * FROM websocket_admin WHERE id_usuario=1";
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                ResultSet rs2 = stmt2.executeQuery();                
+                if (rs2.next()) {                    
+                    notificacaoPedido.setWebsocketId(rs2.getString("token"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(200);
+        }
+        return notificacaoPedido;
     }
     
 }

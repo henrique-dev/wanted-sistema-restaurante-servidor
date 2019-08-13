@@ -55,6 +55,7 @@ public class ServicoNotificacao implements WebSocketConfigurer {
     public static boolean enviarMensagem(String userId, String mensagem) throws IOException {
         System.out.println("Quantidade atual de clientes conextados: " + sessions.size());
         WebSocketSession wss = sessions.get(userId);
+        System.out.println(userId);
         if (wss != null) {
             wss.sendMessage(new TextMessage(mensagem));
             return true;

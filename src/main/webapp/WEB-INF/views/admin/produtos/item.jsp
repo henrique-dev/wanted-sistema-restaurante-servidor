@@ -62,20 +62,19 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 col-sm-12">
-                            <table id="tbl_tipos" class="table table-bordered" id="dataTable" cellspacing="0">
+                        <div class="col-md-12 col-sm-12" style="overflow-y: scroll;">
+                            <table class="table table-bordered mb-0" >
                                 <thead>
                                     <tr>
-                                        <th>Id</th>
-                                        <th>Nome</th>
+                                        <th width="80%">Nome</th>
+                                        <th width="20%"></th>
                                     </tr>
                                 </thead>
+                            </table>                            
+                        </div>
+                        <div class="col-md-12 col-sm-12" style="height: 280px; max-height: 280px; overflow-y: scroll;">
+                            <table id="tbl_tipos" class="table table-bordered" cellspacing="0">
                                 <tbody>
-                                    <tr><td colspan="2">&nbsp;</td></tr>
-                                    <tr><td colspan="2">&nbsp;</td></tr>
-                                    <tr><td colspan="2">&nbsp;</td></tr>
-                                    <tr><td colspan="2">&nbsp;</td></tr>
-                                    <tr><td colspan="2">&nbsp;</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -92,21 +91,20 @@
                         </div>                
                     </div>
                     <div class="row">
-                        <div class="col-md-12 col-sm-12">
-                            <table id="tbl_complementos" class="table table-bordered" id="dataTable" cellspacing="0">
+                        <div class="col-md-12 col-sm-12" style="overflow-y: scroll;">
+                            <table class="table table-bordered mb-0" >
                                 <thead>
                                     <tr>
-                                        <th>Id</th>
-                                        <th>Nome</th>
-                                        <th>Preço</th>
+                                        <th width="50%">Nome</th>
+                                        <th width="30%">Preço</th>
+                                        <th width="20%"></th>
                                     </tr>
                                 </thead>
+                            </table>
+                        </div>
+                        <div class="col-md-12 col-sm-12" style="height: 280px; max-height: 280px; overflow-y: scroll;">
+                            <table id="tbl_complementos" class="table table-bordered"cellspacing="0">
                                 <tbody>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -123,21 +121,19 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 col-sm-12 ">
-                            <table id="tbl_ingredientes" class="table table-bordered" id="dataTable" cellspacing="0">
+                        <div class="col-md-12 col-sm-12" style="overflow-y: scroll;">
+                            <table class="table table-bordered mb-0" >
                                 <thead>
                                     <tr>
-                                        <th>Id</th>
-                                        <th>Nome</th>
-                                        <th>Preço</th>
+                                        <th width="80%">Nome</th>
+                                        <th width="20%"></th>
                                     </tr>
                                 </thead>
+                            </table>
+                        </div>
+                        <div class="col-md-12 col-sm-12" style="height: 280px; max-height: 280px; overflow-y: scroll;">
+                            <table id="tbl_ingredientes" class="table table-bordered" id="dataTable" cellspacing="0">
                                 <tbody>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
-                                    <tr><td colspan="3">&nbsp;</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -155,19 +151,30 @@
 
 <script type="text/javascript">
     
-    $("#ctn_conteudo").append($("#ctn_index"));
-    
-    function validar_formuluario() {
-        if (verifica_dados()) {
-            processar_dados("INCLUIR");
-        }
-        return false;
-    }
+    $("#ctn_conteudo").append($("#ctn_index"));    
     
     function verifica_dados() {
         let nome = $("#fld_nome").val();
         let descricao = $("#fld_descricao").val();
         let preco = $("#fld_preco").val();
+        let tipos = new Array();
+        $("#tbl_tipos").children("tbody").find("tr").each(function() {
+            tipos.push($(this).data("id"));
+        });
+        let complementos = new Array();
+        $("#tbl_complementos").children("tbody").find("tr").each(function() {
+            complementos.push($(this).data("id"));
+        });
+        let ingredientes = new Array();
+        $("#tbl_ingredientes").children("tbody").find("tr").each(function() {
+            ingredientes.push($(this).data("id"));
+        });
+        let arquivos = new Array();
+        $("#input-arquivo-1").find("input").each(function() {
+            arquivos.push($(this)[0].files[0]);
+        })
+        //console.log(json);
+        
     }
     
     function processar_dados(aAcao, aComplemento) {
@@ -178,7 +185,8 @@
         
     }
     
-    $(document).ready(function() {        
+    $(document).ready(function() {
+
         $(".collapse").removeClass("show");
         $(".nav-item").removeClass("active");
         $(".collapse-item").removeClass("active");
@@ -199,6 +207,73 @@
             },
             dropFileLabel : "Drop Here"
         });
+
+        $("#fld_tipos").change(function() {
+            let option = $(this).find(":selected");
+            $("#tbl_tipos").children("tbody").append(
+                "<tr id='tr_"+option.data("id")+"' data-id="+option.data("id")+" data-nome="+option.data("nome")+">"
+                    +   "<td width='80%'>"+option.data("nome")+"</td>"
+                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-tipo'>X</button></center></td>"
+                +"</tr>"
+            );
+            option.remove();
+            $("#tr_" + option.data("id") + " .btn-remover-tipo").click(function() {
+                let tr = $(this).parent().parent().parent();
+                $("#fld_tipos").append(
+                    "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
+                );
+                tr.remove();
+            });            
+        });
+
+        $("#fld_complementos").change(function() {
+            let option = $(this).find(":selected");
+            $("#tbl_complementos").children("tbody").append(
+                "<tr id='tr_"+option.data("id")+"' data-id='"+option.data("id")+"' data-nome='"+option.data("nome")+"' data-preco='"+option.data("preco")+"'>"
+                    +   "<td width='50%'>"+option.data("nome")+"</td>"
+                    +   "<td width='30%'>"+option.data("preco")+"</td>"
+                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-complemento'>X</button></center></td>"
+                +"</tr>"
+            );
+            option.remove();
+            $("#tr_" + option.data("id") + " .btn-remover-complemento").click(function() {
+                let tr = $(this).parent().parent().parent();
+                $("#fld_complementos").append(
+                    "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"' data-preco='"+tr.data("preco")+"'>"+tr.data("nome")+"</option>"
+                );
+                tr.remove();
+            });            
+        });
+
+        $("#fld_ingredientes").change(function() {
+            let option = $(this).find(":selected");
+            $("#tbl_ingredientes").children("tbody").append(
+                "<tr id='tr_"+option.data("id")+"' data-id="+option.data("id")+" data-nome="+option.data("nome")+">"
+                    +   "<td width='80%'>"+option.data("nome")+"</td>"
+                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-ingrediente'>X</button></center></td>"
+                +"</tr>"
+            );
+            option.remove();
+            $("#tr_" + option.data("id") + " .btn-remover-ingrediente").click(function() {
+                let tr = $(this).parent().parent().parent();
+                $("#fld_ingredientes").append(
+                    "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
+                );
+                tr.remove();
+            });            
+        });
+
+        $("#btn_salvar").click(function() {
+            if (verifica_dados()) {
+                //processar_dados("INCLUIR");
+            }
+        });
+
+        //$('#tbl_tipos').DataTable({searching: false, info: false, lengthChange: false});
+        //$('#tbl_complementos').DataTable({searching: false, info: false, lengthChange: false});
+        //$('#tbl_ingredientes').DataTable({searching: false, info: false, lengthChange: false});
+
+
     });
     
 </script>

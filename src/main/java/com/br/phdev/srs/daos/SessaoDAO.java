@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -29,7 +30,7 @@ public class SessaoDAO {
     private Connection conexao;
     
     @Autowired
-    SessaoDAO(DataSource dataSource) {
+    SessaoDAO(BasicDataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
         } catch (SQLException e) {

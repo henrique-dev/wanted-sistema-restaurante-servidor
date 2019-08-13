@@ -18,6 +18,7 @@ import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
+import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import java.sql.Connection;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -46,7 +48,7 @@ public class GerenciadorDAO {
     private Connection conexao;
     
     @Autowired
-    GerenciadorDAO(DataSource dataSource) {
+    GerenciadorDAO(BasicDataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
         } catch (SQLException e) {
@@ -235,6 +237,20 @@ public class GerenciadorDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DAOException(200);
+        }
+    }
+    
+    public void cadastrarTokenAlerta(Usuario usuario, String token) throws DAOException {
+        if (usuario == null) {
+            throw new DAOException("Erro", 300);
+        }
+        String sql = "UPDATE websocket_admin SET token=? WHERE id_usuario=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setString(1, token);
+            stmt.setLong(2, usuario.getIdUsuario());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
         }
     }
     

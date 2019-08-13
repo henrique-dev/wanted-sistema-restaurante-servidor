@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -56,10 +57,9 @@ public class ClienteDAO {
     private Connection conexao;
 
     @Autowired
-    ClienteDAO(DataSource dataSource) {
+    ClienteDAO(BasicDataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
-            System.out.println(this.conexao.isClosed());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -273,7 +273,6 @@ public class ClienteDAO {
                 + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                 + " GROUP BY id_genero ORDER BY genero.nome";
-        System.out.println(sql);
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {

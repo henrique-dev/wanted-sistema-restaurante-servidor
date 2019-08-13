@@ -11,8 +11,6 @@
 <script src="${pageContext.request.contextPath}/resources/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="${pageContext.request.contextPath}/resources/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-<!-- Page level custom scripts -->
-<script src="${pageContext.request.contextPath}/resources/js/demo/datatables-demo.js"></script>
 <style>
     table {
         overflow-x: hidden;
@@ -32,7 +30,7 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <table class="table table-bordered" id="dataTable" cellspacing="0">
+            <table class="table table-bordered" id="tbl_itens" cellspacing="0">
                 <thead>
                     <tr>
                         <th>Id</th>
@@ -68,6 +66,8 @@
         $("#menu_produtos").addClass("show");
         $("#menu_produtos").parent(".nav-item").addClass("active");
         $("#menu_item_itens").addClass("active");
+
+        $('#tbl_itens').DataTable();
     });
     
 </script>

@@ -7,8 +7,9 @@
 <div class="form-group">
     <label for="${id}">${label}</label>
     <select class="form-control" id="${id}" name="${name}">
+        <option value="0"></option>
         <c:forEach items="${data}" var="i">
-            <option value="${i.id}">${i.nome}</option>
+            <option data-id="${i.id}" data-nome="${i.nome}" value="${i.id}">${i.nome}</option>
         </c:forEach>
     </select>
 </div>

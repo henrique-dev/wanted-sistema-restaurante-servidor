@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -35,7 +36,7 @@ public class CadastroDAO {
     private Connection conexao;    
 
     @Autowired
-    CadastroDAO(DataSource dataSource) {
+    CadastroDAO(BasicDataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
         } catch (SQLException e) {
@@ -167,7 +168,7 @@ public class CadastroDAO {
         if (cadastro == null) {
             return new MensagemCadastro(101, "Forneça informaçoes válidas para o cadastro");
         }
-        if (cadastro.getNome() == null || cadastro.getNome().trim().isEmpty() || !cadastro.getNome().matches("^[a-zà-ÿ']+(\\s([a-zà-ÿ']\\s?)*[a-zà-ÿ][A-zà-ÿ']+)*$")) {
+        if (cadastro.getNome() == null || cadastro.getNome().trim().isEmpty() || !cadastro.getNome().toLowerCase().matches("^[a-zà-ÿ']+(\\s([a-zà-ÿ']\\s?)*[a-zà-ÿ][A-zà-ÿ']+)*$")) {
             return new MensagemCadastro(101, "Forneça um nome válido");
         }
         if (cadastro.getEmail() != null && cadastro.getEmail().trim().isEmpty() && !cadastro.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")) {
