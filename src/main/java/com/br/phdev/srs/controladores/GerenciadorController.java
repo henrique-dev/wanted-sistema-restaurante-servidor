@@ -19,6 +19,7 @@ import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.TokenAlerta;
+import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class GerenciadorController {
         try {
             Pedido pedido = this.dao.getPedido();
             modelo.addAttribute("pedido", pedido);
-        } catch (DAOException e) {
+        } catch (DAOException | IOException e) {
             e.printStackTrace();
         }
         return "admin/pedido";
