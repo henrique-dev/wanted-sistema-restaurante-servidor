@@ -321,18 +321,16 @@ public class GerenciadorDAO {
         String sql = "UPDATE pedido SET estado=(IF(estado < 4, estado + 1, 4)) WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                    stmt2.setLong(1, pedido.getId());
-                    ResultSet rs2 = stmt2.executeQuery();
-                    if (rs2.next()) {
-                        Notificacao notificacao = new Notificacao();
-                        notificacao.setCliente(new Cliente(rs2.getLong("id_cliente")));
-                        notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + rs.getInt("estado") + "}");
-                        this.adicionarNotificacao(notificacao);
-                    }
+            stmt.execute();
+            sql = "SELECT id_cliente, estado FROM pedido WHERE id_pedido=?";
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                stmt2.setLong(1, pedido.getId());
+                ResultSet rs = stmt2.executeQuery();
+                if (rs.next()) {
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + rs.getInt("estado") + "}");
+                    this.adicionarNotificacao(notificacao);
                 }
             }
         } catch (SQLException e) {
