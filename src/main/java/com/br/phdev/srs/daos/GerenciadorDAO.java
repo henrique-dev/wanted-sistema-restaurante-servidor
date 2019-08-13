@@ -50,25 +50,25 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class GerenciadorDAO {
-    
+
     private Connection conexao;
-    
+
     @Autowired
     GerenciadorDAO(BasicDataSource dataSource) {
         try {
             this.conexao = dataSource.getConnection();
         } catch (SQLException e) {
-            throw new RuntimeException(e); 
+            throw new RuntimeException(e);
         }
     }
-    
+
     public List<Item> getItens() throws DAOException {
         List<Item> itens = new ArrayList<>();
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
                 + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
                 + " FROM item "
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero order by item.id_item, genero.nome";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {            
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Item item = new Item();
@@ -125,7 +125,7 @@ public class GerenciadorDAO {
         }
         return itens;
     }
-    
+
     public List<Genero> getGeneros() throws DAOException {
         List<Genero> generos = new ArrayList<>();
         String sql = "SELECT genero.id_genero, genero.nome, item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
@@ -147,8 +147,8 @@ public class GerenciadorDAO {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return generos;
-    }    
-    
+    }
+
     public List<Tipo> getTipos() throws DAOException {
         List<Tipo> tipos = new ArrayList<>();
         String sql = "SELECT * FROM tipo ORDER BY nome";
@@ -164,8 +164,8 @@ public class GerenciadorDAO {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return tipos;
-    }    
-    
+    }
+
     public List<Complemento> getComplementos() throws DAOException {
         List<Complemento> complementos = new ArrayList<>();
         String sql = "SELECT * FROM complemento ORDER BY nome";
@@ -182,8 +182,8 @@ public class GerenciadorDAO {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return complementos;
-    }    
-    
+    }
+
     public List<Ingrediente> getIngredientes() throws DAOException {
         List<Ingrediente> ingredientes = new ArrayList<>();
         String sql = "SELECT * FROM ingrediente ORDER BY nome";
@@ -199,14 +199,14 @@ public class GerenciadorDAO {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return ingredientes;
-    }    
-    
+    }
+
     public List<Cliente> getClientes() throws DAOException {
         List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT * FROM cliente "
-                    + " LEFT JOIN usuario ON cliente.id_usuario = usuario.id_usuario "
-                    + " WHERE cliente.telefone = usuario.nome AND id_cliente != 0"
-                    + " ORDER BY id_cliente";
+                + " LEFT JOIN usuario ON cliente.id_usuario = usuario.id_usuario "
+                + " WHERE cliente.telefone = usuario.nome AND id_cliente != 0"
+                + " ORDER BY id_cliente";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -222,9 +222,9 @@ public class GerenciadorDAO {
         }
         return clientes;
     }
-    
+
     public List<Pedido> getPedidos() throws DAOException {
-        List<Pedido> pedidos = null;        
+        List<Pedido> pedidos = null;
         String sql = "SELECT * FROM pedido WHERE estado != 4";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -242,13 +242,13 @@ public class GerenciadorDAO {
         }
         return pedidos;
     }
-    
+
     public Pedido getPedido() throws DAOException, IOException {
-        Pedido pedido = null;        
+        Pedido pedido = null;
         String sql = "SELECT * FROM pedido ped"
-                    + " LEFT JOIN endereco ende ON ped.id_endereco=ende.id_endereco "
-                    + " LEFT JOIN cliente cli ON ped.id_cliente=cli.id_cliente "
-                    + " LEFT JOIN formapagamento pag ON ped.id_formapagamento=pag.id_formapagamento ";
+                + " LEFT JOIN endereco ende ON ped.id_endereco=ende.id_endereco "
+                + " LEFT JOIN cliente cli ON ped.id_cliente=cli.id_cliente "
+                + " LEFT JOIN formapagamento pag ON ped.id_formapagamento=pag.id_formapagamento ";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             pedido = new Pedido();
@@ -279,18 +279,18 @@ public class GerenciadorDAO {
         }
         return pedido;
     }
-    
+
     public void removerCliente(Cliente cliente) throws DAOException {
         String sql = "SELECT usuario.id_usuario, usuario.nome, now() data FROM usuario "
-                    + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
-                    + " WHERE id_cliente=?";
+                + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
+                + " WHERE id_cliente=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 sql = "UPDATE usuario set nome=? WHERE id_usuario=?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                    String time = LocalDateTime.parse(rs.getString("data"), 
+                    String time = LocalDateTime.parse(rs.getString("data"),
                             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH:mm"));
                     stmt2.setString(1, rs.getString("nome") + "?" + time);
                     stmt2.setLong(2, rs.getLong("id_usuario"));
@@ -302,7 +302,7 @@ public class GerenciadorDAO {
             throw new DAOException(200);
         }
     }
-    
+
     public void cadastrarTokenAlerta(Usuario usuario, String token) throws DAOException {
         if (usuario == null) {
             throw new DAOException("Erro", 300);
@@ -316,47 +316,29 @@ public class GerenciadorDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public void atualizarEstadoPedido2(Pedido pedido) throws DAOException {
         String sql = "UPDATE pedido SET estado=(IF(estado < 4, estado + 1, 4)) WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
-            stmt.execute();
-            sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
-            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                stmt2.setLong(1, pedido.getId());
-                ResultSet rs = stmt2.executeQuery();
-                if (rs.next()) {
-                    Notificacao notificacao = new Notificacao();
-                    notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + pedido.getEstado() + "}");
-                    this.adicionarNotificacao(notificacao);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, pedido.getId());
+                    ResultSet rs2 = stmt2.executeQuery();
+                    if (rs2.next()) {
+                        Notificacao notificacao = new Notificacao();
+                        notificacao.setCliente(new Cliente(rs2.getLong("id_cliente")));
+                        notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + rs.getInt("estado") + "}");
+                        this.adicionarNotificacao(notificacao);
+                    }
                 }
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     public void adicionarGeneros(List<Genero> generos) throws DAOException {
         String sql = "CALL gerenciador_inserir_genero(?)";
@@ -384,7 +366,7 @@ public class GerenciadorDAO {
                 }
             }
         }
-    }    
+    }
 
     public void adicionarTipos(List<Tipo> tipos) throws DAOException {
         String sql = "CALL gerenciador_inserir_tipo(?)";
@@ -412,7 +394,7 @@ public class GerenciadorDAO {
                 }
             }
         }
-    }    
+    }
 
     public void adicionarComplemento(Complemento complemento) throws DAOException {
         String sql = "CALL gerenciador_inserir_complemento(?,?,?)";
@@ -450,7 +432,7 @@ public class GerenciadorDAO {
         }
         complementos.clear();
         complementos.addAll(complementosParaApagarFoto);
-    }    
+    }
 
     public void adicionarIngrediente(List<Ingrediente> ingredientes) throws DAOException {
         String sql = "CALL gerenciador_inserir_ingrediente(?)";
@@ -478,7 +460,7 @@ public class GerenciadorDAO {
                 }
             }
         }
-    }    
+    }
 
     public void adicionarItem(Item item) throws DAOException {
         try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_inserir_item(?,?,?,?,?,?)")) {
