@@ -60,7 +60,7 @@ public class GerenciadorController {
     }
     
     @GetMapping("gerenciador/pedido")
-    public String pedido(Integer id, Model modelo) {
+    public String pedido(Integer id, Model modelo) { 
         try {
             Pedido pedido = this.dao.getPedido();
             modelo.addAttribute("pedido", pedido);
