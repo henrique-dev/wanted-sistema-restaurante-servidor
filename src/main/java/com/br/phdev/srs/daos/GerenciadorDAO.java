@@ -9,11 +9,14 @@ package com.br.phdev.srs.daos;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
+import com.br.phdev.srs.models.Endereco;
+import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
+import com.br.phdev.srs.models.ItemPedidoFacil;
 import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
@@ -21,6 +24,9 @@ import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -217,6 +223,63 @@ public class GerenciadorDAO {
         return clientes;
     }
     
+    public List<Pedido> getPedidos() throws DAOException {
+        List<Pedido> pedidos = null;        
+        String sql = "SELECT * FROM pedido WHERE estado != 4";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            pedidos = new ArrayList<>();
+            while (rs.next()) {
+                Pedido pedido = new Pedido();
+                pedido.setId(rs.getLong("id_pedido"));
+                pedido.setPrecoTotal(rs.getDouble("precototal"));
+                pedido.setEstado(rs.getInt("estado"));
+                pedidos.add(pedido);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(200);
+        }
+        return pedidos;
+    }
+    
+    public Pedido getPedido() throws DAOException, IOException {
+        Pedido pedido = null;        
+        String sql = "SELECT * FROM pedido ped"
+                    + " LEFT JOIN endereco ende ON ped.id_endereco=ende.id_endereco "
+                    + " LEFT JOIN cliente cli ON ped.id_cliente=cli.id_cliente "
+                    + " LEFT JOIN formapagamento pag ON ped.id_formapagamento=pag.id_formapagamento ";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            pedido = new Pedido();
+            while (rs.next()) {
+                pedido.setId(rs.getLong("id_pedido"));
+                pedido.setPrecoTotal(rs.getDouble("precototal"));
+                pedido.setEstado(rs.getInt("estado"));
+                ObjectMapper mapeador = new ObjectMapper();
+                List<ItemPedidoFacil> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedidoFacil>>() {
+                });
+                pedido.setItens(itens);
+                Cliente cliente = new Cliente();
+                cliente.setNome(rs.getString("nome"));
+                pedido.setCliente(cliente);
+                Endereco endereco = new Endereco();
+                endereco.setLogradouro(rs.getString("logradouro"));
+                endereco.setBairro(rs.getString("bairro"));
+                endereco.setDescricao(rs.getString("ende.descricao"));
+                endereco.setNumero(rs.getString("numero"));
+                pedido.setEndereco(endereco);
+                FormaPagamento formaPagamento = new FormaPagamento();
+                formaPagamento.setDescricao(rs.getString("pag.descricao"));
+                pedido.setFormaPagamento(formaPagamento);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(200);
+        }
+        return pedido;
+    }
+    
     public void removerCliente(Cliente cliente) throws DAOException {
         String sql = "SELECT usuario.id_usuario, usuario.nome, now() data FROM usuario "
                     + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
@@ -248,6 +311,16 @@ public class GerenciadorDAO {
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token);
             stmt.setLong(2, usuario.getIdUsuario());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public void atualizarEstadoPedido2(Pedido pedido) throws DAOException {
+        String sql = "UPDATE pedido SET estado=(IF(estado < 4, estado + 1, 4)) WHERE id_pedido=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, pedido.getId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);

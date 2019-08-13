@@ -48,15 +48,32 @@ public class GerenciadorController {
     }    
 
     @GetMapping("gerenciador/index")
-    public String main() {
+    public String main(Model modelo) {
+        try {
+            List<Pedido> pedidos = this.dao.getPedidos();
+            modelo.addAttribute("pedidos", pedidos);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
         return "admin/index";
+    }
+    
+    @GetMapping("gerenciador/pedido")
+    public String pedido(Integer id, Model modelo) {
+        try {
+            Pedido pedido = this.dao.getPedido();
+            modelo.addAttribute("pedido", pedido);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/pedido";
     }
     
     @GetMapping("gerenciador/itens")
     public String itens(Model modelo) {
         try {
             List<Item> itens = this.dao.getItens();
-            modelo.addAttribute("itens", itens);            
+            modelo.addAttribute("itens", itens);
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -151,6 +168,21 @@ public class GerenciadorController {
         try {
             Admin admin = (Admin) sessao.getAttribute("admin");
             this.dao.cadastrarTokenAlerta(admin, token);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @PostMapping("gerenciador/atualizar-estado-pedido2")
+    @ResponseBody
+    public void atualizarEstadoPedido(Integer id, Model modelo, HttpSession sessao) {
+        try {
+            Admin admin = (Admin) sessao.getAttribute("admin");
+            if (admin != null) {
+                Pedido pedido = new Pedido();
+                pedido.setId(id);
+                this.dao.atualizarEstadoPedido2(pedido);
+            }            
         } catch (DAOException e) {
             e.printStackTrace();
         }

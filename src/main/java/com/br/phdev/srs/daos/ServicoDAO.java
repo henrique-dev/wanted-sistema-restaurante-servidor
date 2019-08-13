@@ -87,6 +87,7 @@ public class ServicoDAO {
                 Pedido pedido = new Pedido();
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
+                pedido.setEstado(rs.getInt("estado"));
                 pedidos.add(pedido);
             }
             notificacaoPedido.setPedidos(pedidos);

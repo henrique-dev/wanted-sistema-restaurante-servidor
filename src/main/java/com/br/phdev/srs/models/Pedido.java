@@ -24,6 +24,7 @@ public class Pedido {
     private List<ItemPedidoFacil> itens;
     private FormaPagamento formaPagamento;    
     private Endereco endereco;
+    private Cliente cliente;
     private int estado;
     private String observacaoEntrega;
 
@@ -120,5 +121,13 @@ public class Pedido {
     public double getFrete() {
         return frete;
     }       
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
     
 }
