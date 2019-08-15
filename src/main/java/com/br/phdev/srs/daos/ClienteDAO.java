@@ -124,7 +124,7 @@ public class ClienteDAO {
     public ListaItens getItensFavoritos(Cliente cliente) throws DAOException {
         ListaItens listaItens = new ListaItens();
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
-                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo, tipo.id_tipo, tipo.nome tipo_nome "
+                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
                 + " FROM itens_favoritos "
                 + " LEFT JOIN item ON itens_favoritos.id_item = item.id_item "
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
