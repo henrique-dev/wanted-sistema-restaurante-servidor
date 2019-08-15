@@ -131,6 +131,7 @@ public class ClienteDAO {
                 + " WHERE itens_favoritos.id_cliente = ? "
                 + " order by item.id_item, genero.nome, tipo.id_tipo";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             List<Item> itens = new ArrayList<>();
             Set<Genero> generos = new HashSet<>();
