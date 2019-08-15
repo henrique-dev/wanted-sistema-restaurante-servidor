@@ -37,7 +37,7 @@ public class SevicoAgendamento {
             while (iterator.hasNext()) {
                 Notificacao notificacao = iterator.next();
                 if (ServicoNotificacao.enviarMensagem(notificacao.getWebsocketId(), notificacao.getMensagem())) {
-                    System.out.println("Mensagem enviada");
+                    //System.out.println("Mensagem enviada");
                 }
             }
         } catch (DAOException e) {
@@ -53,7 +53,7 @@ public class SevicoAgendamento {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(notificacaoPedido);
             if (ServicoNotificacao.enviarMensagem(notificacaoPedido.getWebsocketId(), json)) {
-                System.out.println("Mensagem enviada");
+                //System.out.println("Mensagem enviada");
             }
         } catch (DAOException e) {
             e.printStackTrace();
