@@ -129,7 +129,7 @@ public class ClienteDAO {
                 + " LEFT JOIN item ON itens_favoritos.id_item = item.id_item "
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                 + " WHERE itens_favoritos.id_cliente = ? "
-                + " order by item.id_item, genero.nome, tipo.id_tipo";
+                + " order by item.id_item, genero.nome";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
