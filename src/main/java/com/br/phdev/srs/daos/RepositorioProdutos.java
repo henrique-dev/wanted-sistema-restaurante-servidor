@@ -8,9 +8,11 @@ package com.br.phdev.srs.daos;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Complemento;
+import com.br.phdev.srs.models.ComplementoFacil;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Item;
+import com.br.phdev.srs.models.ItemFacil;
 import com.br.phdev.srs.models.Variacao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,8 +65,20 @@ public class RepositorioProdutos {
         item.setFavorito(item2.isFavorito());
         item.setDescricao(item2.getDescricao());
     }
+    
+    public void preencherItemFacil(Item item) {
+        Item item2 = this.itens.get(item.getId());
+        item.setPreco(item2.getPreco());
+        item.setNome(item2.getNome());
+    }
 
     public void preencherComplemento(Complemento complemento) {
+        Complemento complemento2 = this.complementos.get(complemento.getId());
+        complemento.setPreco(complemento2.getPreco());
+        complemento.setNome(complemento2.getNome());
+    }
+    
+    public void preencherComplementoFacil(Complemento complemento) {
         Complemento complemento2 = this.complementos.get(complemento.getId());
         complemento.setPreco(complemento2.getPreco());
         complemento.setNome(complemento2.getNome());
@@ -74,7 +88,7 @@ public class RepositorioProdutos {
         Variacao variacao2 = this.variacoes.get(variacao.getId());
         variacao.setNome(variacao2.getNome());
         variacao.setPreco(variacao2.getPreco());
-    }
+    }        
 
     public void checarVariacoes(List<GrupoVariacao> gvListCliente, Item itemReferencia) throws DAOIncorrectData {
         List<GrupoVariacao> gvListSistema = this.itens.get(itemReferencia.getId()).getVariacoes();        

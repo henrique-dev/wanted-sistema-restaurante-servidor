@@ -12,6 +12,7 @@ import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Carrinho;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.ConfirmaPedido;
+import com.br.phdev.srs.models.ConfirmaPedidoFacil;
 import com.br.phdev.srs.models.ConfirmacaoPedido;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
@@ -116,6 +117,7 @@ public class ClienteController {
             if (validarSessao(req)) {
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
                 listaItens = new ListaItens();
+                listaItens.setItens(this.dao.getItensFavoritos(cliente).getItens());
                 listaItens.setItensDia(this.dao.getItensDia(cliente).getItensDia());
                 listaItens.setGeneros(this.dao.getGeneros());
             } else {
@@ -347,14 +349,14 @@ public class ClienteController {
     }
 
     @PostMapping("cliente/refazer-pedido")
-    public ResponseEntity<List<ItemPedido>> refazerPedido(HttpSession sessao, HttpServletRequest req, @RequestBody Pedido pedido) throws Exception {
+    public ResponseEntity<ConfirmaPedido> refazerPedido(HttpSession sessao, HttpServletRequest req, @RequestBody Pedido pedido) throws Exception {
         HttpStatus httpStatus = HttpStatus.OK;
-        List<ItemPedido> itens = null;
+        ConfirmaPedido confirmaPedido = null;
         try {
             
             if (validarSessao(req)) {
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                itens = this.dao.refazerPedido(cliente, pedido);
+                confirmaPedido = this.dao.refazerPedido(cliente, pedido);
             } else {
                 httpStatus = HttpStatus.UNAUTHORIZED;
             }
@@ -363,7 +365,7 @@ public class ClienteController {
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(itens, httpHeaders, httpStatus);
+        return new ResponseEntity<>(confirmaPedido, httpHeaders, httpStatus);
     }
 
     @PostMapping(value = "cliente/carrinho")

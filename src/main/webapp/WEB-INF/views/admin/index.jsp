@@ -3,6 +3,8 @@
     Created on : 11 de ago de 2019, 12:46:06
     Author     : Paulo Henrique Goncalves Bacelar <henrique.phgb@gmail.com>
 --%>
+<%@page import="java.util.List"%>
+<%@page import="com.br.phdev.srs.models.Pedido"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <c:import url="core/main.jsp"/>
@@ -13,36 +15,49 @@
 <script src="${pageContext.request.contextPath}/resources/js/spartan-multi-image-picker-min.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js/sockjs.js"></script>
 
-<div id="ctn_index">
-    <div class="row wrapper">
-        <div class="col-12">
-            <div class="p-2 row">
-                <div class="card col-md-12 col-sm-12 p-4">
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12">
-                            <table id="tbl_pedidos" class="table table-bordered" >
-                                <thead>
+<div id="ctn_index" class="container m-0 p-0">
+    <div class="row wrapper m-0 p-0">
+        <div class="col-md-12 col-sm-12 m-0 p-0">
+            <div class="row m-0 p-0">
+                <div class="col-lg-6 col-md-12 col-sm-12 m-0 p-0">
+                    <div class="card m-0 p-0">
+                        <table id="tbl_confirmacoes" class="table table-bordered" >
+                            <thead>
+                                <tr>
+                                    <th width="10%">Id</th>
+                                    <th width="45%">Estado</th>
+                                    <th width="30%">Preço</th>
+                                    <th width="15%">Acao</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12 p-1">
+                    <div class="card p-2">
+                        <table id="tbl_pedidos" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th width="10%">Id</th>
+                                    <th width="45%">Estado</th>
+                                    <th width="30%">Preço</th>
+                                    <th width="15%">Acao</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach items="${pedidos}" var="pedido">
                                     <tr>
-                                        <th width="10%">Id</th>
-                                        <th width="45%">Descricao</th>
-                                        <th width="15%">Estado</th>
-                                        <th width="15%">Preço</th>
-                                        <th width="15%">Acao</th>
+                                        <td><a href='pedido?id=${pedido.id}'>${pedido.id}</a></td>
+                                        <td>${pedido.estado == 1 ? "Pagamento aprovado" : (pedido.estado == 2 ? "Pedido em preparo" : (pedido.estado == 3 ? "Esperando coleta" : pedido.estado == 4 ? "Saiu para entrega" : ""))}</td>
+                                        <td>${pedido.precoTotal}</td>
+                                        <td><center><button data-id='${pedido.id}' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach items="${pedidos}" var="pedido">
-                                        <tr>
-                                            <td>${pedido.id}</td>
-                                            <td><a href='pedido?id=${pedido.id}'>Pedido</a></td>
-                                            <td>${pedido.estado == 1 ? "Pagamento aprovado" : (pedido.estado == 2 ? "Pedido em preparo" : (pedido.estado == 3 ? "Esperando coleta" : pedido.estado == 4 ? "Saiu para entrega" : ""))}</td>
-                                            <td>${pedido.precoTotal}</td>
-                                            <td><center><button data-id='${pedido.id}' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
+                                </c:forEach>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -75,9 +90,8 @@
                     if (pedido.estado == 3) estado = "Esperando coleta";
                     if (pedido.estado == 4) estado = "Saiu para entrega";
                     $("#tbl_pedidos").children("tbody").append(
-                        "<tr id='tr_"+pedido["id"]+"'>"
-                        +   "<td>"+pedido["id"]+"</td>"
-                        +   "<td><a href='pedido?id="+pedido["id"]+"'>Pedido</a></td>"
+                        "<tr id='tr_"+pedido["id"]+"' style='height: 50px'>"
+                        +   "<td><a href='pedido?id="+pedido["id"]+"'>"+pedido["id"]+"</a></td>"
                         +   "<td>"+estado+"</td>"
                         +   "<td>"+(parseFloat(pedido["precoTotal"]).toFixed(2))+"</td>"                        
                         +   "<td><center><button data-id='"+pedido["id"]+"' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>"
@@ -87,17 +101,29 @@
                         atualizarEstadoPedido($(this).data("id"));
                     });
                 }
+                let qtd = 5 - (pedidos.length % 5);
+                qtd = qtd == 5 ? 0 : qtd;
+                for (let i=0; i<qtd; i++) {
+                    $("#tbl_pedidos").children("tbody").append("<tr style='height: 50px'><td colspan=4></td></tr>");
+                }
             } else {
                 $("#tbl_pedidos").children("tbody").append(
                     "<tr>"                    
                     +   "<td colspan='5'>Sem pedidos</td>"                    
                     +"<tr>"
                 );
+                for (let i=0; i<4; i++) {
+                    $("#tbl_pedidos").children("tbody").append("<tr style='height: 50px'><td colspan=4></td></tr>");
+                }
             }
         }
 
+        
+    }
+
+    function carregarDataTable() {
         if ( _ja_carregou_datatable == false ) {            
-            _ja_carregou_datatable = true;  
+            _ja_carregou_datatable = true;
             $('#tbl_pedidos').DataTable({
                 responsive: true,
                 fixedColumns: true,
@@ -117,14 +143,33 @@
                     },
                 lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
             });
+            $('#tbl_confirmacoes').DataTable({
+                responsive: true,
+                fixedColumns: true,
+                searching: false,
+                lengthChange: false,
+                language: {
+                    lengthMenu: "Exibir _MENU_ linhas por página",
+                    zeroRecords: "Sem confirmações",
+                    info: "Exibindo pagina _PAGE_ de _PAGES_",
+                    infoEmpty: "Vazio",
+                    infoFiltered: "(filtrados de _MAX_ registros)",
+                    search: "Critério:",
+                    paginate: {
+                            next: "Próximo",
+                            previous: "Anterior"
+                        }
+                    },
+                lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
+            });
         } else {
             //$("#tbl_processo").DataTable().page('first').draw( 'page' );
-        } 
+        }
     }
 
     function connect() {
-        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        //sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
             processarRetornoWebSocket(e);
         };
@@ -157,10 +202,11 @@
     }
     
     $(document).ready(function() {
-       carregarTabela();
-       connect();
+        carregarDataTable();
+        carregarTabela();       
+        connect();
 
-       $(".btn-atualizar-estado").click(function() {
+        $(".btn-atualizar-estado").click(function() {
             atualizarEstadoPedido($(this).data("id"));
         });
     });

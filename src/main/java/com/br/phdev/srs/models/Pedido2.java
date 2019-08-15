@@ -6,6 +6,7 @@
  */
 package com.br.phdev.srs.models;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -18,12 +19,38 @@ public class Pedido2 {
     private long id;
     private double precoTotal;
     private String data;
-    private List<ItemPedidoFacil> itens;
+    private List<ItemPedido> itens;
     private FormaPagamento formaPagamento;    
     private Endereco endereco;
     private String status;
     private String observacaoEntrega;
     private double frete;
+    
+    public void calcularPedido() {
+        BigDecimal valorTotal = new BigDecimal("0.00");
+        for (ItemPedido ip : this.getItens()) {            
+            BigDecimal valorItem = new BigDecimal("0.00");
+            if (ip.getComplementos() != null) {
+                for (Complemento c : ip.getComplementos()) {
+                    valorItem = valorItem.add(new BigDecimal(String.valueOf(c.getPreco())));
+                }
+            }
+            if (ip.getVariacoes() != null) {
+                List<GrupoVariacao> variacoes = ip.getVariacoes();                
+                for (GrupoVariacao gv : variacoes) {
+                    if (gv.getVariacoes() != null) {
+                        for (Variacao v : gv.getVariacoes()) {
+                            valorItem = valorItem.add(new BigDecimal(String.valueOf(v.getPreco())));
+                        }
+                    }
+                }
+            }
+            valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
+            ip.setPrecoTotal(valorItem.doubleValue());
+            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
+        }
+        this.setPrecoTotal(valorTotal.doubleValue());
+    }
 
     public long getId() {
         return id;
@@ -49,11 +76,11 @@ public class Pedido2 {
         this.data = data;
     }
 
-    public List<ItemPedidoFacil> getItens() {
+    public List<ItemPedido> getItens() {
         return itens;
     }
 
-    public void setItens(List<ItemPedidoFacil> itens) {
+    public void setItens(List<ItemPedido> itens) {
         this.itens = itens;
     }
 

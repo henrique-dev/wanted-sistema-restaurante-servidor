@@ -12,6 +12,7 @@ package com.br.phdev.srs.models;
 public class ItemPedidoFacil extends ItemFacil {
 
     private int quantidade;
+    private Double precoTotal;
 
     public ItemPedidoFacil() {
 
@@ -29,5 +30,13 @@ public class ItemPedidoFacil extends ItemFacil {
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
     }
+
+    public Double getPrecoTotal() {
+        return precoTotal;
+    }
+
+    public void setPrecoTotal(Double precoTotal) {
+        this.precoTotal = precoTotal;
+    }        
 
 }

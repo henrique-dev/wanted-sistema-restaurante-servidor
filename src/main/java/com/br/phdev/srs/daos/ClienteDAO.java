@@ -12,6 +12,7 @@ import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.ComplementoFacil;
 import com.br.phdev.srs.models.ConfirmaPedido;
+import com.br.phdev.srs.models.ConfirmaPedidoFacil;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -708,10 +709,49 @@ public class ClienteDAO {
                 }
             }
             valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
+            ip.setPrecoTotal(valorItem.doubleValue());
             valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
         }
         confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
         return confirmaPedido;
+    }
+    
+    private void inserirPrecosInterno(ConfirmaPedido confirmaPedido) throws DAOException, DAOIncorrectData {
+        if (confirmaPedido.getItens() == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (confirmaPedido.getItens().isEmpty()) {
+            throw new DAOIncorrectData(301);
+        }
+        RepositorioProdutos repositorioPrecos = RepositorioProdutos.getInstancia();
+        repositorioPrecos.carregar(this.conexao);
+        BigDecimal valorTotal = new BigDecimal("0.00");
+        for (ItemPedido ip : confirmaPedido.getItens()) {
+            repositorioPrecos.preencherItemFacil(ip);
+            BigDecimal valorItem = new BigDecimal("0.00");
+            if (ip.getComplementos() != null) {
+                for (Complemento c : ip.getComplementos()) {
+                    repositorioPrecos.preencherComplementoFacil(c);
+                    valorItem = valorItem.add(new BigDecimal(String.valueOf(c.getPreco())));
+                }
+            }
+            if (ip.getVariacoes() != null) {
+                List<GrupoVariacao> variacoes = ip.getVariacoes();
+                repositorioPrecos.checarVariacoes(variacoes, ip);
+                for (GrupoVariacao gv : variacoes) {
+                    if (gv.getVariacoes() != null) {
+                        for (Variacao v : gv.getVariacoes()) {
+                            repositorioPrecos.preecherVariacao(v);
+                            valorItem = valorItem.add(new BigDecimal(String.valueOf(v.getPreco())));
+                        }
+                    }
+                }
+            }
+            valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
+            ip.setPrecoTotal(valorItem.doubleValue());
+            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
+        }
+        confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
     }
 
     public List<ItemPedido> recuperarPrePredido(Cliente cliente) throws DAOException {
@@ -791,33 +831,34 @@ public class ClienteDAO {
         }
     }
 
-    public List<ItemPedido> refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {
-        List<ItemPedido> itens = null;
+    public ConfirmaPedido refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {        
+        ConfirmaPedido confirmaPedido = new ConfirmaPedido();
         // recuperar_itens_pedido
         String sql = "SELECT itens, precototal, frete FROM pedido WHERE id_cliente = ? AND id_pedido = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, pedido.getId());
             ResultSet rs = stmt.executeQuery();
-            List<ItemPedidoFacil> itemPedidos = new ArrayList<>();
+            List<ItemPedido> itemPedidos = new ArrayList<>();
             if (rs.next()) {
                 ObjectMapper mapeador = new ObjectMapper();
                 itemPedidos = mapeador.readValue(rs.getString("itens"),
-                        new TypeReference<List<ItemPedidoFacil>>() {
+                        new TypeReference<List<ItemPedido>>() {
                 });
+                confirmaPedido.setItens(itemPedidos);
+                inserirPrecosInterno(confirmaPedido);
             }
             if (!itemPedidos.isEmpty()) {
                 RepositorioProdutos.getInstancia().carregar(this.conexao);
-                itens = new ArrayList<>();
-                for (ItemPedidoFacil ipf : itemPedidos) {
+                for (ItemPedido ipf : confirmaPedido.getItens()) {
                     ItemPedido ip = new ItemPedido();
                     ip.setId(ipf.getId());
                     getItem(ip, cliente);
                     ip.setQuantidade(ipf.getQuantidade());
                     for (Complemento c : ip.getComplementos()) {
-                        for (ComplementoFacil cf : ipf.getComplementos()) {
-                            if (c.getId() == cf.getId()) {
-                                c.setCheck(true);
+                        for (Complemento cf : ipf.getComplementos()) {                            
+                            if (c.getId() == cf.getId()) {                                
+                                cf.setCheck(true);
                             }
                         }
                     }
@@ -826,7 +867,7 @@ public class ClienteDAO {
                             for (GrupoVariacao gpf : ipf.getVariacoes()) {
                                 for (Variacao vf : gpf.getVariacoes()) {
                                     if (v.getId() == vf.getId()) {
-                                        v.setCheck(true);
+                                        vf.setCheck(true);
                                     }
                                 }
                             }
@@ -836,17 +877,16 @@ public class ClienteDAO {
                         i.setCheck(false);
                         for (Ingrediente i2 : ipf.getIngredientes()) {
                             if (i.getId() == i2.getId()) {
-                                i.setCheck(true);
+                                i2.setCheck(true);
                             }
                         }
                     }
-                    itens.add(ip);
                 }
             }
         } catch (SQLException | IOException e) {
             throw new DAOException(e, 200);
         }
-        return itens;
+        return confirmaPedido;
     }
 
     synchronized public boolean inserirPrePedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
@@ -1011,25 +1051,26 @@ public class ClienteDAO {
                 endereco.setId(rs.getObject("id_endereco") != null ? rs.getLong("id_endereco") : -1);
                 endereco.setDescricao(rs.getString("endereco_descricao"));
                 pedido.setEndereco(endereco);
-                pedido.setFrete(rs.getDouble("frete"));
+                pedido.setFrete(rs.getDouble("frete"));                
                 switch (rs.getInt("estado")) {
                     case 1:
-                        pedido.setStatus("Conferido");
+                        pedido.setStatus("Pagamento aprovado");
                         break;
                     case 2:
-                        pedido.setStatus("Em produção");
+                        pedido.setStatus("Pedido em preparo");
                         break;
                     case 3:
-                        pedido.setStatus("Saiu pra entrega");
+                        pedido.setStatus("Esperando coleta");
                         break;
                     case 4:
-                        pedido.setStatus("Entregue");
+                        pedido.setStatus("Saiu para entrega");
                         break;
                 }
                 ObjectMapper mapeador = new ObjectMapper();
-                List<ItemPedidoFacil> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedidoFacil>>() {
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
                 });
                 pedido.setItens(itens);
+                pedido.calcularPedido();
                 pedidos.add(pedido);
             }
         } catch (SQLException e) {
@@ -1076,9 +1117,10 @@ public class ClienteDAO {
                 pedido.setEndereco(endereco);
 
                 ObjectMapper mapeador = new ObjectMapper();
-                List<ItemPedidoFacil> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedidoFacil>>() {
-                });
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
+                });                
                 pedido.setItens(itens);
+                pedido.calcularPedido();
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
