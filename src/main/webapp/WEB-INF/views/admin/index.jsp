@@ -19,8 +19,8 @@
     <div class="row wrapper m-0 p-0">
         <div class="col-md-12 col-sm-12 m-0 p-0">
             <div class="row m-0 p-0">
-                <div class="col-lg-6 col-md-12 col-sm-12 m-0 p-0">
-                    <div class="card m-0 p-0">
+                <div class="col-lg-6 col-md-12 col-sm-12 p-1">
+                    <div class="card p-2">
                         <table id="tbl_confirmacoes" class="table table-bordered" >
                             <thead>
                                 <tr>
@@ -168,8 +168,8 @@
     }
 
     function connect() {
-        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        //sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
             processarRetornoWebSocket(e);
         };
