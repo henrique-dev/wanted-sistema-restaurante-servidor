@@ -74,6 +74,7 @@ public class SessaoController {
         Mensagem mensagem = new Mensagem();
         try {
             String senhaUsuario = usuario.getSenhaUsuario();
+            String nomeUsuario = usuario.getNomeUsuario();
             Cliente cliente = this.dao.autenticar(usuario);
             if (cliente != null) {
                 this.dao.gerarSessao(usuario, sessao.getId());
@@ -83,7 +84,7 @@ public class SessaoController {
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.add("session-id", sessao.getId());
-                httpHeaders.add("h-usuario", new ServicoGeracaoToken().gerarSHA256(usuario.getNomeUsuario()));
+                httpHeaders.add("h-usuario", new ServicoGeracaoToken().gerarSHA256(nomeUsuario));
                 httpHeaders.add("h-segredo", new ServicoGeracaoToken().gerarSHA256(senhaUsuario));
                 return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
             } else {
