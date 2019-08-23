@@ -84,6 +84,31 @@ public class GerenciadorController {
         return "admin/produtos/itens";
     }
     
+    @GetMapping("gerenciador/item")
+    public String item(String opcao, Integer id, Model modelo) {        
+        try {
+            switch(opcao.toUpperCase()) {
+                case "EDITAR":
+                    List<Item> itens = this.dao.getItens();
+                    modelo.addAttribute("listaItens", itens);
+                    break;
+                case "NOVO":
+                    List<Genero> generos = this.dao.getGeneros();
+                    List<Tipo> tipos = this.dao.getTipos();
+                    List<Complemento> complementos = this.dao.getComplementos();
+                    List<Ingrediente> ingredientes = this.dao.getIngredientes();                    
+                    modelo.addAttribute("generos", generos);
+                    modelo.addAttribute("tipos", tipos);
+                    modelo.addAttribute("complementos", complementos);
+                    modelo.addAttribute("ingredientes", ingredientes);
+                    break;
+            }            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/item";
+    }
+    
     @PostMapping("gerenciador/adicionar-item")
     @ResponseBody
     public void adicionarItem(String nome, String descricao, String preco, String tipos, String genero,
@@ -138,32 +163,7 @@ public class GerenciadorController {
             e.printStackTrace();
         }
         return "admin/produtos/ingredientes";
-    }
-    
-    @GetMapping("gerenciador/item")
-    public String item(String opcao, Integer id, Model modelo) {        
-        try {
-            switch(opcao.toUpperCase()) {
-                case "EDITAR":
-                    List<Item> itens = this.dao.getItens();
-                    modelo.addAttribute("listaItens", itens);
-                    break;
-                case "NOVO":
-                    List<Genero> generos = this.dao.getGeneros();
-                    List<Tipo> tipos = this.dao.getTipos();
-                    List<Complemento> complementos = this.dao.getComplementos();
-                    List<Ingrediente> ingredientes = this.dao.getIngredientes();                    
-                    modelo.addAttribute("generos", generos);
-                    modelo.addAttribute("tipos", tipos);
-                    modelo.addAttribute("complementos", complementos);
-                    modelo.addAttribute("ingredientes", ingredientes);
-                    break;
-            }            
-        } catch (DAOException e) {
-            e.printStackTrace();
-        }
-        return "admin/produtos/item";
-    }
+    }        
     
     @GetMapping("gerenciador/clientes")
     public String clientes(Model modelo) {
