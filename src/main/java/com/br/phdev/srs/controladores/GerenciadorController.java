@@ -14,12 +14,14 @@ import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
+import com.br.phdev.srs.models.Item2;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -79,6 +82,29 @@ public class GerenciadorController {
             e.printStackTrace();
         }
         return "admin/produtos/itens";
+    }
+    
+    @PostMapping("gerenciador/adicionar-item")
+    @ResponseBody
+    public void adicionarItem(String nome, String descricao, String preco, String tipos, String genero,
+            String ingredientes, String complementos, MultipartFile arquivo0, MultipartFile arquivo1,
+            MultipartFile arquivo2, MultipartFile arquivo3) {
+        try {
+            Item2 item = new Item2();
+            item.setNome(nome);
+            item.setDescricao(descricao);
+            item.setPreco(Double.parseDouble(preco));
+            item.setGenero(new Genero(Long.parseLong(genero)));
+            List<MultipartFile> arquivos = new ArrayList<>();
+            if (arquivo0 != null) arquivos.add(arquivo0);
+            if (arquivo1 != null) arquivos.add(arquivo1);
+            if (arquivo2 != null) arquivos.add(arquivo2);
+            if (arquivo3 != null) arquivos.add(arquivo3);
+            item.setFotos(arquivos);
+            this.dao.adicionarItem(item);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     @GetMapping("gerenciador/generos")

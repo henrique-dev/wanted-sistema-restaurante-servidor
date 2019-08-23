@@ -154,9 +154,11 @@
     $("#ctn_conteudo").append($("#ctn_index"));    
     
     function verifica_dados() {
+        let ok = true;
         let nome = $("#fld_nome").val();
         let descricao = $("#fld_descricao").val();
         let preco = $("#fld_preco").val();
+        let genero = $('#fld_genero').find(":selected").val();        
         let tipos = new Array();
         $("#tbl_tipos").children("tbody").find("tr").each(function() {
             tipos.push($(this).data("id"));
@@ -172,16 +174,41 @@
         let arquivos = new Array();
         $("#input-arquivo-1").find("input").each(function() {
             arquivos.push($(this)[0].files[0]);
-        })
-        //console.log(json);
+        });
+        if (ok) {
+            let formData = new FormData();
+            formData.append("nome", nome);
+            formData.append("descricao", descricao);
+            formData.append("preco", preco);
+            formData.append("genero", genero);
+            formData.append("tipos", JSON.stringify({tipos : tipos}));
+            formData.append("complementos", JSON.stringify({complementos : complementos}));
+            formData.append("ingredientes", JSON.stringify({ingredientes : ingredientes}));
+            for (let i=0; i<arquivos.length; i++) {
+                formData.append("arquivo" + i, arquivos[i]);
+            }
+            return formData;
+            //formData.append("tipos", JSON.stringify({tipos : tipos}));
+        } else {
+            return null;
+        }
         
     }
     
-    function processar_dados(aAcao, aComplemento) {
-        
+    function processar_dados(dados) {        
+        $.ajax({
+            type: "POST",
+            url: "adicionar-item",
+            data: dados,
+            processData: false,
+            contentType: false,
+            success: function(dadosIn) {
+                console.log(dadosIn);
+            }
+        });
     }
     
-    function processarRetornoAjax(aAcao, aDados, aComplemento) {
+    function processarRetornoAjax(dados) {
         
     }
     
@@ -264,8 +291,9 @@
         });
 
         $("#btn_salvar").click(function() {
-            if (verifica_dados()) {
-                //processar_dados("INCLUIR");
+            let dados = verifica_dados();
+            if (dados != null) {
+                processar_dados(dados);
             }
         });
 

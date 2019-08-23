@@ -7,6 +7,7 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.exceptions.StorageException;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Endereco;
@@ -16,6 +17,7 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
+import com.br.phdev.srs.models.Item2;
 import com.br.phdev.srs.models.ItemPedidoFacil;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
@@ -32,6 +34,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,6 +44,7 @@ import java.util.Set;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -331,9 +335,9 @@ public class GerenciadorDAO {
                 if (rs.next()) {
                     Notificacao notificacao = new Notificacao();
                     notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() 
-                            + ", \"estado_id\":" + rs.getInt("estado") 
-                            + ", \"estado_descricao\":" + rs.getString("pedido_estado.descricao") 
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId()
+                            + ", \"estado_id\":" + rs.getInt("estado")
+                            + ", \"estado_descricao\":" + rs.getString("pedido_estado.descricao")
                             + ", \"estado_controle\":" + rs.getString("pedido_estado.controle") + "}");
                     this.adicionarNotificacao(notificacao);
                 }
@@ -342,6 +346,50 @@ public class GerenciadorDAO {
             throw new DAOException(e, 200);
         }
     }
+
+    public void adicionarItem(Item2 item) {
+        String sql = "INSERT INTO item (nome, descricao, preco, id_genero, modificavel, modificavel_ingrediente, tempo_preparo) "
+                + " values (?,?,?,?,?,?,?)";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, item.getNome());
+            stmt.setString(2, item.getDescricao());
+            stmt.setDouble(3, item.getPreco());
+            stmt.setLong(4, item.getGenero().getId());
+            stmt.setBoolean(5, item.isModificavel());
+            stmt.setBoolean(6, item.isModificavelIngrediente());
+            //stmt.setString(7, item.getTempoPreparo());
+            stmt.setString(7, "");
+            stmt.execute();
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                Long idItem = rs.getLong(1);
+                stmt.close();
+                ServicoArmazenamento sa = new ServicoArmazenamento();
+                for (MultipartFile file : item.getFotos()) {
+                    sql = "INSERT INTO arquivo VALUES (default, null)";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                        stmt2.execute();
+                        ResultSet rs2 = stmt2.getGeneratedKeys();
+                        if (rs2.next()) {
+                            sa.salvar(file, rs2.getLong(1));
+                            sql = "INSERT INTO item_arquivo VALUES (?,?)";
+                            try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
+                                stmt3.setLong(1, idItem);
+                                stmt3.setLong(2, rs2.getLong(1));
+                                stmt3.execute();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException | StorageException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    
+    
 
     public void adicionarGeneros(List<Genero> generos) throws DAOException {
         String sql = "CALL gerenciador_inserir_genero(?)";
@@ -465,7 +513,7 @@ public class GerenciadorDAO {
         }
     }
 
-    public void adicionarItem(Item item) throws DAOException {
+    public void __adicionarItem(Item item) throws DAOException {
         try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_inserir_item(?,?,?,?,?,?)")) {
             stmt.setString(1, item.getNome());
             stmt.setDouble(2, item.getPreco());

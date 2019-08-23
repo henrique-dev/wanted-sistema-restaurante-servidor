@@ -13,6 +13,9 @@ import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Usuario;
+import com.br.phdev.srs.utils.ServicoGeracaoToken;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -78,7 +81,9 @@ public class SessaoController {
                 sessao.setAttribute("cliente", cliente);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.add("stk", sessao.getId());
+                httpHeaders.add("session-id", sessao.getId());
+                httpHeaders.add("h-usuario", new ServicoGeracaoToken().gerarSHA256(usuario.getNomeUsuario()));
+                httpHeaders.add("h-segredo", new ServicoGeracaoToken().gerarSHA256(usuario.getSenhaUsuario()));
                 return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
             } else {
                 mensagem.setCodigo(101);
@@ -88,6 +93,8 @@ public class SessaoController {
             e.printStackTrace();
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

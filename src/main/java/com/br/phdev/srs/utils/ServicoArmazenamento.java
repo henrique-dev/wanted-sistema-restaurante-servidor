@@ -39,6 +39,7 @@ public class ServicoArmazenamento {
                 fos.flush();
             }            
         } catch (IOException e) {
+            System.out.println("Falha ao gravar arquivo no disco");
             throw new StorageException("Falha ao gravar arquivo no disco", e);
         }        
     }
