@@ -21,8 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.servlet.http.HttpSession;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -98,7 +97,7 @@ public class CadastroDAO {
             String sql = "";
             switch (mensagem.getCodigo()) {
                 case 105:
-                    sql = "INSERT INTO usuario VALUES (default, ?, '', null, ?, 0, 0, now())";
+                    sql = "INSERT INTO usuario VALUES (default, ?, '', null, ?, null, null, 0, 0, now())";
                     try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                         String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
                         stmt.setString(1, cadastro.getTelefone());                        
@@ -159,7 +158,7 @@ public class CadastroDAO {
         return null;
     }
 
-    public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro, HttpSession sessao) throws DAOException {
+    public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
         MensagemCadastro mensagem = this.verificarNumero(cadastro);
         if (!(mensagem.getCodigo() == 104 || mensagem.getCodigo() == 106)) {
             return mensagem;
@@ -182,15 +181,21 @@ public class CadastroDAO {
         }
         
         try {
-            String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true WHERE usuario.id_usuario = ?";
+            String tokenLoginUsuario = new ServicoGeracaoToken().gerarSHA256(cadastro.getTelefone());
+            String tokenLoginSegredo = new ServicoGeracaoToken().gerarSHA256(cadastro.getSenhaUsuario());
+            
+            String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true "
+                    + " token_login_usuario = ?, token_usuario_segredo = ? "
+                    + " WHERE usuario.id_usuario = ?";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
                 stmt.setString(1, cadastro.getSenhaUsuario());
-                stmt.setLong(2, usuario.getIdUsuario());                
+                stmt.setString(2, tokenLoginUsuario);
+                stmt.setString(3, tokenLoginSegredo);
+                stmt.setLong(4, usuario.getIdUsuario());                
                 stmt.execute();
             }
             sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                Cliente cliente = null;
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, usuario.getNomeUsuario());
@@ -214,7 +219,7 @@ public class CadastroDAO {
                 mensagem.setDescricao("Cadastro concluído");
             }
             
-        } catch (SQLException e) {
+        } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
             e.printStackTrace();
             throw new DAOException(e, 200);
         }

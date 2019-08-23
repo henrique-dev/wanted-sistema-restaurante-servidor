@@ -13,7 +13,10 @@ import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Usuario;
+import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import com.br.phdev.srs.utils.ServicoSms;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -100,7 +103,9 @@ public class CadastroController {
         try {
             Usuario usuario = (Usuario) sessao.getAttribute("usuario");
             if (usuario != null) {
-                mensagem = this.dao.cadastrarCliente(usuario, cadastro, sessao);
+                mensagem = this.dao.cadastrarCliente(usuario, cadastro);
+                httpHeaders.add("h-usuario", new ServicoGeracaoToken().gerarSHA256(cadastro.getTelefone()));
+                httpHeaders.add("h-segredo", new ServicoGeracaoToken().gerarSHA256(cadastro.getSenhaUsuario()));
                 if (mensagem.getCodigo() == 100) {
                     Cliente cliente = this.dao.getCliente(usuario);
                     if (cliente != null) {
@@ -113,6 +118,8 @@ public class CadastroController {
             }
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);

@@ -8,11 +8,11 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
-import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.NotificacaoPedido;
 import com.br.phdev.srs.models.Pedido;
+import com.br.phdev.srs.models.Pedido2;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,8 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -79,15 +78,17 @@ public class ServicoDAO {
     public NotificacaoPedido listarPedidos() throws DAOException {
         NotificacaoPedido notificacaoPedido = new NotificacaoPedido();
         notificacaoPedido.setTipo("atualizacao");
-        String sql = "SELECT * FROM pedido WHERE estado != 4";
+        String sql = "SELECT * FROM pedido "
+                + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
+                + " WHERE pedido_estado.controle != 'FINAL'";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            List<Pedido> pedidos = new ArrayList<>();
+            List<Pedido2> pedidos = new ArrayList<>();
             while (rs.next()) {
-                Pedido pedido = new Pedido();
+                Pedido2 pedido = new Pedido2();
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
-                pedido.setEstado(rs.getInt("estado"));
+                pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 pedidos.add(pedido);
             }
             notificacaoPedido.setPedidos(pedidos);

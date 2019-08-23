@@ -51,7 +51,7 @@
                                 <c:forEach items="${pedidos}" var="pedido">
                                     <tr>
                                         <td><a href='pedido?id=${pedido.id}'>${pedido.id}</a></td>
-                                        <td>${pedido.estado == 1 ? "Pagamento aprovado" : (pedido.estado == 2 ? "Pedido em preparo" : (pedido.estado == 3 ? "Esperando coleta" : pedido.estado == 4 ? "Saiu para entrega" : ""))}</td>
+                                        <td>${pedido.status}</td>
                                         <td>${pedido.precoTotal}</td>
                                         <td><center><button data-id='${pedido.id}' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>
                                     </tr>
@@ -84,15 +84,10 @@
             if (pedidos.length > 0) {
                 for (let i=0; i<pedidos.length; i++) {
                     let pedido = pedidos[i];
-                    let estado = "";
-                    if (pedido.estado == 1) estado = "Pagamento aprovado";
-                    if (pedido.estado == 2) estado = "Pedido em preparo";
-                    if (pedido.estado == 3) estado = "Esperando coleta";
-                    if (pedido.estado == 4) estado = "Saiu para entrega";
                     $("#tbl_pedidos").children("tbody").append(
                         "<tr id='tr_"+pedido["id"]+"' style='height: 50px'>"
                         +   "<td><a href='pedido?id="+pedido["id"]+"'>"+pedido["id"]+"</a></td>"
-                        +   "<td>"+estado+"</td>"
+                        +   "<td>"+pedido.status+"</td>"
                         +   "<td>"+(parseFloat(pedido["precoTotal"]).toFixed(2))+"</td>"                        
                         +   "<td><center><button data-id='"+pedido["id"]+"' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>"
                         +"<tr>"
@@ -169,7 +164,7 @@
 
     function connect() {
         var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        //sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        //var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
             processarRetornoWebSocket(e);
         };

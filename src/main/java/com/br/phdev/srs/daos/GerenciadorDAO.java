@@ -17,9 +17,9 @@ import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.ItemPedidoFacil;
-import com.br.phdev.srs.models.ListaItens;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
+import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Variacao;
@@ -35,12 +35,10 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -223,17 +221,19 @@ public class GerenciadorDAO {
         return clientes;
     }
 
-    public List<Pedido> getPedidos() throws DAOException {
-        List<Pedido> pedidos = null;
-        String sql = "SELECT * FROM pedido WHERE estado != 4";
+    public List<Pedido2> getPedidos() throws DAOException {
+        List<Pedido2> pedidos = null;
+        String sql = "SELECT * FROM pedido "
+                + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
+                + " WHERE pedido_estado.controle != 'FINAL'";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             pedidos = new ArrayList<>();
             while (rs.next()) {
-                Pedido pedido = new Pedido();
+                Pedido2 pedido = new Pedido2();
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
-                pedido.setEstado(rs.getInt("estado"));
+                pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 pedidos.add(pedido);
             }
         } catch (SQLException e) {
@@ -318,18 +318,23 @@ public class GerenciadorDAO {
     }
 
     public void atualizarEstadoPedido2(Pedido pedido) throws DAOException {
-        String sql = "UPDATE pedido SET estado=(IF(estado < 4, estado + 1, 4)) WHERE id_pedido=?";
+        String sql = "UPDATE pedido SET estado=(IF(estado < 11, estado + 1, 11)) WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             stmt.execute();
-            sql = "SELECT id_cliente, estado FROM pedido WHERE id_pedido=?";
+            sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle FROM pedido "
+                    + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
+                    + " WHERE id_pedido=? ";
             try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                 stmt2.setLong(1, pedido.getId());
                 ResultSet rs = stmt2.executeQuery();
                 if (rs.next()) {
                     Notificacao notificacao = new Notificacao();
                     notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", \"estado\":" + rs.getInt("estado") + "}");
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() 
+                            + ", \"estado_id\":" + rs.getInt("estado") 
+                            + ", \"estado_descricao\":" + rs.getString("pedido_estado.descricao") 
+                            + ", \"estado_controle\":" + rs.getString("pedido_estado.controle") + "}");
                     this.adicionarNotificacao(notificacao);
                 }
             }

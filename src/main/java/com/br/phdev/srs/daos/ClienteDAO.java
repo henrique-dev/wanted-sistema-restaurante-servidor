@@ -12,7 +12,6 @@ import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.ComplementoFacil;
 import com.br.phdev.srs.models.ConfirmaPedido;
-import com.br.phdev.srs.models.ConfirmaPedidoFacil;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -43,8 +42,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -870,7 +868,7 @@ public class ClienteDAO {
         return confirmaPedido;
     }
 
-    synchronized public boolean inserirPrePedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
+    public boolean inserirPrePedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
@@ -903,7 +901,7 @@ public class ClienteDAO {
         return false;
     }
 
-    synchronized public void inserirPedido(Pedido pedido, Cliente cliente) throws DAOException {
+    public void inserirPedido(Pedido pedido, Cliente cliente) throws DAOException {
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
@@ -927,7 +925,7 @@ public class ClienteDAO {
         }
     }
 
-    synchronized public boolean atualizarTokenPrePedido(String idPagamento, String idComprador) throws DAOException {
+    public boolean atualizarTokenPrePedido(String idPagamento, String idComprador) throws DAOException {
         if (idPagamento == null) {
             throw new DAOIncorrectData(300);
         }
@@ -970,7 +968,7 @@ public class ClienteDAO {
         return null;
     }
 
-    synchronized public void inserirPedidoDePrePedido(String idPagamento) throws DAOException {
+    public void inserirPedidoDePrePedido(String idPagamento) throws DAOException {
         if (idPagamento == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1010,8 +1008,9 @@ public class ClienteDAO {
             pagina *= 10;
         }
         String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, pedido.frete, "
-                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao "
                 + " FROM pedido "
+                + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                 + " WHERE pedido.id_cliente = ? "
@@ -1033,20 +1032,8 @@ public class ClienteDAO {
                 endereco.setDescricao(rs.getString("endereco_descricao"));
                 pedido.setEndereco(endereco);
                 pedido.setFrete(rs.getDouble("frete"));                
-                switch (rs.getInt("estado")) {
-                    case 1:
-                        pedido.setStatus("Pagamento aprovado");
-                        break;
-                    case 2:
-                        pedido.setStatus("Pedido em preparo");
-                        break;
-                    case 3:
-                        pedido.setStatus("Esperando coleta");
-                        break;
-                    case 4:
-                        pedido.setStatus("Saiu para entrega");
-                        break;
-                }
+                System.out.println(rs.getString("pedido_estado.descricao"));
+                pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 ObjectMapper mapeador = new ObjectMapper();
                 List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
                 });
@@ -1062,8 +1049,9 @@ public class ClienteDAO {
 
     public void getPedido(Pedido2 pedido, Cliente cliente) throws DAOException, IOException {
         String sql = "SELECT pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
-                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao "
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao "
                 + " FROM pedido "
+                + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                 + " WHERE pedido.id_cliente = ? AND pedido.id_pedido = ?";
@@ -1078,20 +1066,7 @@ public class ClienteDAO {
                 pedido.setFormaPagamento(new FormaPagamento(0, rs.getString("formapagamento_descricao")));
                 pedido.setObservacaoEntrega(rs.getString("observacao_entrega"));
                 pedido.setFrete(rs.getDouble("frete"));
-                switch (rs.getInt("estado")) {
-                    case 1:
-                        pedido.setStatus("Conferido");
-                        break;
-                    case 2:
-                        pedido.setStatus("Em produção");
-                        break;
-                    case 3:
-                        pedido.setStatus("Saiu pra entrega");
-                        break;
-                    case 4:
-                        pedido.setStatus("Entregue");
-                        break;
-                }
+                pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 Endereco endereco = new Endereco();
                 endereco.setId(-1);
                 endereco.setDescricao(rs.getString("endereco_descricao"));

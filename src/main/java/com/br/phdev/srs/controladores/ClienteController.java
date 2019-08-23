@@ -12,7 +12,6 @@ import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Carrinho;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.ConfirmaPedido;
-import com.br.phdev.srs.models.ConfirmaPedidoFacil;
 import com.br.phdev.srs.models.ConfirmacaoPedido;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
@@ -28,7 +27,6 @@ import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,9 +51,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class ClienteController {
-    
+
     private ClienteDAO dao;
-    
+
     @Autowired
     public ClienteController(ClienteDAO dao) {
         this.dao = dao;
@@ -65,7 +63,7 @@ public class ClienteController {
     public ResponseEntity<Mensagem> cadastrarTokenAlerta(@RequestBody TokenAlerta token, HttpSession sessao) {
         Mensagem mensagem = new Mensagem();
         try {
-            Cliente cliente = (Cliente) sessao.getAttribute("cliente");            
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             this.dao.cadastrarTokenAlerta(cliente, token.getToken());
             mensagem.setCodigo(100);
             mensagem.setDescricao("Token de alerta cadastrado");
@@ -94,12 +92,8 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Cliente cliente = null;
         try {
-            if (validarSessao(req)) {
-                cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.getCliente(cliente);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+            cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.getCliente(cliente);
         } catch (DAOException e) {
             e.printStackTrace();
             cliente = null;
@@ -113,19 +107,15 @@ public class ClienteController {
     public ResponseEntity<ListaItens> principal(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
-        try {            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                listaItens = new ListaItens();
-                listaItens.setItens(this.dao.getItensFavoritos(cliente).getItens());
-                listaItens.setItensDia(this.dao.getItensDia(cliente).getItensDia());
-                listaItens.setGeneros(this.dao.getGeneros());
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+        try {
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            listaItens = new ListaItens();
+            listaItens.setItens(this.dao.getItensFavoritos(cliente).getItens());
+            listaItens.setItensDia(this.dao.getItensDia(cliente).getItensDia());
+            listaItens.setGeneros(this.dao.getGeneros());
         } catch (DAOException e) {
             e.printStackTrace();
-        } 
+        }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
@@ -136,12 +126,8 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
         try {
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                listaItens = this.dao.getItensDia(cliente);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            listaItens = this.dao.getItensDia(cliente);
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -155,13 +141,9 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                listaItens = this.dao.getItensFavoritos(cliente);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            listaItens = this.dao.getItensFavoritos(cliente);
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -175,15 +157,11 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Mensagem mensagem = new Mensagem();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.cadastrarItemFavorito(cliente, item);
-                mensagem.setCodigo(100);
-                mensagem.setDescricao("Item favoritado com sucesso");
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.cadastrarItemFavorito(cliente, item);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Item favoritado com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
@@ -198,15 +176,11 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Mensagem mensagem = new Mensagem();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.removerItemFavorito(cliente, item);
-                mensagem.setCodigo(100);
-                mensagem.setDescricao("Item desfavoritado com sucesso");
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.removerItemFavorito(cliente, item);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Item desfavoritado com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
@@ -221,12 +195,8 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         List<Genero> listaGeneros = null;
         try {
-            
-            if (validarSessao(req)) {
-                listaGeneros = this.dao.getGeneros();
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            listaGeneros = this.dao.getGeneros();
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -240,15 +210,11 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                listaItens = this.dao.getItens(cliente, genero, (pg == null ? 0 : pg), buscar);
-                if (listaItens != null) {
-                    listaItens.setFrete(RepositorioProdutos.getInstancia().frete);
-                }
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            listaItens = this.dao.getItens(cliente, genero, (pg == null ? 0 : pg), buscar);
+            if (listaItens != null) {
+                listaItens.setFrete(RepositorioProdutos.getInstancia().frete);
             }
         } catch (DAOException e) {
             e.printStackTrace();
@@ -261,11 +227,9 @@ public class ClienteController {
     @PostMapping(value = "cliente/info-item")
     public ResponseEntity<Item> infoPrato(@RequestBody Item item, HttpSession sessao, HttpServletRequest req) {
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.getItem(item, cliente);
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.getItem(item, cliente);
         } catch (DAOException e) {
             e.printStackTrace();
             item = null;
@@ -280,18 +244,14 @@ public class ClienteController {
         Mensagem mensagem = new Mensagem();
         HttpStatus httpStatus = HttpStatus.OK;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                if (this.dao.possuiPrePredido(cliente)) {
-                    mensagem.setCodigo(100);
-                    mensagem.setDescricao("Existe um pré pedido");
-                } else {
-                    mensagem.setCodigo(101);
-                    mensagem.setDescricao("Não existe um pré pedido");
-                }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            if (this.dao.possuiPrePredido(cliente)) {
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Existe um pré pedido");
             } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
+                mensagem.setCodigo(101);
+                mensagem.setDescricao("Não existe um pré pedido");
             }
         } catch (DAOException e) {
             e.printStackTrace();
@@ -308,13 +268,9 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         List<ItemPedido> itens = null;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                itens = this.dao.recuperarPrePredido(cliente);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            itens = this.dao.recuperarPrePredido(cliente);
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -328,16 +284,12 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Mensagem mensagem = new Mensagem();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.removerPrepedido(cliente);
-                sessao.removeAttribute("pre-pedido-itens");
-                sessao.removeAttribute("pre-pedido-preco");
-                mensagem.setCodigo(100);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.removerPrepedido(cliente);
+            sessao.removeAttribute("pre-pedido-itens");
+            sessao.removeAttribute("pre-pedido-preco");
+            mensagem.setCodigo(100);
         } catch (DAOException e) {
             mensagem.setCodigo(101);
             mensagem.setDescricao(e.getMessage());
@@ -353,13 +305,9 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         ConfirmaPedido confirmaPedido = null;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                confirmaPedido = this.dao.refazerPedido(cliente, pedido);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            confirmaPedido = this.dao.refazerPedido(cliente, pedido);
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -373,17 +321,13 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Carrinho carrinho = new Carrinho();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                List<Endereco> enderecos = this.dao.getEnderecos(cliente);
-                List<FormaPagamento> formaPagamentos = this.dao.getFormasPagamento(cliente);
-                carrinho.setFormaPagamentos(formaPagamentos);
-                carrinho.setEnderecos(enderecos);
-                carrinho.setFrete(new BigDecimal(RepositorioProdutos.getInstancia().frete));
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            List<Endereco> enderecos = this.dao.getEnderecos(cliente);
+            List<FormaPagamento> formaPagamentos = this.dao.getFormasPagamento(cliente);
+            carrinho.setFormaPagamentos(formaPagamentos);
+            carrinho.setEnderecos(enderecos);
+            carrinho.setFrete(new BigDecimal(RepositorioProdutos.getInstancia().frete));
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -396,20 +340,16 @@ public class ClienteController {
     public ResponseEntity<ConfirmaPedido> preConfirmaPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         try {
-            
+
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-            if (validarSessao(req)) {
-                if (!this.dao.existePedidoAberto(cliente)) {
-                    this.dao.inserirPrecos(confirmaPedido);
-                    confirmaPedido.calcularPrecoTotal(RepositorioProdutos.getInstancia().frete);
-                    sessao.setAttribute("pre-pedido-itens", confirmaPedido.getItens());
-                    sessao.setAttribute("pre-pedido-preco", confirmaPedido.getPrecoTotal());
-                    confirmaPedido.setMensagem(new Mensagem(100, "Pedido pré-confirmado"));
-                } else {
-                    confirmaPedido.setMensagem(new Mensagem(101, "Já existe um pedido em andamento"));
-                }
+            if (!this.dao.existePedidoAberto(cliente)) {
+                this.dao.inserirPrecos(confirmaPedido);
+                confirmaPedido.calcularPrecoTotal(RepositorioProdutos.getInstancia().frete);
+                sessao.setAttribute("pre-pedido-itens", confirmaPedido.getItens());
+                sessao.setAttribute("pre-pedido-preco", confirmaPedido.getPrecoTotal());
+                confirmaPedido.setMensagem(new Mensagem(100, "Pedido pré-confirmado"));
             } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
+                confirmaPedido.setMensagem(new Mensagem(101, "Já existe um pedido em andamento"));
             }
         } catch (DAOException e) {
             e.printStackTrace();
@@ -426,40 +366,36 @@ public class ClienteController {
         ConfirmacaoPedido confirmacaoPedido = new ConfirmacaoPedido();
         Pedido pedido = null;
         try {
-            
-            if (validarSessao(req)) {
-                if (sessao.getAttribute("pre-pedido-preco") != null && sessao.getAttribute("pre-pedido-itens") != null) {
-                    Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                    pedido = new Pedido();
-                    pedido.setEndereco(confirmaPedido.getEnderecos().get(0));
-                    pedido.setFormaPagamento(confirmaPedido.getFormaPagamentos().get(0));
-                    pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
-                    pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
-                    pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
-                    pedido.setFrete(RepositorioProdutos.getInstancia().frete);
-                    switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
-                        case 0:
-                            this.dao.inserirPedido(pedido, cliente);
-                            confirmacaoPedido.setStatus(0);
-                            sessao.setAttribute("pre-pedido-itens", null);
-                            sessao.setAttribute("pre-pedido-preco", null);
-                            break;
-                        case 1:
 
-                            break;
-                        case 2:
+            if (sessao.getAttribute("pre-pedido-preco") != null && sessao.getAttribute("pre-pedido-itens") != null) {
+                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+                pedido = new Pedido();
+                pedido.setEndereco(confirmaPedido.getEnderecos().get(0));
+                pedido.setFormaPagamento(confirmaPedido.getFormaPagamentos().get(0));
+                pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
+                pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
+                pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
+                pedido.setFrete(RepositorioProdutos.getInstancia().frete);
+                switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
+                    case 0:
+                        this.dao.inserirPedido(pedido, cliente);
+                        confirmacaoPedido.setStatus(0);
+                        sessao.setAttribute("pre-pedido-itens", null);
+                        sessao.setAttribute("pre-pedido-preco", null);
+                        break;
+                    case 1:
 
-                            break;
-                        case 3:
+                        break;
+                    case 2:
 
-                            break;
-                        default:
-                            confirmacaoPedido.setStatus(-1);
-                            break;
-                    }
+                        break;
+                    case 3:
+
+                        break;
+                    default:
+                        confirmacaoPedido.setStatus(-1);
+                        break;
                 }
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
             }
         } catch (DAOException e) {
             e.printStackTrace();
@@ -474,13 +410,9 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         List<Pedido2> pedidos = null;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                pedidos = this.dao.getPedidos(cliente, (pg == null ? 0 : pg));
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            pedidos = this.dao.getPedidos(cliente, (pg == null ? 0 : pg));
         } catch (DAOException e) {
             e.printStackTrace();
         } catch (IOException ex) {
@@ -493,8 +425,8 @@ public class ClienteController {
 
     @PostMapping("cliente/info-pedido")
     public ResponseEntity<Pedido2> listarPedidos(@RequestBody Pedido2 pedido, HttpSession sessao) {
+        HttpHeaders httpHeaders = new HttpHeaders();
         try {
-            
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             this.dao.getPedido(pedido, cliente);
         } catch (DAOException e) {
@@ -502,7 +434,6 @@ public class ClienteController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(pedido, httpHeaders, HttpStatus.OK);
     }
@@ -517,13 +448,8 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         List<Endereco> enderecos = null;
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                enderecos = this.dao.getEnderecos(cliente);
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            enderecos = this.dao.getEnderecos(cliente);
         } catch (DAOException e) {
             //e.printStackTrace();
         }
@@ -537,15 +463,11 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Mensagem mensagem = new Mensagem();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.cadastrarEndereco(cliente, endereco);
-                mensagem.setCodigo(100);
-                mensagem.setDescricao("Endereço cadastrado com sucesso");
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.cadastrarEndereco(cliente, endereco);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Endereço cadastrado com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
@@ -560,15 +482,10 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Mensagem mensagem = new Mensagem();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.removerEndereco(cliente, endereco);
-                mensagem.setCodigo(100);
-                mensagem.setDescricao("Endereço removido com sucesso");
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.removerEndereco(cliente, endereco);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Endereço removido com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
@@ -583,15 +500,10 @@ public class ClienteController {
         HttpStatus httpStatus = HttpStatus.OK;
         Mensagem mensagem = new Mensagem();
         try {
-            
-            if (validarSessao(req)) {
-                Cliente cliente = (Cliente) sessao.getAttribute("cliente");
-                this.dao.favoritarEndereco(cliente, endereco);
-                mensagem.setCodigo(100);
-                mensagem.setDescricao("Endereço favoritado com sucesso");
-            } else {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-            }
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.favoritarEndereco(cliente, endereco);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Endereço favoritado com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
@@ -605,7 +517,7 @@ public class ClienteController {
     public ResponseEntity<List<FormaPagamento>> listarFormasPagamento(HttpSession sessao) {
         List<FormaPagamento> formaPagamentos = null;
         try {
-            
+
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             formaPagamentos = this.dao.getFormasPagamento(cliente);
         } catch (DAOException e) {
@@ -638,15 +550,6 @@ public class ClienteController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.IMAGE_PNG);
         return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
-    }
-
-    private boolean validarSessao(HttpServletRequest req) throws DAOException {
-        return true;/*
-        if (!new AutenticaDAO(conexao).verificarSessao(req.getHeader("ac-tk"))) {
-            req.getSession().invalidate();
-            //return false;            
-        }
-        return true;*/
     }
 
 }

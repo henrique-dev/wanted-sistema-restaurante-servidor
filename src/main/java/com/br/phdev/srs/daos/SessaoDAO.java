@@ -15,8 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -50,15 +49,9 @@ public class SessaoDAO {
         }
         Cliente cliente = null;
         try {
-            String sql = "SELECT " +
-                "	cliente.id_usuario, " +
-                "    cliente.id_cliente, " +
-                "    cliente.nome, " +
-                "    cliente.cpf, " +
-                "    cliente.telefone, " +
-                "    cliente.email" +
-                " FROM cliente " +
-                " WHERE cliente.id_usuario = (SELECT usuario.id_usuario FROM usuario WHERE usuario.nome = ? AND usuario.senha = ? AND usuario.ativo = true)";
+            String sql = "SELECT cliente.id_usuario, cliente.id_cliente, cliente.nome, cliente.cpf, cliente.telefone, cliente.email "
+                + " FROM cliente "
+                + " WHERE cliente.id_usuario = (SELECT usuario.id_usuario FROM usuario WHERE usuario.nome = ? AND usuario.senha = ? AND usuario.ativo = true)";
             PreparedStatement stmt = this.conexao.prepareStatement(sql);
             stmt.setString(1, usuario.getNomeUsuario());
             stmt.setString(2, usuario.getSenhaUsuario());
@@ -161,6 +154,32 @@ public class SessaoDAO {
             throw new DAOException(e, 300);
         }
         return false;
+    }
+    
+    public Cliente verificarTokenLogin(String telefone, String usuario, String segredo) throws DAOException {
+        Cliente cliente = null;
+        if (usuario == null || segredo == null) {
+            return cliente;
+        }        
+        String sql = "SELECT cliente.id_usuario, cliente.id_cliente, cliente.nome, cliente.cpf, cliente.telefone, cliente.email "
+                + " FROM usuario "
+                + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
+                + " WHERE usuario.nome = ? "
+                + " AND usuario.token_login_usuario = ? "
+                + " AND usuario.token_login_segredo = ? ";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setString(1, telefone);
+            stmt.setString(2, usuario);
+            stmt.setString(3, segredo);
+            ResultSet rs = stmt.executeQuery();            
+            if (rs.next()) {
+                cliente = new Cliente();
+                cliente.setId(rs.getLong("id_cliente"));
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 300);
+        }
+        return cliente;
     }
     
 }

@@ -14,7 +14,7 @@ public class NotificacaoPedido {
     private String tipo;
     private String mensagem;
     private String websocketId;
-    private List<Pedido> pedidos;
+    private List<Pedido2> pedidos;
     private boolean entregue;
 
     public long getId() {
@@ -49,11 +49,11 @@ public class NotificacaoPedido {
         this.websocketId = websocketId;
     }
 
-    public List<Pedido> getPedidos() {
+    public List<Pedido2> getPedidos() {
         return pedidos;
     }
 
-    public void setPedidos(List<Pedido> pedidos) {
+    public void setPedidos(List<Pedido2> pedidos) {
         this.pedidos = pedidos;
     }
 

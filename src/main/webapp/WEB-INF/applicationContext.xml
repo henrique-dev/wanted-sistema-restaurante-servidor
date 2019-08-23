@@ -16,11 +16,12 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
         <property name="suffix" value=".jsp"/>
     </bean>         
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />    
-    <bean id="basicDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="basicDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://localhost:3306/restaurante_wanted?useTimezone=true&amp;serverTimezone=UTC&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
         <property name="username" value="root"/>
         <property name="password" value="root"/>
+        <property name="minIdle" value="5" />
     </bean>
     <mvc:default-servlet-handler/>     
     <mvc:interceptors>

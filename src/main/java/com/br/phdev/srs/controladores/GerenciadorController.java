@@ -17,8 +17,8 @@ import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
+import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
-import com.br.phdev.srs.models.TokenAlerta;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -51,7 +51,7 @@ public class GerenciadorController {
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
-            List<Pedido> pedidos = this.dao.getPedidos();
+            List<Pedido2> pedidos = this.dao.getPedidos();
             modelo.addAttribute("pedidos", pedidos);
         } catch (DAOException e) {
             e.printStackTrace();

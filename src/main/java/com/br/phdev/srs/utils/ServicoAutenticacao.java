@@ -45,7 +45,7 @@ public class ServicoAutenticacao {
         return tokenHex.toString();
     }
 
-    public String gerarHashSenha(String senha) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String gerarSHA256(String senha) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
         byte textoDigerido[] = algoritmo.digest(senha.getBytes("UTF-8"));
         StringBuilder tokenHex = new StringBuilder();

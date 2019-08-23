@@ -34,4 +34,14 @@ public class ServicoGeracaoToken {
         return token.toString().substring(0, tamanho);
     }
     
+    public String gerarSHA256(String valor) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
+        byte textoDigerido[] = algoritmo.digest(valor.getBytes("UTF-8"));
+        StringBuilder tokenHex = new StringBuilder();
+        for (byte b : textoDigerido) {
+            tokenHex.append(String.format("%02X", 0xFF & b));
+        }
+        return tokenHex.toString();
+    }
+    
 }
