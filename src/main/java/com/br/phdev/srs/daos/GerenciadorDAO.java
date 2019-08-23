@@ -130,9 +130,8 @@ public class GerenciadorDAO {
 
     public List<Genero> getGeneros() throws DAOException {
         List<Genero> generos = new ArrayList<>();
-        String sql = "SELECT genero.id_genero, genero.nome FROM item "
-                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
-                + " GROUP BY id_genero ORDER BY genero.nome";
+        String sql = "SELECT genero.id_genero, genero.nome FROM genero "
+                + " ORDER BY genero.nome";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
