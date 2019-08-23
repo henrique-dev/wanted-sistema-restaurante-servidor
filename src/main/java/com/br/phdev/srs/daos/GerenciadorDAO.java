@@ -139,9 +139,6 @@ public class GerenciadorDAO {
                 Genero genero = new Genero();
                 genero.setId(rs.getLong("id_genero"));
                 genero.setNome(rs.getString("nome"));
-                Foto foto = new Foto();
-                foto.setId(rs.getLong("id_arquivo"));
-                genero.setFoto(ServicoArmazenamento.setTamanho(foto));
                 generos.add(genero);
             }
         } catch (SQLException e) {
