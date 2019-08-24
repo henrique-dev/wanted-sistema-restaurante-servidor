@@ -17,9 +17,9 @@
     }
 </style>
   
-<div id="ctn_index">
-    <div class="row mb-5">
-        <div class="col-3">
+  <div id="ctn_index" class="container col-12">
+    <div class="row mt-3">
+        <div class="col-lg-3 col-md-3 col-sm-3 p-1">
             <a href="item?opcao=novo" class="btn btn-primary btn-icon-split">
                 <span class="icon text-white-50">
                     <i class="fas fa-plus"></i>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-lg-12 col-md-12 col-sm-12 p-1">
             <table class="table table-bordered" id="tbl_itens" cellspacing="0">
                 <thead>
                     <tr>

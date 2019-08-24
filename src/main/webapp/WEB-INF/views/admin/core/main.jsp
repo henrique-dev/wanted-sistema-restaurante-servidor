@@ -145,7 +145,7 @@
                     <!-- End of Topbar -->
 
                     <!-- Begin Page Content -->
-                    <div id="ctn_conteudo" class="container-fluid m-0 p-0">
+                    <div id="ctn_conteudo" class="container-fluid">
 
                     </div>
                     <!-- /.container-fluid -->

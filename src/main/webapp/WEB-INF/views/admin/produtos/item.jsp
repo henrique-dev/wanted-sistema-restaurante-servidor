@@ -18,26 +18,30 @@
     
 </style>
   
-<div id="ctn_index">
-    <div class="row">
+  <div id="ctn_index" class="container col-12">
+    <div class="row mt-3">
         <div class="col-md-4 col-sm-4">
             <div class="p-2 row">
                 <div class="card col-md-12 col-sm-12 p-4">
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
+                            <span id="msg_nome" class="text-danger"></span>
                             <models:campoTexto id="fld_nome" name="nome" label="Nome"/>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
+                            <span id="msg_descricao" class="text-danger"></span>
                             <models:areaTexto id="fld_descricao" name="descricao" label="Descrição"/>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-8 col-sm-8">
+                            <span id="msg_genero" class="text-danger"></span>
                             <models:listaGenero id="fld_genero" name="genero" label="Genêros" data="${generos}"/>
                         </div>
                         <div class="col-md-4 col-sm-4">
+                            <span id="msg_preco" class="text-danger"></span>
                             <models:campoPreco id="fld_preco" name="preco" label="Preço"/>
                         </div>
                     </div>
@@ -47,7 +51,8 @@
         <div class="col-md-8 col-sm-8">
             <div class="p-2 row h-100">
                 <div class="card col-md-12 col-sm-12 h-100">
-                    <div class="row h-100 align-middle" id="input-arquivo-1"></div>
+                    <span id="msg_arquivo" class="text-danger"></span>
+                    <div class="row h-100 align-middle" id="fld_arquivo"></div>
                 </div>
             </div>
         </div>
@@ -57,7 +62,7 @@
             <div class="p-2 row">
                 <div class="card col-md-12 col-sm-12 p-4 ">
                     <div class="row">
-                        <div class="col-md-12 col-sm-12">
+                        <div class="col-md-12 col-sm-12">                            
                             <models:listaTipo id="fld_tipos" name="tipos" label="Tipos"  data="${tipos}"/>
                         </div>
                     </div>
@@ -172,9 +177,44 @@
             ingredientes.push($(this).data("id"));
         });
         let arquivos = new Array();
-        $("#input-arquivo-1").find("input").each(function() {
-            arquivos.push($(this)[0].files[0]);
+        $("#fld_arquivo").find("input").each(function() {
+            if ($(this)[0].files[0] != null) {
+                arquivos.push($(this)[0].files[0]);
+            }            
         });
+
+
+        if (nome == null || nome.trim().length == 0) {
+            $("#msg_nome").text("Insira um nome válido para o item.");
+            ok = false;
+        } else {
+            $("#msg_nome").text("");
+        }
+        if (descricao == null || descricao.trim().length == 0) {
+            $("#msg_descricao").text("Insira uma descriçao válida para o item.");
+            ok = false;
+        } else {
+            $("#msg_descricao").text("");
+        }
+        if (preco == null || preco.trim().length == 0 || parseFloat(preco) < 0) {
+            $("#msg_preco").text("Insira um preço válido para o item.");
+            ok = false;
+        } else {
+            $("#msg_preco").text("");
+        }
+        if (genero == null || genero == 0) {
+            $("#msg_genero").text("Insira um genero para o item.");
+            ok = false;
+        } else {
+            $("#msg_genero").text("");
+        }
+        if (arquivos == null || arquivos.length == 0) {
+            $("#msg_arquivo").text("Insira pelo menos uma imagem para o item.");
+            ok = false;
+        } else {
+            $("#msg_arquivo").text("");
+        }
+
         if (ok) {
             let formData = new FormData();
             formData.append("nome", nome);
@@ -194,8 +234,15 @@
         }
         
     }
+
+    function limparCampos() {
+        $("#fld_nome").val("");
+        $("#fld_descricao").val("");
+        $("#fld_preco").val(0);
+        $('#fld_genero').val(0);
+    }
     
-    function processar_dados(dados) {        
+    function processarDados(dados) {        
         $.ajax({
             type: "POST",
             url: "adicionar-item",
@@ -222,7 +269,7 @@
         $("#menu_produtos").parent(".nav-item").addClass("active");
         $("#menu_item_itens").addClass("active");
         
-        $("#input-arquivo-1").spartanMultiImagePicker({
+        $("#fld_arquivo").spartanMultiImagePicker({
             fieldName:        'fileUpload[]',
             maxCount:         4,
             rowHeight:        '200px',
@@ -293,7 +340,7 @@
         $("#btn_salvar").click(function() {
             let dados = verifica_dados();
             if (dados != null) {
-                processar_dados(dados);
+                processarDados(dados);
             }
         });
 

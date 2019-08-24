@@ -15,51 +15,47 @@
 <script src="${pageContext.request.contextPath}/resources/js/spartan-multi-image-picker-min.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js/sockjs.js"></script>
 
-<div id="ctn_index" class="container m-0 p-0">
-    <div class="row wrapper m-0 p-0">
-        <div class="col-md-12 col-sm-12 m-0 p-0">
-            <div class="row m-0 p-0">
-                <div class="col-lg-6 col-md-12 col-sm-12 p-1">
-                    <div class="card p-2">
-                        <table id="tbl_confirmacoes" class="table table-bordered" >
-                            <thead>
-                                <tr>
-                                    <th width="10%">Id</th>
-                                    <th width="45%">Estado</th>
-                                    <th width="30%">Preço</th>
-                                    <th width="15%">Acao</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-12 col-sm-12 p-1">
-                    <div class="card p-2">
-                        <table id="tbl_pedidos" class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th width="10%">Id</th>
-                                    <th width="45%">Estado</th>
-                                    <th width="30%">Preço</th>
-                                    <th width="15%">Acao</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach items="${pedidos}" var="pedido">
-                                    <tr>
-                                        <td><a href='pedido?id=${pedido.id}'>${pedido.id}</a></td>
-                                        <td>${pedido.status}</td>
-                                        <td>${pedido.precoTotal}</td>
-                                        <td><center><button data-id='${pedido.id}' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div id="ctn_index" class="container col-12">
+    <div class="row mt-3">
+        <div class="col-lg-6 col-md-12 col-sm-12 p-1">
+            <div class="card p-2">
+                <table id="tbl_confirmacoes" class="table table-bordered" >
+                    <thead>
+                        <tr>
+                            <th width="10%">Id</th>
+                            <th width="45%">Estado</th>
+                            <th width="30%">Preço</th>
+                            <th width="15%">Acao</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12 p-1">
+            <div class="card p-2">
+                <table id="tbl_pedidos" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th width="10%">Id</th>
+                            <th width="45%">Estado</th>
+                            <th width="30%">Preço</th>
+                            <th width="15%">Acao</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach items="${pedidos}" var="pedido">
+                            <tr>
+                                <td><a href='pedido?id=${pedido.id}'>${pedido.id}</a></td>
+                                <td>${pedido.status}</td>
+                                <td>${pedido.precoTotal}</td>
+                                <td><center><button data-id='${pedido.id}' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
