@@ -121,6 +121,7 @@ public class SessaoController {
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
+            e.printStackTrace();
         }
         return "redirect:login";
     }
