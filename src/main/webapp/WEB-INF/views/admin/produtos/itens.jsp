@@ -5,6 +5,7 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@taglib tagdir="/WEB-INF/tags" prefix="models" %>
 <c:import url="../core/main.jsp"/>
 
 <!-- Page level plugins -->
@@ -20,7 +21,7 @@
   <div id="ctn_index" class="container col-12">
     <div class="row mt-3">
         <div class="col-lg-3 col-md-3 col-sm-3 p-1">
-            <a href="item?opcao=novo" class="btn btn-primary btn-icon-split">
+            <a href="item/novo" class="btn btn-primary btn-icon-split">
                 <span class="icon text-white-50">
                     <i class="fas fa-plus"></i>
                 </span>
@@ -37,15 +38,22 @@
                         <th>Nome</th>
                         <th>Gênero</th>
                         <th>Preço</th>
+                        <th>Açao</th>
                     </tr>
                 </thead>
                 <tbody>
                     <c:forEach items="${itens}" var="item">
                         <tr>
-                            <td>${item.id}</td>
-                            <td>${item.nome}</td>
-                            <td>${item.genero.nome}</td>
-                            <td align="right">${String.format("%.2f", item.preco)}</td>
+                            <td width='5%'>${item.id}</td>
+                            <td >${item.nome}</td>
+                            <td width='20%'>${item.genero.nome}</td>
+                            <td width='15%' align="right">${String.format("%.2f", item.preco)}</td> 
+                            <th width='15%' style='min-width:210px;'>
+                                <center>
+                                    <models:botaoHref link="item/atualizar?id=${item.id}" label="Atualizar" icon="fas fa-delete" clas="btn btn-success btn-atualizar"/>
+                                    <models:botaoHref link="item/remover?id=${item.id}"  label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/>                                    
+                                </center>
+                            </th>
                         </tr>
                     </c:forEach>
                 </tbody>
@@ -67,7 +75,31 @@
         $("#menu_produtos").parent(".nav-item").addClass("active");
         $("#menu_item_itens").addClass("active");
 
-        $('#tbl_itens').DataTable();
+        $('#tbl_itens').DataTable({
+            responsive: true,
+            fixedColumns: true,
+            lengthChange: false,
+            language: {
+                lengthMenu: "Exibir _MENU_ linhas por página",
+                zeroRecords: "Sem pedidos",
+                info: "Exibindo pagina _PAGE_ de _PAGES_",
+                infoEmpty: "Vazio",
+                infoFiltered: "(filtrados de _MAX_ registros)",
+                search: "Critério:",
+                paginate: {
+                        next: "Próximo",
+                        previous: "Anterior"
+                    }
+                },
+            lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
+        });
+
+        $('.btn-atualizar').click(function() {
+
+        });
+        $('.btn-remover').click(function() {
+
+        });
     });
     
 </script>

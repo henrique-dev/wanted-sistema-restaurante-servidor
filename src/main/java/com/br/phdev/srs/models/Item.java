@@ -33,6 +33,10 @@ public class Item {
     public Item() {        
     }        
 
+    public Item(long id) {
+        this.id = id;
+    }
+
     public Item(long id, String nome, String descricao, double preco, Genero genero, Set<Tipo> tipos, boolean modificavel, Set<Complemento> complementos, List<GrupoVariacao> variacoes, Set<Foto> fotos) {
         this.id = id;
         this.nome = nome;

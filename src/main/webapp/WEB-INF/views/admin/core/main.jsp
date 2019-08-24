@@ -58,7 +58,7 @@
 
                 <!-- Nav Item - Dashboard -->
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/gerenciador/index.html">
                         <i class="fas fa-fw fa-tachometer-alt"></i>
                         <span>Pedidos</span></a>
                 </li>
@@ -90,10 +90,10 @@
                     </a>
                     <div id="menu_produtos" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <a id="menu_item_itens" class="collapse-item" href="itens">Itens</a>
-                            <a id="menu_item_generos" class="collapse-item" href="generos">Genêros</a>
-                            <a id="menu_item_complementos" class="collapse-item" href="complementos">Complementos</a>
-                            <a id="menu_item_ingredientes" class="collapse-item" href="ingredientes">Ingredientes</a>
+                            <a id="menu_item_itens" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/itens">Itens</a>
+                            <a id="menu_item_generos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/generos">Genêros</a>
+                            <a id="menu_item_complementos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/complementos">Complementos</a>
+                            <a id="menu_item_ingredientes" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/ingredientes">Ingredientes</a>
                         </div>
                     </div>
                 </li>
@@ -114,7 +114,7 @@
                     </a>
                     <div id="menu_clientes" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
-                            <a id="menu_cliente_todos" class="collapse-item" href="clientes">Todos</a>
+                            <a id="menu_cliente_todos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/clientes">Todos</a>
                         </div>
                     </div>
                 </li>

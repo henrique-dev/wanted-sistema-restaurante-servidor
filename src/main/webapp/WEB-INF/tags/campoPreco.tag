@@ -5,5 +5,5 @@
 <%@attribute name="value" required="false" %>
 <div class="form-group">
     <label for="nome">${label}</label>
-    <input type="number" min="1" step="any" class="form-control ${clas}" id="${id}" name="${name}" value="${value}">
+    <input type="number" min="0" step="any" class="form-control ${clas}" id="${id}" name="${name}" value="${value}">
 </div>

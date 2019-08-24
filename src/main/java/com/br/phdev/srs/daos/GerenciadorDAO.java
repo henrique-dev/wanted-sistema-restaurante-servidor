@@ -7,6 +7,7 @@
 package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.exceptions.StorageException;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
@@ -358,7 +359,37 @@ public class GerenciadorDAO {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 Long idItem = rs.getLong(1);
-                stmt.close();
+                for (Tipo t : item.getTipos()) {
+                    sql = "INSERT INTO item_tipo VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_tipo=?";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, idItem);
+                        stmt2.setLong(2, t.getId());
+                        stmt2.setLong(3, idItem);
+                        stmt2.setLong(4, t.getId());
+                        stmt2.execute();
+                    }
+                }
+                for (Complemento c : item.getComplementos()) {
+                    sql = "INSERT INTO item_complemento VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_complemento=?";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, idItem);
+                        stmt2.setLong(2, c.getId());
+                        stmt2.setLong(3, idItem);
+                        stmt2.setLong(4, c.getId());
+                        stmt2.execute();
+                    }
+                }
+                for (Ingrediente i : item.getIngredientes()) {
+                    sql = "INSERT INTO item_ingrediente VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_ingrediente=?";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, idItem);
+                        stmt2.setLong(2, i.getId());
+                        stmt2.setLong(3, idItem);
+                        stmt2.setLong(4, i.getId());
+                        stmt2.execute();
+                    }
+                }
+                
                 ServicoArmazenamento sa = new ServicoArmazenamento();
                 for (MultipartFile file : item.getFotos()) {
                     sql = "INSERT INTO arquivo VALUES (default, null)";
@@ -366,7 +397,7 @@ public class GerenciadorDAO {
                         stmt2.execute();
                         ResultSet rs2 = stmt2.getGeneratedKeys();
                         if (rs2.next()) {
-                            sa.salvar(file, rs2.getLong(1));
+                            //sa.salvar(file, rs2.getLong(1));
                             sql = "INSERT INTO item_arquivo VALUES (?,?)";
                             try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
                                 stmt3.setLong(1, idItem);
@@ -377,10 +408,170 @@ public class GerenciadorDAO {
                     }
                 }
             }
-        } catch (SQLException | StorageException e) {
+        } catch (SQLException/* | StorageException*/ e) {
             e.printStackTrace();
         }
     }
+    
+    public Item getItem(Item item) throws DAOException {
+        if (item == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (item.getId() == 0) {
+            throw new DAOIncorrectData(301);
+        }
+        // get_item
+        String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
+                + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
+                + " FROM item "
+                + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
+                + " WHERE item.id_item = ? ";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, item.getId());
+            ResultSet rs = stmt.executeQuery();
+            Set<Ingrediente> ingredientes = new HashSet<>();
+            Set<Complemento> complementos = new HashSet<>();
+            List<GrupoVariacao> variacoes = new ArrayList<>();
+            while (rs.next()) {
+                item.setId(rs.getLong("id_item"));
+                item.setNome(rs.getString("nome"));
+                item.setPreco(rs.getDouble("preco"));
+                item.setTempoPreparo(rs.getString("tempo_preparo"));
+                item.setModificavel(rs.getBoolean("modificavel"));
+                item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));                
+                item.setGenero(new Genero(rs.getLong("id_genero"), rs.getString("genero")));
+
+                sql = "SELECT arquivo.id_arquivo "
+                        + " FROM arquivo "
+                        + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
+                        + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
+                        + " WHERE item.id_item = ?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, rs.getLong("id_item"));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    Set<Foto> fotos = new HashSet<>();
+                    while (rs2.next()) {
+                        Foto foto = new Foto();
+                        foto.setId(rs2.getLong("id_arquivo"));
+                        fotos.add(ServicoArmazenamento.setTamanho(foto));
+                    }
+                    item.setFotos(fotos);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item_tipo "
+                        + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
+                        + " WHERE item_tipo.id_item = ?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, rs.getLong("id_item"));
+                    ResultSet rs2 = stmt2.executeQuery();
+                    Set<Tipo> tipos = new HashSet<>();
+                    while (rs2.next()) {
+                        Tipo tipo = new Tipo();
+                        tipo.setId(rs2.getLong("id_tipo"));
+                        tipo.setNome(rs2.getString("nome"));
+                        tipos.add(tipo);
+                    }
+                    item.setTipos(tipos);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                if (item.isModificavel()) {
+                    // get_lista_complementos_item
+                    sql = "SELECT complemento.id_complemento, complemento.nome, complemento.preco, complemento.id_arquivo "
+                            + " FROM complemento "
+                            + " LEFT JOIN item_complemento ON complemento.id_complemento = item_complemento.id_complemento "
+                            + " WHERE item_complemento.id_item = ?";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, item.getId());
+                        ResultSet rs2 = stmt2.executeQuery();
+                        complementos = new HashSet<>();
+                        while (rs2.next()) {
+                            complementos.add(new Complemento(
+                                    rs2.getLong("id_complemento"),
+                                    rs2.getString("nome"),
+                                    rs2.getDouble("preco"),
+                                    new Foto(rs2.getLong("id_arquivo"), null, 0)));
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (item.isModificavelIngrediente()) {
+                    // get_lista_ingredientes_item
+                    sql = "SELECT ingrediente.id_ingrediente, ingrediente.nome "
+                            + " FROM ingrediente "
+                            + " LEFT JOIN item_ingrediente ON ingrediente.id_ingrediente = item_ingrediente.id_ingrediente "
+                            + " WHERE item_ingrediente.id_item = ?";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, item.getId());
+                        ResultSet rs2 = stmt2.executeQuery();
+                        ingredientes = new HashSet<>();
+                        while (rs2.next()) {
+                            ingredientes.add(new Ingrediente(
+                                    rs2.getLong("id_ingrediente"),
+                                    rs2.getString("nome")));
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // get_lista_variacoes_item
+                sql = "SELECT variacao.id_variacao, variacao.nome, variacao.preco, variacao.ordem, "
+                        + " grupo_variacao.id_item, grupo_variacao.nome nome_grupo, grupo_variacao.max, grupo_variacao.grupo "
+                        + " FROM variacao "
+                        + " LEFT JOIN grupo_variacao ON variacao.id_grupo_variacao = grupo_variacao.id_grupo_variacao "
+                        + " WHERE id_item = ? ORDER BY grupo, ordem ASC";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, item.getId());
+                    ResultSet rs2 = stmt2.executeQuery();
+                    variacoes = new ArrayList<>();
+                    while (rs2.next()) {
+                        if (variacoes.size() > rs2.getInt("grupo")) {
+                            GrupoVariacao gv = variacoes.get(rs2.getInt("grupo"));
+                            gv.getVariacoes().add(new Variacao(rs2.getLong("id_variacao"), rs2.getString("nome"), rs2.getDouble("preco"), rs2.getInt("ordem")));
+                            gv.setMax(rs2.getInt("max"));
+                        } else {
+                            GrupoVariacao gv = new GrupoVariacao();
+                            Set<Variacao> v = new HashSet<>();
+                            v.add(new Variacao(rs2.getLong("id_variacao"), rs2.getString("nome"), rs2.getDouble("preco"), rs2.getInt("ordem")));
+                            gv.setMax(rs2.getInt("max"));
+                            gv.setNome(rs2.getString("nome_grupo"));
+                            gv.setVariacoes(v);
+                            variacoes.add(gv);
+
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                item.setComplementos(complementos);
+                item.setIngredientes(ingredientes);
+                item.setVariacoes(variacoes);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return item;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

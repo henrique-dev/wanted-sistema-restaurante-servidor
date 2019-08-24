@@ -9,7 +9,14 @@
     <select class="form-control" id="${id}" name="${name}">
         <option value="0"></option>
         <c:forEach items="${data}" var="i">
-            <option data-id="${i.id}" data-nome="${i.nome}" value="${i.id}">${i.nome}</option>
+            <c:choose>
+                <c:when test="${i.id == value}">
+                    <option selected data-id="${i.id}" data-nome="${i.nome}" value="${i.id}">${i.nome}</option>
+                </c:when>
+                <c:otherwise>
+                    <option data-id="${i.id}" data-nome="${i.nome}" value="${i.id}">${i.nome}</option>
+                </c:otherwise>
+            </c:choose>            
         </c:forEach>
     </select>
 </div>

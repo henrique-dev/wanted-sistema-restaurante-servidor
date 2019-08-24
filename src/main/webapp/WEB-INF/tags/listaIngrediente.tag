@@ -4,12 +4,21 @@
 <%@attribute name="label" required="false" %>
 <%@attribute name="value" required="false" %>
 <%@attribute name="data" required="false" type="java.util.ArrayList" %>
+<%@attribute name="data_to_not_include" required="false" type="java.util.Set" %>
 <div class="form-group">
     <label for="${id}">${label}</label>
     <select class="form-control" id="${id}" name="${name}">
         <option value="0"></option>
         <c:forEach items="${data}" var="i">
-            <option data-id="${i.id}" data-nome="${i.nome}" value="${i.id}">${i.nome}</option>
+            <c:set var="existe" value="false"/>
+            <c:forEach items="${data_to_not_include}" var="in">
+                <c:if test="${in.id == i.id}">
+                    <c:set var="existe" value="true"/>
+                </c:if>
+            </c:forEach>
+            <c:if test="${existe == false}">
+                <option data-id="${i.id}" data-nome="${i.nome}" value="${i.id}">${i.nome}</option>
+            </c:if>            
         </c:forEach>
     </select>
 </div>

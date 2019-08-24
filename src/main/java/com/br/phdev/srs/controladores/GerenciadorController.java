@@ -15,14 +15,18 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Item2;
+import com.br.phdev.srs.models.ItemPedido;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -84,35 +88,41 @@ public class GerenciadorController {
         return "admin/produtos/itens";
     }
     
-    @GetMapping("gerenciador/item")
-    public String item(String opcao, Integer id, Model modelo) {        
-        try {
-            switch(opcao.toUpperCase()) {
-                case "EDITAR":
-                    List<Item> itens = this.dao.getItens();
-                    modelo.addAttribute("listaItens", itens);
-                    break;
-                case "NOVO":
-                    List<Genero> generos = this.dao.getGeneros();
-                    List<Tipo> tipos = this.dao.getTipos();
-                    List<Complemento> complementos = this.dao.getComplementos();
-                    List<Ingrediente> ingredientes = this.dao.getIngredientes();                    
-                    modelo.addAttribute("generos", generos);
-                    modelo.addAttribute("tipos", tipos);
-                    modelo.addAttribute("complementos", complementos);
-                    modelo.addAttribute("ingredientes", ingredientes);
-                    break;
-            }            
+    @GetMapping("gerenciador/item/novo")
+    public String novoItem(String opcao, Integer id, Model modelo) {        
+        try {            
+            modelo.addAttribute("acao", "novo");
+            modelo.addAttribute("generos", this.dao.getGeneros());
+            modelo.addAttribute("tipos", this.dao.getTipos());
+            modelo.addAttribute("complementos", this.dao.getComplementos());
+            modelo.addAttribute("ingredientes", this.dao.getIngredientes());
         } catch (DAOException e) {
             e.printStackTrace();
         }
-        return "admin/produtos/item";
+        return "admin/produtos/item/novo";
     }
     
-    @PostMapping("gerenciador/adicionar-item")
+    @GetMapping("gerenciador/item/atualizar")
+    public String atualizarItem(String opcao, Integer id, Model modelo) {        
+        try {
+            Item item = this.dao.getItem(new Item(id));
+            System.out.println(item);
+            modelo.addAttribute("acao", "atualizar");
+            modelo.addAttribute("item", item);
+            modelo.addAttribute("generos", this.dao.getGeneros());
+            modelo.addAttribute("tipos", this.dao.getTipos());
+            modelo.addAttribute("complementos", this.dao.getComplementos());
+            modelo.addAttribute("ingredientes", this.dao.getIngredientes());
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/item/atualizar";
+    }
+    
+    @PostMapping("gerenciador/item/salvar")
     @ResponseBody
-    public void adicionarItem(String nome, String descricao, String preco, String tipos, String genero,
-            String ingredientes, String complementos, MultipartFile arquivo0, MultipartFile arquivo1,
+    public void adicionarItem(String nome, String descricao, String preco, String tiposJSON, String genero,
+            String ingredientesJSON, String complementosJSON, MultipartFile arquivo0, MultipartFile arquivo1,
             MultipartFile arquivo2, MultipartFile arquivo3) {
         try {
             Item2 item = new Item2();
@@ -120,6 +130,24 @@ public class GerenciadorController {
             item.setDescricao(descricao);
             item.setPreco(Double.parseDouble(preco));
             item.setGenero(new Genero(Long.parseLong(genero)));
+            
+            System.out.println(tiposJSON);
+            
+            ObjectMapper mapeador = new ObjectMapper();
+            Set<Tipo> tipos = mapeador.readValue(tiposJSON,
+                    new TypeReference<Set<Tipo>>() {
+            });
+            Set<Complemento> complementos = mapeador.readValue(complementosJSON,
+                    new TypeReference<Set<Complemento>>() {
+            });
+            Set<Ingrediente> ingredientes = mapeador.readValue(ingredientesJSON,
+                    new TypeReference<Set<Ingrediente>>() {
+            });
+            
+            item.setTipos(tipos);
+            item.setComplementos(complementos);
+            item.setIngredientes(ingredientes);
+             
             List<MultipartFile> arquivos = new ArrayList<>();
             if (arquivo0 != null) arquivos.add(arquivo0);
             if (arquivo1 != null) arquivos.add(arquivo1);
