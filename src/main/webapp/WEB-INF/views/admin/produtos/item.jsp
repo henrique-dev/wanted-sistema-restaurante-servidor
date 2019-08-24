@@ -240,6 +240,27 @@
         $("#fld_descricao").val("");
         $("#fld_preco").val(0);
         $('#fld_genero').val(0);
+        $("#tbl_tipos").children("tbody").find("tr").each(function() {
+            let tr = $(this);
+            $("#fld_tipos").append(
+                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
+            );
+            tr.remove();
+        });
+        $("#tbl_complementos").children("tbody").find("tr").each(function() {
+            let tr = $(this);
+            $("#fld_complementos").append(
+                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"' data-preco='"+tr.data("preco")+"'>"+tr.data("nome")+"</option>"
+            );
+            tr.remove();
+        });
+        $("#tbl_ingredientes").children("tbody").find("tr").each(function() {
+            let tr = $(this);
+            $("#fld_ingredientes").append(
+                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
+            );
+            tr.remove();
+        });
     }
     
     function processarDados(dados) {        
@@ -250,7 +271,7 @@
             processData: false,
             contentType: false,
             success: function(dadosIn) {
-                console.log(dadosIn);
+                limparCampos();
             }
         });
     }
