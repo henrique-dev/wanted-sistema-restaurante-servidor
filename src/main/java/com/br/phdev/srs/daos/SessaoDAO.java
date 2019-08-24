@@ -111,6 +111,7 @@ public class SessaoDAO {
             stmt.setLong(4, usuario.getIdUsuario());
             stmt.execute();
         } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
     }
