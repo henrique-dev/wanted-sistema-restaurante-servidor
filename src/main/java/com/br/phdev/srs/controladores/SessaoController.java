@@ -73,19 +73,20 @@ public class SessaoController {
     public ResponseEntity<Mensagem> autenticar(@RequestBody Usuario usuario, HttpServletRequest req, HttpServletResponse res, HttpSession sessao) {
         Mensagem mensagem = new Mensagem();
         try {
-            String senhaUsuario = usuario.getSenhaUsuario();
-            String nomeUsuario = usuario.getNomeUsuario();
+            Usuario tmpUsuario = new Usuario();
+            tmpUsuario.setNomeUsuario(usuario.getNomeUsuario());
+            tmpUsuario.setSenhaUsuario(usuario.getSenhaUsuario());
             Cliente cliente = this.dao.autenticar(usuario);
             if (cliente != null) {
-                this.dao.gerarSessao(usuario, sessao.getId());
+                this.dao.gerarSessao(tmpUsuario, sessao.getId());
                 mensagem.setCodigo(100);
                 sessao.setAttribute("usuario", usuario);
                 sessao.setAttribute("cliente", cliente);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.add("session-id", sessao.getId());
-                httpHeaders.add("h-usuario", new ServicoGeracaoToken().gerarSHA256(nomeUsuario));
-                httpHeaders.add("h-segredo", new ServicoGeracaoToken().gerarSHA256(senhaUsuario));
+                httpHeaders.add("h-usuario", tmpUsuario.getNomeUsuario());
+                httpHeaders.add("h-segredo", tmpUsuario.getSenhaUsuario());
                 return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
             } else {
                 mensagem.setCodigo(101);
@@ -95,8 +96,6 @@ public class SessaoController {
             e.printStackTrace();
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

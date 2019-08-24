@@ -106,8 +106,12 @@ public class SessaoDAO {
                 + " WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token1);
-            stmt.setString(2, new ServicoGeracaoToken().gerarSHA256(usuario.getNomeUsuario()));
-            stmt.setString(3, new ServicoGeracaoToken().gerarSHA256(usuario.getSenhaUsuario()));
+            String tokenNome = new ServicoGeracaoToken().gerarSHA256(usuario.getNomeUsuario());
+            usuario.setNomeUsuario(tokenNome);
+            stmt.setString(2, tokenNome);
+            String tokenSegredo = new ServicoGeracaoToken().gerarSHA256(usuario.getSenhaUsuario());
+            stmt.setString(3, tokenSegredo);
+            usuario.setSenhaUsuario(tokenSegredo);
             stmt.setLong(4, usuario.getIdUsuario());
             stmt.execute();
         } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
