@@ -330,10 +330,10 @@ public class GerenciadorDAO {
                 if (rs.next()) {
                     Notificacao notificacao = new Notificacao();
                     notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
-                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId()
-                            + ", \"estado_id\":" + rs.getInt("estado")
-                            + ", \"estado_descricao\":" + rs.getString("pedido_estado.descricao")
-                            + ", \"estado_controle\":" + rs.getString("pedido_estado.controle") + "}");
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", "
+                            + " \"estado_id\":" + rs.getInt("estado") + ", "
+                            + " \"estado_descricao\" : \"" + rs.getString("pedido_estado.descricao") + "\", "
+                            + " \"estado_controle\" : \"" + rs.getString("pedido_estado.controle") + "\"}");
                     this.adicionarNotificacao(notificacao);
                 }
             }
