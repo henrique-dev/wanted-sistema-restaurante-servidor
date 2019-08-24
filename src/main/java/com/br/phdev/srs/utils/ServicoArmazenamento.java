@@ -68,7 +68,7 @@ public class ServicoArmazenamento {
         try (FileInputStream fis = new FileInputStream(file)) {
             fis.read(bytes);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return bytes;
     }

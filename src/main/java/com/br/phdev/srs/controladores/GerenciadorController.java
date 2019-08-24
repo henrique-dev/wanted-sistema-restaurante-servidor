@@ -9,8 +9,10 @@ package com.br.phdev.srs.controladores;
 import com.br.phdev.srs.daos.GerenciadorDAO;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Admin;
+import com.br.phdev.srs.models.Arquivo;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
+import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
@@ -21,10 +23,12 @@ import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
+import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
@@ -36,6 +40,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -120,7 +125,7 @@ public class GerenciadorController {
     @PostMapping("gerenciador/item/salvar")
     @ResponseBody
     public void adicionarItem(Integer id, String nome, String descricao, String preco, String tempoPreparo, String tiposJSON, String genero,
-            String ingredientesJSON, String complementosJSON, MultipartFile arquivo0, MultipartFile arquivo1,
+            String ingredientesJSON, String complementosJSON, String arquivosexcluirJSON, String arquivosmantidosJSON, MultipartFile arquivo0, MultipartFile arquivo1,
             MultipartFile arquivo2, MultipartFile arquivo3) {
         try {
             Item2 item = new Item2();
@@ -140,19 +145,42 @@ public class GerenciadorController {
             });
             Set<Ingrediente> ingredientes = mapeador.readValue(ingredientesJSON,
                     new TypeReference<Set<Ingrediente>>() {
+            });            
+            List<Arquivo> arquivosParaExcluir = mapeador.readValue(arquivosexcluirJSON == null ? "[]" : arquivosexcluirJSON,
+                    new TypeReference<List<Arquivo>>() {
+            });
+            List<Arquivo> arquivosParaManter = mapeador.readValue(arquivosmantidosJSON == null ? "[]" : arquivosmantidosJSON,
+                    new TypeReference<List<Arquivo>>() {
             });
             
             item.setTipos(tipos);
             item.setComplementos(complementos);
             item.setIngredientes(ingredientes);
-             
-            List<MultipartFile> arquivos = new ArrayList<>();
-            if (arquivo0 != null) arquivos.add(arquivo0);
-            if (arquivo1 != null) arquivos.add(arquivo1);
-            if (arquivo2 != null) arquivos.add(arquivo2);
-            if (arquivo3 != null) arquivos.add(arquivo3);
+            
+            List<Arquivo> arquivos = new ArrayList<>();
+            
+            if (arquivo0 != null) arquivos.add(new Arquivo(0, arquivo0));
+            if (arquivo1 != null) arquivos.add(new Arquivo(0, arquivo1));
+            if (arquivo2 != null) arquivos.add(new Arquivo(0, arquivo2));
+            if (arquivo3 != null) arquivos.add(new Arquivo(0, arquivo3));
+            if (arquivosParaExcluir.size() > 0) {
+                for (int i=0; i<arquivosParaExcluir.size(); i++) {
+                    Arquivo arq = arquivosParaExcluir.get(i);
+                    for (Arquivo arq2 : arquivos) {
+                        if (arq2.getId() == 0) {                            
+                            arq2.setId(arq.getId());
+                        }
+                        arquivosParaExcluir.remove(arq);
+                        i--;
+                    }
+                }                
+            }
+                                     
             item.setFotos(arquivos);
-            this.dao.adicionarItem(item);
+            for (Arquivo arq2 : arquivos) {
+                System.out.println(arq2.getId());
+            }
+            //this.dao.adicionarItem(item);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -273,6 +301,18 @@ public class GerenciadorController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @GetMapping("gerenciador/imagens/{idArquivo}")
+    @ResponseBody
+    public ResponseEntity<byte[]> image(@PathVariable int idArquivo) {
+        byte[] bytes = null;
+        Foto foto = new Foto();
+        foto.setId(idArquivo);
+        bytes = new ServicoArmazenamento().carregar(foto);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.IMAGE_PNG);
+        return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
     }
 
 }

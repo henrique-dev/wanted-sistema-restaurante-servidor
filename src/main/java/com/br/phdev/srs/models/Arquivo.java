@@ -5,16 +5,24 @@
  */
 package com.br.phdev.srs.models;
 
-import java.sql.Timestamp;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Paulo Henrique Gonçalves Bacelar
  */
-public class Arquivo {            
-    
-    private int id;        
-    private int tamanho;    
+public class Arquivo {
+
+    private int id;
+    private MultipartFile multipartFile;
+
+    public Arquivo() {
+    }
+
+    public Arquivo(int id, MultipartFile multipartFile) {
+        this.id = id;
+        this.multipartFile = multipartFile;
+    }
 
     public int getId() {
         return id;
@@ -24,12 +32,12 @@ public class Arquivo {
         this.id = id;
     }
 
-    public int getTamanho() {
-        return tamanho;
+    public MultipartFile getMultipartFile() {
+        return multipartFile;
     }
 
-    public void setTamanho(int tamanho) {
-        this.tamanho = tamanho;
-    }            
-    
+    public void setMultipartFile(MultipartFile multipartFile) {
+        this.multipartFile = multipartFile;
+    }
+
 }

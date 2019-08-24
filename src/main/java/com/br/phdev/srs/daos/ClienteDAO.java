@@ -640,7 +640,7 @@ public class ClienteDAO {
     }
 
     public boolean existePedidoAberto(Cliente cliente) throws DAOException {
-        String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 4";
+        String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 11";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();

@@ -29,7 +29,7 @@ public class Item2 {
     private boolean modificavelIngrediente;
     private Set<Ingrediente> ingredientes;
     private List<GrupoVariacao> variacoes;
-    private List<MultipartFile> fotos;
+    private List<Arquivo> fotos;
 
     public long getId() {
         return id;
@@ -135,11 +135,11 @@ public class Item2 {
         this.variacoes = variacoes;
     }
 
-    public List<MultipartFile> getFotos() {
+    public List<Arquivo> getFotos() {
         return fotos;
     }
 
-    public void setFotos(List<MultipartFile> fotos) {
+    public void setFotos(List<Arquivo> fotos) {
         this.fotos = fotos;
     }
 

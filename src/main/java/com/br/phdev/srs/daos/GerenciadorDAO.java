@@ -9,6 +9,7 @@ package com.br.phdev.srs.daos;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.exceptions.StorageException;
+import com.br.phdev.srs.models.Arquivo;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Endereco;
@@ -367,12 +368,12 @@ public class GerenciadorDAO {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 Long idItem = rs.getLong(1);
-                for (Tipo t : item.getTipos()) {
-                    sql = "DELETE FROM item_tipo WHERE id_item=?";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                        stmt2.setLong(1, idItem);
-                        stmt2.execute();
-                    }
+                sql = "DELETE FROM item_tipo WHERE id_item=?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, idItem);
+                    stmt2.execute();
+                }
+                for (Tipo t : item.getTipos()) {                    
                     sql = "INSERT INTO item_tipo VALUES (?,?)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
@@ -381,6 +382,11 @@ public class GerenciadorDAO {
                         stmt2.setLong(4, t.getId());
                         stmt2.execute();
                     }
+                }
+                sql = "DELETE FROM item_complemento WHERE id_item=?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, idItem);
+                    stmt2.execute();
                 }
                 for (Complemento c : item.getComplementos()) {
                     sql = "INSERT INTO item_complemento VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_complemento=?";
@@ -391,6 +397,11 @@ public class GerenciadorDAO {
                         stmt2.setLong(4, c.getId());
                         stmt2.execute();
                     }
+                }
+                sql = "DELETE FROM item_ingrediente WHERE id_item=?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, idItem);
+                    stmt2.execute();
                 }
                 for (Ingrediente i : item.getIngredientes()) {
                     sql = "INSERT INTO item_ingrediente VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_ingrediente=?";
@@ -404,13 +415,13 @@ public class GerenciadorDAO {
                 }
                 
                 ServicoArmazenamento sa = new ServicoArmazenamento();
-                for (MultipartFile file : item.getFotos()) {
+                for (Arquivo arquivo : item.getFotos()) {
                     sql = "INSERT INTO arquivo VALUES (default, null)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                         stmt2.execute();
                         ResultSet rs2 = stmt2.getGeneratedKeys();
                         if (rs2.next()) {
-                            sa.salvar(file, rs2.getLong(1));
+                            sa.salvar(arquivo.getMultipartFile(), rs2.getLong(1));
                             sql = "INSERT INTO item_arquivo VALUES (?,?)";
                             try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
                                 stmt3.setLong(1, idItem);

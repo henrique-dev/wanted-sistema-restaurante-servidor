@@ -54,10 +54,18 @@
                 </div>
             </div>            
         </div>
-        <div class="col-md-8 col-sm-8">
+        <div class="col-md-8 col-sm-8">            
             <div class="p-2 row h-100">
                 <div class="card col-md-12 col-sm-12 h-100">
                     <span id="msg_arquivo" class="text-danger"></span>
+                    <div class="row h-100 pt-2 pb-2">                        
+                        <c:forEach items="${item.fotos}" var="foto">                            
+                            <div class="col-md-3 col-sm-3 h-100 align-items-center justify-content-center">
+                                <img src="http://localhost:8080/wanted/gerenciador/imagens/${foto.id}" alt="..." class="img-thumbnail my-auto">
+                                <center><models:botao data="data-id=${foto.id} data-remover='false'" label="Excluir" icon="fas fa-x" clas="btn btn-danger remover-foto"/></center>                                
+                            </div>
+                        </c:forEach>                                                
+                    </div>
                     <div class="row h-100 align-middle" id="fld_arquivo"></div>
                 </div>
             </div>
@@ -197,6 +205,15 @@
                 arquivos.push($(this)[0].files[0]);
             }            
         });
+        let arquivos_para_excluir = new Array();
+        let arquivos_mantidos = new Array();
+        $(".remover-foto").each(function() {            
+            if ($(this).data("remover")) {                
+                arquivos_para_excluir.push({id : $(this).data("id")});
+            } else {
+                arquivos_mantidos.push({id : $(this).data("id")});
+            }
+        });
 
         if (nome == null || nome.trim().length == 0) {
             $("#msg_nome").text("Insira um nome válido para o item.");
@@ -227,13 +244,18 @@
             ok = false;
         } else {
             $("#msg_genero").text("");
-        }
-        if (arquivos == null || arquivos.length == 0) {
+        }        
+        if (arquivos == null || arquivos_mantidos.length + arquivos.length == 0) {
             $("#msg_arquivo").text("Insira pelo menos uma imagem para o item.");
             ok = false;
         } else {
-            $("#msg_arquivo").text("");
-        }
+            if (arquivos_mantidos.length + arquivos.length > 4) {
+                $("#msg_arquivo").text("É permitido o máximo de 4 imagens por item.");
+                ok = false;
+            } else {
+                $("#msg_arquivo").text("");
+            }
+        }        
 
         if (ok) {
             let formData = new FormData();
@@ -246,6 +268,8 @@
             formData.append("tiposJSON", JSON.stringify(tipos));
             formData.append("complementosJSON", JSON.stringify(complementos));
             formData.append("ingredientesJSON", JSON.stringify(ingredientes));
+            formData.append("arquivosexcluirJSON", JSON.stringify(arquivos_para_excluir));
+            formData.append("arquivosmantidosJSON", JSON.stringify(arquivos_mantidos));
             for (let i=0; i<arquivos.length; i++) {
                 formData.append("arquivo" + i, arquivos[i]);
             }
@@ -391,6 +415,22 @@
             if (dados != null) {
                 processarDados(dados);
             }
+        });
+
+        $(".remover-foto").click(function(){            
+            if (!$(this).data("remover")) {
+                $(this).parent().prev().css("opacity", "0.2");
+                $(this).data("remover", true);
+                $(this).find(".text").text("Incluir");
+                $(this).removeClass("btn-danger");
+                $(this).addClass("btn-primary");
+            } else {
+                $(this).parent().prev().css("opacity", "1");
+                $(this).data("remover", false);
+                $(this).find(".text").text("Excluir");                
+                $(this).removeClass("btn-primary");
+                $(this).addClass("btn-danger");
+            }            
         });
 
         //$('#tbl_tipos').DataTable({searching: false, info: false, lengthChange: false});
