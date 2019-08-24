@@ -102,7 +102,7 @@ public class SessaoDAO {
     }
 
     public void gerarSessao(Usuario usuario, String token1) throws DAOException {
-        String sql = "UPDATE usuario SET token_sessao = ?, token_login_usuario = ?, token_usuario_segredo = ? "
+        String sql = "UPDATE usuario SET token_sessao = ?, token_login_usuario = ?, token_login_segredo = ? "
                 + " WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token1);
