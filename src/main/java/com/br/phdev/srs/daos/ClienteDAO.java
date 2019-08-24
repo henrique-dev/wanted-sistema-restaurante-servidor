@@ -166,10 +166,9 @@ public class ClienteDAO {
                     e.printStackTrace();
                 }
 
-                sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
-                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item_tipo "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
-                        + " WHERE item.id_item = ?";
+                        + " WHERE item_tipo.id_item = ?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
@@ -345,10 +344,9 @@ public class ClienteDAO {
                     e.printStackTrace();
                 }
 
-                sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
-                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item_tipo "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
-                        + " WHERE item.id_item = ?";
+                        + " WHERE item_tipo.id_item = ?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
@@ -427,10 +425,9 @@ public class ClienteDAO {
                     e.printStackTrace();
                 }
 
-                sql = "SELECT tipo.id_tipo, tipo.nome FROM item "
-                        + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
+                sql = "SELECT tipo.id_tipo, tipo.nome FROM item_tipo "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
-                        + " WHERE item.id_item = ?";
+                        + " WHERE item_tipo.id_item = ?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
