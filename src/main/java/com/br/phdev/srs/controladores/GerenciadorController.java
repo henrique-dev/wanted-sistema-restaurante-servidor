@@ -106,7 +106,6 @@ public class GerenciadorController {
     public String atualizarItem(String opcao, Integer id, Model modelo) {        
         try {
             Item item = this.dao.getItem(new Item(id));
-            System.out.println(item);
             modelo.addAttribute("acao", "atualizar");
             modelo.addAttribute("item", item);
             modelo.addAttribute("generos", this.dao.getGeneros());
@@ -130,8 +129,6 @@ public class GerenciadorController {
             item.setDescricao(descricao);
             item.setPreco(Double.parseDouble(preco));
             item.setGenero(new Genero(Long.parseLong(genero)));
-            
-            System.out.println(tiposJSON);
             
             ObjectMapper mapeador = new ObjectMapper();
             Set<Tipo> tipos = mapeador.readValue(tiposJSON,
