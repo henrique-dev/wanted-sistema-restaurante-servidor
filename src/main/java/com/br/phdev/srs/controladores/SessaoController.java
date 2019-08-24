@@ -78,6 +78,7 @@ public class SessaoController {
             tmpUsuario.setSenhaUsuario(usuario.getSenhaUsuario());
             Cliente cliente = this.dao.autenticar(usuario);
             if (cliente != null) {
+                tmpUsuario.setIdUsuario(usuario.getIdUsuario());
                 this.dao.gerarSessao(tmpUsuario, sessao.getId());
                 mensagem.setCodigo(100);
                 sessao.setAttribute("usuario", usuario);
