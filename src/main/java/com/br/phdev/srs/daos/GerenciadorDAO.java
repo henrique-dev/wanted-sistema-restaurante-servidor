@@ -344,23 +344,36 @@ public class GerenciadorDAO {
     }
 
     public void adicionarItem(Item2 item) {
-        String sql = "INSERT INTO item (nome, descricao, preco, id_genero, modificavel, modificavel_ingrediente, tempo_preparo) "
-                + " values (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO item (id_item, nome, descricao, preco, id_genero, modificavel, modificavel_ingrediente, tempo_preparo) "
+                + " values (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE nome=?, descricao=?, preco=?, id_genero=?, modificavel=?, modificavel_ingrediente=?, tempo_preparo=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, item.getNome());
-            stmt.setString(2, item.getDescricao());
-            stmt.setDouble(3, item.getPreco());
-            stmt.setLong(4, item.getGenero().getId());
-            stmt.setBoolean(5, item.isModificavel());
-            stmt.setBoolean(6, item.isModificavelIngrediente());
-            //stmt.setString(7, item.getTempoPreparo());
-            stmt.setString(7, "");
+            stmt.setLong(1, item.getId());
+            stmt.setString(2, item.getNome());
+            stmt.setString(3, item.getDescricao());
+            stmt.setDouble(4, item.getPreco());
+            stmt.setLong(5, item.getGenero().getId());
+            stmt.setBoolean(6, item.isModificavel());
+            stmt.setBoolean(7, item.isModificavelIngrediente());
+            stmt.setString(8, item.getTempoPreparo());
+            
+            stmt.setString(9 ,item.getNome());
+            stmt.setString(10, item.getDescricao());
+            stmt.setDouble(11, item.getPreco());
+            stmt.setLong(12, item.getGenero().getId());
+            stmt.setBoolean(13, item.isModificavel());
+            stmt.setBoolean(14, item.isModificavelIngrediente());
+            stmt.setString(15, item.getTempoPreparo());
             stmt.execute();
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 Long idItem = rs.getLong(1);
                 for (Tipo t : item.getTipos()) {
-                    sql = "INSERT INTO item_tipo VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_tipo=?";
+                    sql = "DELETE FROM item_tipo WHERE id_item=?";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, idItem);
+                        stmt2.execute();
+                    }
+                    sql = "INSERT INTO item_tipo VALUES (?,?)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
                         stmt2.setLong(2, t.getId());
@@ -397,7 +410,7 @@ public class GerenciadorDAO {
                         stmt2.execute();
                         ResultSet rs2 = stmt2.getGeneratedKeys();
                         if (rs2.next()) {
-                            //sa.salvar(file, rs2.getLong(1));
+                            sa.salvar(file, rs2.getLong(1));
                             sql = "INSERT INTO item_arquivo VALUES (?,?)";
                             try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
                                 stmt3.setLong(1, idItem);
@@ -408,7 +421,7 @@ public class GerenciadorDAO {
                     }
                 }
             }
-        } catch (SQLException/* | StorageException*/ e) {
+        } catch (SQLException | StorageException e) {
             e.printStackTrace();
         }
     }
@@ -435,6 +448,7 @@ public class GerenciadorDAO {
             while (rs.next()) {
                 item.setId(rs.getLong("id_item"));
                 item.setNome(rs.getString("nome"));
+                item.setDescricao(rs.getString("descricao"));
                 item.setPreco(rs.getDouble("preco"));
                 item.setTempoPreparo(rs.getString("tempo_preparo"));
                 item.setModificavel(rs.getBoolean("modificavel"));

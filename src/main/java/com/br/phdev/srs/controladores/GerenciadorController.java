@@ -104,10 +104,9 @@ public class GerenciadorController {
     
     @GetMapping("gerenciador/item/atualizar")
     public String atualizarItem(String opcao, Integer id, Model modelo) {        
-        try {
-            Item item = this.dao.getItem(new Item(id));
+        try {            
             modelo.addAttribute("acao", "atualizar");
-            modelo.addAttribute("item", item);
+            modelo.addAttribute("item", this.dao.getItem(new Item(id)));
             modelo.addAttribute("generos", this.dao.getGeneros());
             modelo.addAttribute("tipos", this.dao.getTipos());
             modelo.addAttribute("complementos", this.dao.getComplementos());
@@ -120,14 +119,16 @@ public class GerenciadorController {
     
     @PostMapping("gerenciador/item/salvar")
     @ResponseBody
-    public void adicionarItem(String nome, String descricao, String preco, String tiposJSON, String genero,
+    public void adicionarItem(Integer id, String nome, String descricao, String preco, String tempoPreparo, String tiposJSON, String genero,
             String ingredientesJSON, String complementosJSON, MultipartFile arquivo0, MultipartFile arquivo1,
             MultipartFile arquivo2, MultipartFile arquivo3) {
         try {
             Item2 item = new Item2();
+            item.setId(id);
             item.setNome(nome);
             item.setDescricao(descricao);
             item.setPreco(Double.parseDouble(preco));
+            item.setTempoPreparo(tempoPreparo);
             item.setGenero(new Genero(Long.parseLong(genero)));
             
             ObjectMapper mapeador = new ObjectMapper();

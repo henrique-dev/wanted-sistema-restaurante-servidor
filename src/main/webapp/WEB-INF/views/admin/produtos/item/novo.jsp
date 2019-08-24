@@ -17,8 +17,7 @@
 <style>
     
 </style>
-  
-  <div id="ctn_index" class="container col-12">
+  <div id="ctn_index" class="container col-12">    
     <div class="row mt-3">
         <div class="col-md-4 col-sm-4">
             <div class="p-2 row">
@@ -43,6 +42,12 @@
                         <div class="col-md-4 col-sm-4">
                             <span id="msg_preco" class="text-danger"></span>
                             <models:campoPreco id="fld_preco" name="preco" label="Preço" value="0"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12">
+                            <span id="msg_tempo_preparo" class="text-danger"></span>
+                            <models:campoTexto id="fld_tempo_preparo" name="tempo_preparo" label="Tempo de preparo"/>
                         </div>
                     </div>
                 </div>
@@ -163,6 +168,7 @@
         let nome = $("#fld_nome").val();
         let descricao = $("#fld_descricao").val();
         let preco = $("#fld_preco").val();
+        let tempo_preparo = $("#fld_tempo_preparo").val();
         let genero = $('#fld_genero').find(":selected").val();        
         let tipos = new Array();
         $("#tbl_tipos").children("tbody").find("tr").each(function() {
@@ -201,6 +207,12 @@
         } else {
             $("#msg_preco").text("");
         }
+        if (tempo_preparo == null || tempo_preparo.trim().length == 0) {
+            $("#msg_tempo_preparo").text("Insira o tempo de preparo válido para o item.");
+            ok = false;
+        } else {
+            $("#msg_tempo_preparo").text("");
+        }
         if (genero == null || genero == 0) {
             $("#msg_genero").text("Insira um genero para o item.");
             ok = false;
@@ -216,9 +228,11 @@
 
         if (ok) {
             let formData = new FormData();
+            formData.append("id", 0);
             formData.append("nome", nome);
             formData.append("descricao", descricao);
             formData.append("preco", preco);
+            formData.append("tempoPreparo", tempo_preparo);
             formData.append("genero", genero);
             formData.append("tiposJSON", JSON.stringify(tipos));
             formData.append("complementosJSON", JSON.stringify(complementos));
@@ -238,6 +252,7 @@
         $("#fld_nome").val("");
         $("#fld_descricao").val("");
         $("#fld_preco").val(0);
+        $("#fld_tempo_preparo").val("");
         $('#fld_genero').val(0);
         $("#tbl_tipos").children("tbody").find("tr").each(function() {
             let tr = $(this);
@@ -266,7 +281,7 @@
     }
     
     function processarDados(dados) {
-        $("#btn_salvar").attr('disabled');
+        $("#btn_salvar").attr('disabled', 'disabled');
         $.ajax({
             type: "POST",
             url: "salvar",
@@ -274,7 +289,9 @@
             processData: false,
             contentType: false,
             success: function(dadosIn) {
-                $("#btn_salvar").removeAttr('disabled', 'disabled');
+                console.log(dadosIn);
+                alertar("success", "Item cadastrado com sucesso");
+                $("#btn_salvar").removeAttr('disabled');
                 limparCampos();
             }
         });

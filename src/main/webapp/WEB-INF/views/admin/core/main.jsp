@@ -126,25 +126,11 @@
             <div id="content-wrapper" class="d-flex flex-column">
 
                 <!-- Main Content -->
-                <div id="content">
-
-                    <!-- Topbar -->
-                    <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow">
-
-                        <!-- Sidebar Toggle (Topbar) -->
-                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                            <i class="fa fa-bars"></i>
-                        </button>                         
-
-                        <!-- Topbar Navbar -->
-                        <ul class="navbar-nav ml-auto">                            
-
-                        </ul>
-
-                    </nav>
-                    <!-- End of Topbar -->
+                <div id="content">                    
 
                     <!-- Begin Page Content -->
+                    <div id="ctn_alerta" class="alert alert-dismissible fade" role="alert">                        
+                    </div>
                     <div id="ctn_conteudo" class="container-fluid">
 
                     </div>
@@ -204,5 +190,25 @@
         <script src="${pageContext.request.contextPath}/resources/js/sb-admin-2.min.js"></script>
 
     </body>
+
+    <script type="text/javascript" >
+        function alertar(tipo, mensagem) {
+            if (tipo == "warning" || tipo == "success" || tipo == "danger") {                
+                $("#ctn_alerta").removeClass("alert-warning");
+                $("#ctn_alerta").removeClass("alert-danger");
+                $("#ctn_alerta").removeClass("alert-success");
+                $("#ctn_alerta").addClass("alert-" + tipo);
+                $("#ctn_alerta").addClass("show");
+                $("#ctn_alerta").empty();
+                $("#ctn_alerta").append(mensagem);
+                $("#ctn_alerta").append(
+                    "<button type='button' class='close' data-dismiss='alert' aria-label='Fechar'>"
+                        +"<span aria-hidden='true'>&times;</span>"
+                    +"</button>"
+                );
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+            }            
+        }
+    </script>
 
 </html>

@@ -21,7 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class ServicoArmazenamento {
     
-    private static final String MASTER_PATH = "/home/mrfood/imagens/";       
+    private static final String MASTER_PATH = "/home/mrfood/imagens/";
+    //private static final String MASTER_PATH = "D://DESENVOLVIMENTO/PROJETOS/wanted/repo/";       
     
     
     public void salvar(MultipartFile arquivo, long id) throws StorageException {                

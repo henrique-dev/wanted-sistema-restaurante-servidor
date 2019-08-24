@@ -45,6 +45,12 @@
                             <models:campoPreco id="fld_preco" name="preco" label="Preço" value="${item.preco}"/>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12">
+                            <span id="msg_tempo_preparo" class="text-danger"></span>
+                            <models:areaTexto id="fld_tempo_preparo" name="tempo_preparo" label="Tempo de preparo" value="${item.tempoPreparo}"/>
+                        </div>
+                    </div>
                 </div>
             </div>            
         </div>
@@ -161,6 +167,8 @@
 </div>
 
 <script type="text/javascript">
+
+    const id_item = "${item.id}";
     
     $("#ctn_conteudo").append($("#ctn_index"));    
     
@@ -169,6 +177,7 @@
         let nome = $("#fld_nome").val();
         let descricao = $("#fld_descricao").val();
         let preco = $("#fld_preco").val();
+        let tempo_preparo = $("#fld_tempo_preparo").val();
         let genero = $('#fld_genero').find(":selected").val();        
         let tipos = new Array();
         $("#tbl_tipos").children("tbody").find("tr").each(function() {
@@ -207,6 +216,12 @@
         } else {
             $("#msg_preco").text("");
         }
+        if (tempo_preparo == null || tempo_preparo.trim().length == 0) {
+            $("#msg_tempo_preparo").text("Insira o tempo de preparo válido para o item.");
+            ok = false;
+        } else {
+            $("#msg_tempo_preparo").text("");
+        }
         if (genero == null || genero == 0) {
             $("#msg_genero").text("Insira um genero para o item.");
             ok = false;
@@ -222,9 +237,11 @@
 
         if (ok) {
             let formData = new FormData();
+            formData.append("id", id_item);
             formData.append("nome", nome);
             formData.append("descricao", descricao);
             formData.append("preco", preco);
+            formData.append("tempoPreparo", tempo_preparo);
             formData.append("genero", genero);
             formData.append("tiposJSON", JSON.stringify(tipos));
             formData.append("complementosJSON", JSON.stringify(complementos));
@@ -244,6 +261,7 @@
         $("#fld_nome").val("");
         $("#fld_descricao").val("");
         $("#fld_preco").val(0);
+        $("#fld_tempo_preparo").val("");
         $('#fld_genero').val(0);
         $("#tbl_tipos").children("tbody").find("tr").each(function() {
             let tr = $(this);

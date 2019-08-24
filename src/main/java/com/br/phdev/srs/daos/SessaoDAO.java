@@ -11,6 +11,9 @@ import com.br.phdev.srs.exceptions.DAOIncorrectData;
 import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Usuario;
+import com.br.phdev.srs.utils.ServicoGeracaoToken;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -99,12 +102,15 @@ public class SessaoDAO {
     }
 
     public void gerarSessao(Usuario usuario, String token1) throws DAOException {
-        String sql = "UPDATE usuario SET token_sessao = ? WHERE usuario.id_usuario = ?";
+        String sql = "UPDATE usuario SET token_sessao = ?, token_login_usuario = ?, token_usuario_segredo = ? "
+                + " WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token1);
-            stmt.setLong(2, usuario.getIdUsuario());            
+            stmt.setString(2, new ServicoGeracaoToken().gerarSHA256(usuario.getNomeUsuario()));
+            stmt.setString(3, new ServicoGeracaoToken().gerarSHA256(usuario.getSenhaUsuario()));
+            stmt.setLong(4, usuario.getIdUsuario());
             stmt.execute();
-        } catch (SQLException e) {
+        } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new DAOException(e, 200);
         }
     }
