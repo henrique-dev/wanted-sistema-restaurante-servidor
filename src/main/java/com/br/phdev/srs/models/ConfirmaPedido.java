@@ -14,13 +14,14 @@ import java.util.List;
  */
 public class ConfirmaPedido {
         
+    private double precoTotal;
+    private String observacaoEntrega;
+    private Double frete;
     private List<ItemPedido> itens;
     private List<FormaPagamento> formaPagamentos;
     private List<Endereco> enderecos;
-    private String codigoPromocional;
-    private double precoTotal;
-    private String observacaoEntrega;
-    private Mensagem mensagem;
+    private Mensagem mensagem;    
+    private CupomDesconto cupom;
 
     public ConfirmaPedido() {
     }
@@ -29,8 +30,8 @@ public class ConfirmaPedido {
         this.itens = itens;
         this.formaPagamentos = formaPagamentos;
         this.enderecos = enderecos;
-        this.precoTotal = precoTotal;        
-    }      
+        this.precoTotal = precoTotal;
+    }
 
     public List<ItemPedido> getItens() {
         return itens;
@@ -38,7 +39,7 @@ public class ConfirmaPedido {
 
     public void setItens(List<ItemPedido> itens) {
         this.itens = itens;
-    }    
+    }
 
     public List<FormaPagamento> getFormaPagamentos() {
         return formaPagamentos;
@@ -55,26 +56,18 @@ public class ConfirmaPedido {
     public void setEnderecos(List<Endereco> enderecos) {
         this.enderecos = enderecos;
     }
-    
+
     public void calcularPrecoTotal(double frete) {
         this.precoTotal += frete;
     }
 
     public void setPrecoTotal(double precoTotal) {
         this.precoTotal = precoTotal;
-    }        
+    }
 
     public double getPrecoTotal() {
         return precoTotal;
-    }      
-
-    public String getCodigoPromocional() {
-        return codigoPromocional;
     }
-
-    public void setCodigoPromocional(String codigoPromocional) {
-        this.codigoPromocional = codigoPromocional;
-    }  
 
     public String getObservacaoEntrega() {
         return observacaoEntrega;
@@ -82,7 +75,7 @@ public class ConfirmaPedido {
 
     public void setObservacaoEntrega(String observacaoEntrega) {
         this.observacaoEntrega = observacaoEntrega;
-    }        
+    }
 
     public Mensagem getMensagem() {
         return mensagem;
@@ -92,9 +85,20 @@ public class ConfirmaPedido {
         this.mensagem = mensagem;
     }
 
-    @Override
-    public String toString() {
-        return "ConfirmaPedido{" + "itens=" + itens + ", formaPagamentos=" + formaPagamentos + ", enderecos=" + enderecos + ", codigoPromocional=" + codigoPromocional + ", precoTotal=" + precoTotal + ", observacaoEntrega=" + observacaoEntrega + '}';
-    }    
-        
+    public CupomDesconto getCupom() {
+        return cupom;
+    }
+
+    public void setCupom(CupomDesconto cupom) {
+        this.cupom = cupom;
+    }
+
+    public Double getFrete() {
+        return frete;
+    }
+
+    public void setFrete(Double frete) {
+        this.frete = frete;
+    }
+
 }

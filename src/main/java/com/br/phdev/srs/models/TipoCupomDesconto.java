@@ -15,13 +15,15 @@ public class TipoCupomDesconto {
 
     private Long id;
     private String descricao;
+    private String controle;
 
     public TipoCupomDesconto() {
     }
 
-    public TipoCupomDesconto(Long id, String descricao) {
+    public TipoCupomDesconto(Long id, String descricao, String controle) {
         this.id = id;
         this.descricao = descricao;
+        this.controle = controle;
     }        
 
     public Long getId() {
@@ -39,6 +41,14 @@ public class TipoCupomDesconto {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
+    public String getControle() {
+        return controle;
+    }
+
+    public void setControle(String controle) {
+        this.controle = controle;
+    }       
 
     @Override
     public String toString() {

@@ -15,21 +15,22 @@ import java.util.List;
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-public class Pedido {        
-    
+public class Pedido {
+
     private long id;
     private double precoTotal;
     private double frete;
     private Timestamp data;
     private List<ItemPedidoFacil> itens;
-    private FormaPagamento formaPagamento;    
+    private FormaPagamento formaPagamento;
     private Endereco endereco;
     private Cliente cliente;
     private int estado;
     private String observacaoEntrega;
+    private CupomDesconto cupom;
 
     public Pedido() {
-        
+
     }
 
     public Pedido(long id, double precoTotal, Timestamp data, List<ItemPedidoFacil> itens, FormaPagamento formaPagamento, Endereco endereco, int estado, String observacaoEntrega) {
@@ -41,7 +42,7 @@ public class Pedido {
         this.endereco = endereco;
         this.estado = estado;
         this.observacaoEntrega = observacaoEntrega;
-    }         
+    }
 
     public long getId() {
         return id;
@@ -65,7 +66,7 @@ public class Pedido {
 
     public void setItens(List<ItemPedidoFacil> itens) {
         this.itens = itens;
-    }        
+    }
 
     public void convertItemParaItemFacil(List<ItemPedido> itens) {
         this.itens = new ArrayList<>();
@@ -88,7 +89,7 @@ public class Pedido {
 
     public void setEndereco(Endereco endereco) {
         this.endereco = endereco;
-    }        
+    }
 
     public int getEstado() {
         return estado;
@@ -104,7 +105,7 @@ public class Pedido {
 
     public void setPrecoTotal(double precoTotal) {
         this.precoTotal = precoTotal;
-    }   
+    }
 
     public String getObservacaoEntrega() {
         return observacaoEntrega;
@@ -112,7 +113,7 @@ public class Pedido {
 
     public void setObservacaoEntrega(String observacaoEntrega) {
         this.observacaoEntrega = observacaoEntrega;
-    }        
+    }
 
     public void setFrete(double frete) {
         this.frete = frete;
@@ -120,7 +121,7 @@ public class Pedido {
 
     public double getFrete() {
         return frete;
-    }       
+    }
 
     public Cliente getCliente() {
         return cliente;
@@ -129,5 +130,13 @@ public class Pedido {
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
-    
+
+    public CupomDesconto getCupom() {
+        return cupom;
+    }
+
+    public void setCupom(CupomDesconto cupom) {
+        this.cupom = cupom;
+    }
+
 }

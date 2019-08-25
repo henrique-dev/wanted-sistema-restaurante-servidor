@@ -22,6 +22,7 @@ public class CupomDesconto2 {
     private Long quantidade;
     private String validade;
     private Boolean ativo;
+    private Boolean expirado;
     private Boolean percentual;
     private Boolean proximaCompra;
     private Boolean usado;
@@ -113,6 +114,14 @@ public class CupomDesconto2 {
 
     public void setUsado(Boolean usado) {
         this.usado = usado;
+    }
+
+    public Boolean getExpirado() {
+        return expirado;
+    }
+
+    public void setExpirado(Boolean expirado) {
+        this.expirado = expirado;
     }
 
     @Override

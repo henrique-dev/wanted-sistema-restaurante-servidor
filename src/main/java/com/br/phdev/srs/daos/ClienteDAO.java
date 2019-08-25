@@ -690,12 +690,24 @@ public class ClienteDAO {
             }
             valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
             ip.setPrecoTotal(valorItem.doubleValue());
-            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
+            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade() == 0 ? 1 : ip.getQuantidade())));
+        }        
+        if (confirmaPedido.getCupom() != null) {
+            if (confirmaPedido.getCupom().getPercentual()) {
+                BigDecimal porcentagem = new BigDecimal(confirmaPedido.getCupom().getValor()).divide(new BigDecimal(100));
+                valorTotal = valorTotal.subtract(new BigDecimal(valorTotal.doubleValue()).multiply(porcentagem));
+            } else {
+                BigDecimal desconto = new BigDecimal(confirmaPedido.getCupom().getValor());                
+                valorTotal = valorTotal.subtract(desconto);
+                if (valorTotal.doubleValue() < 0) {
+                    valorTotal = new BigDecimal(0);
+                }
+            }
         }
-        confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
+        confirmaPedido.setPrecoTotal(valorTotal.doubleValue());        
         return confirmaPedido;
     }
-    
+
     private void inserirPrecosInterno(ConfirmaPedido confirmaPedido) throws DAOException, DAOIncorrectData {
         if (confirmaPedido.getItens() == null) {
             throw new DAOIncorrectData(300);
@@ -729,7 +741,7 @@ public class ClienteDAO {
             }
             valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
             ip.setPrecoTotal(valorItem.doubleValue());
-            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
+            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade() == 0 ? 1 : ip.getQuantidade())));
         }
         confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
     }
@@ -811,7 +823,7 @@ public class ClienteDAO {
         }
     }
 
-    public ConfirmaPedido refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {        
+    public ConfirmaPedido refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {
         ConfirmaPedido confirmaPedido = new ConfirmaPedido();
         // recuperar_itens_pedido
         String sql = "SELECT itens, precototal, frete FROM pedido WHERE id_cliente = ? AND id_pedido = ?";
@@ -836,8 +848,8 @@ public class ClienteDAO {
                     getItem(ip, cliente);
                     ip.setQuantidade(ipf.getQuantidade());
                     for (Complemento c : ip.getComplementos()) {
-                        for (Complemento cf : ipf.getComplementos()) {                            
-                            if (c.getId() == cf.getId()) {                                
+                        for (Complemento cf : ipf.getComplementos()) {
+                            if (c.getId() == cf.getId()) {
                                 cf.setCheck(true);
                             }
                         }
@@ -906,7 +918,7 @@ public class ClienteDAO {
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
-        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?, ?)";
+        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?, ?, ?)";
         // inserir_pedido
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -918,6 +930,7 @@ public class ClienteDAO {
             stmt.setLong(5, pedido.getEndereco().getId());
             stmt.setString(6, pedido.getObservacaoEntrega());
             stmt.setDouble(7, pedido.getFrete());
+            stmt.setLong(8, pedido.getCupom() == null ? null : pedido.getCupom().getId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -975,26 +988,26 @@ public class ClienteDAO {
         }
         // inserir_pedido_de_pre_pedido
         String sql = "SELECT pre_pedido.id_cliente, pre_pedido.id_pre_pedido FROM pre_pedido WHERE pre_pedido.token = ?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, idPagamento);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 long idCliente = rs.getLong("id_cliente");
-                long idPrePedido = rs.getLong("id_pre_pedido");                
+                long idPrePedido = rs.getLong("id_pre_pedido");
                 sql = "INSERT INTO pedido (data, itens, precototal, id_formapagamento, id_cliente, id_endereco, pagamentoefetuado, estado, observacao_entrega) "
                         + " (SELECT datapedido, itens, precototal, id_formapagamento, id_cliente, id_endereco, true, 1, observacao_entrega "
                         + " FROM pre_pedido WHERE pre_pedido.id_cliente = ?)";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, idCliente);
                     stmt2.execute();
-                }                
+                }
                 // remover_pre_pedido                
                 sql = "DELETE FROM pre_pedido WHERE id_pre_pedido = ?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt.setLong(1, idPrePedido);
                     stmt.execute();
-                }                
-            }            
+                }
+            }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
@@ -1032,7 +1045,7 @@ public class ClienteDAO {
                 endereco.setId(rs.getObject("id_endereco") != null ? rs.getLong("id_endereco") : -1);
                 endereco.setDescricao(rs.getString("endereco_descricao"));
                 pedido.setEndereco(endereco);
-                pedido.setFrete(rs.getDouble("frete"));                
+                pedido.setFrete(rs.getDouble("frete"));
                 System.out.println(rs.getString("pedido_estado.descricao"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 ObjectMapper mapeador = new ObjectMapper();
@@ -1075,7 +1088,7 @@ public class ClienteDAO {
 
                 ObjectMapper mapeador = new ObjectMapper();
                 List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
-                });                
+                });
                 pedido.setItens(itens);
                 pedido.calcularPedido();
             }
@@ -1158,10 +1171,12 @@ public class ClienteDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public List<CupomDesconto2> getCuponsDescontos(Cliente cliente) throws DAOException {
         List<CupomDesconto2> cuponsDescontos = new ArrayList<>();
-        String sql = "SELECT codigo, cupomdesconto.descricao, cupomdesconto_tipo.descricao, validade, percentual, valor, proxima_compra, usado FROM cupomdesconto_cliente "
+        String sql = "SELECT cupomdesconto.id_cupomdesconto, codigo, cupomdesconto.descricao, cupomdesconto_tipo.controle, "
+                + " cupomdesconto_tipo.descricao, validade, percentual, valor, proxima_compra, usado, (NOW() > validade) expirada "
+                + " FROM cupomdesconto_cliente "
                 + " LEFT JOIN cupomdesconto ON cupomdesconto_cliente.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
                 + " LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo "
                 + " WHERE cupomdesconto_cliente.id_cliente = ?";
@@ -1170,31 +1185,33 @@ public class ClienteDAO {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 CupomDesconto2 cupomDesconto = new CupomDesconto2();
+                cupomDesconto.setId(rs.getLong("id_cupomdesconto"));
                 cupomDesconto.setCodigo(rs.getString("codigo"));
                 cupomDesconto.setDescricao(rs.getString("cupomdesconto.descricao"));
-                cupomDesconto.setTipo(new TipoCupomDesconto(0l, rs.getString("cupomdesconto_tipo.descricao")));
+                cupomDesconto.setTipo(new TipoCupomDesconto(0l, rs.getString("cupomdesconto_tipo.descricao"), rs.getString("cupomdesconto_tipo.controle")));
                 String validade = LocalDateTime.parse(rs.getString("validade"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                cupomDesconto.setValidade(validade);                
+                cupomDesconto.setValidade(validade);
+                cupomDesconto.setExpirado(rs.getBoolean("expirada"));
                 cupomDesconto.setValor(rs.getDouble("valor"));
                 cupomDesconto.setPercentual(rs.getBoolean("percentual"));
                 cupomDesconto.setProximaCompra(rs.getBoolean("proxima_compra"));
                 cupomDesconto.setUsado(rs.getBoolean("usado"));
                 cuponsDescontos.add(cupomDesconto);
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DAOException(e, 200);
         }
         return cuponsDescontos;
     }
-    
-    synchronized public Mensagem cadastrarCupomDesconto(Cliente cliente, String codigo) throws DAOException {
+
+    synchronized public Mensagem cadastrarCupomDesconto(Cliente cliente, CupomDesconto cupom) throws DAOException {
         Mensagem mensagem = new Mensagem();
         String sql = "SELECT id_cupomdesconto id, controle, "
                 + " IF(controle = 'PRIMEIRA_COMPRA' AND (SELECT COUNT(*) FROM pedido WHERE id_cliente = ? AND estado = 11) > 0, true, false) primeira_compra, "
                 + " (quantidade - (SELECT COUNT(*) FROM cupomdesconto_cliente WHERE id_cupomdesconto = id)) quantidade_restante, "
-                + " (SELECT COUNT(*) FROM cupomdesconto_cliente WHERE id_cliente = ? AND id_cupomdesconto = id) possui, " 
+                + " (SELECT COUNT(*) FROM cupomdesconto_cliente WHERE id_cliente = ? AND id_cupomdesconto = id) possui, "
                 + " (NOW() > validade) expirada "
                 + " FROM cupomdesconto "
                 + " LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo "
@@ -1202,7 +1219,7 @@ public class ClienteDAO {
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, cliente.getId());
-            stmt.setString(3, codigo);
+            stmt.setString(3, cupom.getCodigo());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String controle = rs.getString("controle");
@@ -1211,7 +1228,7 @@ public class ClienteDAO {
                 Boolean possui = rs.getBoolean("possui");
                 Boolean expirada = rs.getBoolean("expirada");
                 Long idCupom = rs.getLong("id");
-                if (!expirada && !possui && quantidadeRestante > 0 && (controle.equals("PRIMEIRA_COMPRA") && !primeiraCompra)) {
+                if (!expirada && !possui && quantidadeRestante > 0 && (controle.equals("PRIMEIRA_COMPRA") ? !primeiraCompra : true)) {
                     sql = "INSERT INTO cupomdesconto_cliente (id_cliente, id_cupomdesconto, proxima_compra, usado) VALUES (?,?,false,false)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, cliente.getId());
@@ -1233,6 +1250,66 @@ public class ClienteDAO {
             throw new DAOException(e, 200);
         }
         return mensagem;
+    }
+
+    public Mensagem ativarCupomDesconto(Cliente cliente, CupomDesconto cupom) throws DAOException {
+        Mensagem mensagem = new Mensagem();
+        try {
+            String sql = "SELECT validade FROM cupomdesconto_cliente "
+                    + " LEFT JOIN cupomdesconto ON cupomdesconto_cliente.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
+                    + " WHERE validade > NOW() AND id_cliente = ? AND cupomdesconto_cliente.id_cupomdesconto = ?";
+            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+                stmt.setLong(1, cliente.getId());
+                stmt.setLong(2, cupom.getId());
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    sql = "UPDATE cupomdesconto_cliente SET proxima_compra=false "
+                            + " WHERE id_cliente = ? AND usado = false";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, cliente.getId());
+                        stmt2.execute();
+                    }
+                    sql = "UPDATE cupomdesconto_cliente SET proxima_compra=true "
+                            + " WHERE id_cliente = ? AND id_cupomdesconto = ? AND usado = false";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, cliente.getId());
+                        stmt2.setLong(2, cupom.getId());
+                        stmt2.execute();
+                    }
+                    mensagem.setCodigo(100);
+                    mensagem.setDescricao("Cupom será usado na proxima compra");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(101);
+            throw new DAOException(e, 200);
+        }
+        return mensagem;
+    }
+    
+    public CupomDesconto verificarCupomDesconto(Cliente cliente) throws DAOException {
+        CupomDesconto cupom = null;
+        String sql = "SELECT cupomdesconto.id_cupomdesconto, percentual, valor, controle FROM cupomdesconto_cliente "
+                + " LEFT JOIN cupomdesconto ON cupomdesconto_cliente.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
+                + " LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo "
+                + " WHERE id_cliente = ? AND proxima_compra = true AND ativo = true AND usado = false";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                cupom = new CupomDesconto();
+                cupom.setId(rs.getLong("id_cupomdesconto"));
+                cupom.setPercentual(rs.getBoolean("percentual"));
+                cupom.setValor(rs.getDouble("valor"));
+                cupom.setTipo(new TipoCupomDesconto(0l, rs.getString("controle"), ""));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return cupom;
     }
 
 }

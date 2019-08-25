@@ -325,13 +325,22 @@ public class GerenciadorDAO {
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             stmt.execute();
-            sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle FROM pedido "
+            sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle, id_cupomdesconto FROM pedido "
                     + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                     + " WHERE id_pedido=? ";
             try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                 stmt2.setLong(1, pedido.getId());
                 ResultSet rs = stmt2.executeQuery();
-                if (rs.next()) {
+                if (rs.next()) {                    
+                    if (rs.getInt("estado") == 11 && rs.getObject("id_cupomdesconto") != null) {
+                        sql = "UPDATE cupomdesconto_cliente SET usado = true, proxima_compra = false WHERE id_cliente = ? AND id_cupomdesconto = ?";
+                        try (PreparedStatement stmt3 = this.conexao.prepareStatement(sql)) {
+                            stmt3.setLong(1, rs.getLong("id_cliente"));
+                            stmt3.setLong(2, rs.getLong("id_cupomdesconto"));
+                            stmt3.execute();
+                        }
+                    }
+                    
                     Notificacao notificacao = new Notificacao();
                     notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
                     notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", "
@@ -340,7 +349,7 @@ public class GerenciadorDAO {
                             + " \"estado_controle\" : \"" + rs.getString("pedido_estado.controle") + "\"}");
                     this.adicionarNotificacao(notificacao);
                 }
-            }
+            }            
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
@@ -645,7 +654,7 @@ public class GerenciadorDAO {
             while (rs.next()) {
                 CupomDesconto cupom = new CupomDesconto();
                 cupom.setId(rs.getLong("id_cupomdesconto"));
-                cupom.setTipo(new TipoCupomDesconto(rs.getLong("cupomdesconto_tipo.id_cupomdesconto_tipo"), rs.getString("cupomdesconto_tipo.descricao")));
+                cupom.setTipo(new TipoCupomDesconto(rs.getLong("cupomdesconto_tipo.id_cupomdesconto_tipo"), rs.getString("cupomdesconto_tipo.descricao"), rs.getString("cupomdesconto_tipo.controle")));                
                 cupom.setCodigo(rs.getString("codigo"));
                 cupom.setDescricao(rs.getString("descricao"));
                 cupom.setQuantidade(rs.getLong("quantidade"));
