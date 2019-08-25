@@ -61,7 +61,7 @@
                     <div class="row h-100 pt-2 pb-2">                        
                         <c:forEach items="${item.fotos}" var="foto">                            
                             <div class="col-md-3 col-sm-3 h-100 align-items-center justify-content-center">
-                                <img src="http://localhost:8080/wanted/gerenciador/imagens/${foto.id}" alt="..." class="img-thumbnail my-auto">
+                                <img src="https://headred.com.br/wanted/gerenciador/imagens/${foto.id}" alt="..." class="img-thumbnail my-auto">
                                 <center><models:botao data="data-id=${foto.id} data-remover='false'" label="Excluir" icon="fas fa-x" clas="btn btn-danger remover-foto"/></center>                                
                             </div>
                         </c:forEach>                                                
