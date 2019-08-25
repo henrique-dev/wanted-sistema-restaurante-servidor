@@ -306,8 +306,8 @@
                 let mensagem = JSON.parse(dadosIn);
                 switch(mensagem.codigo) {
                     case 100:
-                        alertar("success", "Item atualizado com sucesso");
-                        window.location.replace("../itens");
+                        alertar("success", "Item atualizado com sucesso");                        
+                        window.location.replace("../itens?msg_tipo="+escape("success")+"&msg=" + escape("Item atualizado com sucesso"));
                         break;
                     default :
                         alertar("danger", "Erro ao cadastrar o item");

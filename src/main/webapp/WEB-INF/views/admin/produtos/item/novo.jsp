@@ -310,13 +310,7 @@
     
     $(document).ready(function() {
 
-        $(".collapse").removeClass("show");
-        $(".nav-item").removeClass("active");
-        $(".collapse-item").removeClass("active");
-
-        $("#menu_produtos").addClass("show");
-        $("#menu_produtos").parent(".nav-item").addClass("active");
-        $("#menu_item_itens").addClass("active");
+        atualizarMenu("itens");
         
         $("#fld_arquivo").spartanMultiImagePicker({
             fieldName:        'fileUpload[]',

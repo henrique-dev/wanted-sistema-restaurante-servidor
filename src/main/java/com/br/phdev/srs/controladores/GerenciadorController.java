@@ -12,6 +12,7 @@ import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Arquivo;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
+import com.br.phdev.srs.models.CupomDesconto;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
@@ -83,6 +84,48 @@ public class GerenciadorController {
         return "admin/pedido";
     }
     
+    @GetMapping("gerenciador/cupons")
+    public String cupons(Model modelo) {
+        try {
+            List<CupomDesconto> cupomDescontos = this.dao.getCupomDescontos();
+            modelo.addAttribute("cupons", cupomDescontos);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/cupons/cupons";
+    }
+    
+    @GetMapping("gerenciador/cupom/novo")
+    public String novoCupom(Model modelo) {        
+        try {
+            modelo.addAttribute("tipos", this.dao.getTipoCupomDescontos());
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/cupons/cupom/novo";
+    }
+    
+    @ResponseBody
+    @PostMapping("gerenciador/cupom/salvar")
+    public String salvarCupom(String cupomJSON, Model modelo) throws JsonProcessingException {    
+        Mensagem mensagem = new Mensagem();        
+        try {
+            ObjectMapper mapeador = new ObjectMapper();
+            CupomDesconto cupom = mapeador.readValue(cupomJSON,
+                    new TypeReference<CupomDesconto>() {
+            });
+            if (!this.dao.checarExistenciaCupomCodigo(cupom.getCodigo())) {
+                this.dao.inserirCupom(cupom);
+                mensagem.setCodigo(100);
+            } else {
+                mensagem.setCodigo(300);
+            }            
+        } catch (DAOException | IOException e) {
+            e.printStackTrace();
+        }
+        return new ObjectMapper().writeValueAsString(mensagem);
+    }
+    
     @GetMapping("gerenciador/itens")
     public String itens(Model modelo) {
         try {
@@ -96,8 +139,7 @@ public class GerenciadorController {
     
     @GetMapping("gerenciador/item/novo")
     public String novoItem(String opcao, Integer id, Model modelo) {        
-        try {            
-            modelo.addAttribute("acao", "novo");
+        try {
             modelo.addAttribute("generos", this.dao.getGeneros());
             modelo.addAttribute("tipos", this.dao.getTipos());
             modelo.addAttribute("complementos", this.dao.getComplementos());
@@ -110,8 +152,7 @@ public class GerenciadorController {
     
     @GetMapping("gerenciador/item/atualizar")
     public String atualizarItem(String opcao, Integer id, Model modelo) {        
-        try {            
-            modelo.addAttribute("acao", "atualizar");
+        try {
             modelo.addAttribute("item", this.dao.getItem(new Item(id)));
             modelo.addAttribute("generos", this.dao.getGeneros());
             modelo.addAttribute("tipos", this.dao.getTipos());
@@ -123,8 +164,8 @@ public class GerenciadorController {
         return "admin/produtos/item/atualizar";
     }
     
-    @PostMapping("gerenciador/item/salvar")
     @ResponseBody
+    @PostMapping("gerenciador/item/salvar")    
     public String adicionarItem(Integer id, String nome, String descricao, String preco, String tempoPreparo, String tiposJSON, String genero,
             String ingredientesJSON, String complementosJSON, String arquivosexcluirJSON, String arquivosmantidosJSON, MultipartFile arquivo0, MultipartFile arquivo1,
             MultipartFile arquivo2, MultipartFile arquivo3) throws JsonProcessingException {

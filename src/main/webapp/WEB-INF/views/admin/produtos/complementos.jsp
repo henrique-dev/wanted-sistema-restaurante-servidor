@@ -12,13 +12,7 @@
     $("#ctn_conteudo").append($("#ctn_index"));
     
     $(document).ready(function() {
-        $(".collapse").removeClass("show");
-        $(".nav-item").removeClass("active");
-        $(".collapse-item").removeClass("active");
-
-        $("#menu_produtos").addClass("show");
-        $("#menu_complementos").parent(".nav-item").addClass("active");
-        $("#menu_item_complementos").addClass("active");
+        atualizarMenu("complementos");                    
     });
     
 </script>

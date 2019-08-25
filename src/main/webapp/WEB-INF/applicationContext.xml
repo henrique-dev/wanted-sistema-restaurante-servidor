@@ -25,6 +25,7 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
         <property name="password" value="root"/>
         <property name="minIdle" value="10" />
         <property name="maxIdle" value="15" />
+        <property name="maxConnLifetimeMillis" value="0" />
     </bean>
     <mvc:default-servlet-handler/>     
     <mvc:interceptors>

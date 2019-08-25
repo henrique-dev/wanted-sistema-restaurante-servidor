@@ -12,6 +12,8 @@ import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.ComplementoFacil;
 import com.br.phdev.srs.models.ConfirmaPedido;
+import com.br.phdev.srs.models.CupomDesconto;
+import com.br.phdev.srs.models.CupomDesconto2;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -25,6 +27,8 @@ import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
+import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.TipoCupomDesconto;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -1153,6 +1157,82 @@ public class ClienteDAO {
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
+    }
+    
+    public List<CupomDesconto2> getCuponsDescontos(Cliente cliente) throws DAOException {
+        List<CupomDesconto2> cuponsDescontos = new ArrayList<>();
+        String sql = "SELECT codigo, cupomdesconto.descricao, cupomdesconto_tipo.descricao, validade, percentual, valor, proxima_compra, usado FROM cupomdesconto_cliente "
+                + " LEFT JOIN cupomdesconto ON cupomdesconto_cliente.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
+                + " LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo "
+                + " WHERE cupomdesconto_cliente.id_cliente = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                CupomDesconto2 cupomDesconto = new CupomDesconto2();
+                cupomDesconto.setCodigo(rs.getString("codigo"));
+                cupomDesconto.setDescricao(rs.getString("cupomdesconto.descricao"));
+                cupomDesconto.setTipo(new TipoCupomDesconto(0l, rs.getString("cupomdesconto_tipo.descricao")));
+                String validade = LocalDateTime.parse(rs.getString("validade"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                cupomDesconto.setValidade(validade);                
+                cupomDesconto.setValor(rs.getDouble("valor"));
+                cupomDesconto.setPercentual(rs.getBoolean("percentual"));
+                cupomDesconto.setProximaCompra(rs.getBoolean("proxima_compra"));
+                cupomDesconto.setUsado(rs.getBoolean("usado"));
+                cuponsDescontos.add(cupomDesconto);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return cuponsDescontos;
+    }
+    
+    synchronized public Mensagem cadastrarCupomDesconto(Cliente cliente, String codigo) throws DAOException {
+        Mensagem mensagem = new Mensagem();
+        String sql = "SELECT id_cupomdesconto id, controle, "
+                + " IF(controle = 'PRIMEIRA_COMPRA' AND (SELECT COUNT(*) FROM pedido WHERE id_cliente = ? AND estado = 11) > 0, true, false) primeira_compra, "
+                + " (quantidade - (SELECT COUNT(*) FROM cupomdesconto_cliente WHERE id_cupomdesconto = id)) quantidade_restante, "
+                + " (SELECT COUNT(*) FROM cupomdesconto_cliente WHERE id_cliente = ? AND id_cupomdesconto = id) possui, " 
+                + " (NOW() > validade) expirada "
+                + " FROM cupomdesconto "
+                + " LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo "
+                + " WHERE codigo = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            stmt.setLong(2, cliente.getId());
+            stmt.setString(3, codigo);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String controle = rs.getString("controle");
+                Boolean primeiraCompra = rs.getBoolean("primeira_compra");
+                Long quantidadeRestante = rs.getLong("quantidade_restante");
+                Boolean possui = rs.getBoolean("possui");
+                Boolean expirada = rs.getBoolean("expirada");
+                Long idCupom = rs.getLong("id");
+                if (!expirada && !possui && quantidadeRestante > 0 && (controle.equals("PRIMEIRA_COMPRA") && !primeiraCompra)) {
+                    sql = "INSERT INTO cupomdesconto_cliente (id_cliente, id_cupomdesconto, proxima_compra, usado) VALUES (?,?,false,false)";
+                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        stmt2.setLong(1, cliente.getId());
+                        stmt2.setLong(2, idCupom);
+                        stmt2.execute();
+                    }
+                    mensagem.setCodigo(100);
+                    mensagem.setDescricao("Cupom salvo");
+                } else {
+                    mensagem.setCodigo(101);
+                    mensagem.setDescricao("Cupom inválido");
+                }
+            } else {
+                mensagem.setCodigo(101);
+                mensagem.setDescricao("Cupom inválido");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return mensagem;
     }
 
 }

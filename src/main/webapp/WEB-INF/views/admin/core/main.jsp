@@ -119,6 +119,27 @@
                     </div>
                 </li>
 
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Cupons
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#menu_cupons" aria-expanded="true" aria-controls="menu_cupons">
+                        <i class="fas fa-fw fa-book"></i>
+                        <span>Gerenciar</span>
+                    </a>
+                    <div id="menu_cupons" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a id="menu_cupom_todos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/cupons">Todos</a>
+                        </div>
+                    </div>
+                </li>
+
             </ul>
             <!-- End of Sidebar -->
 
@@ -129,8 +150,7 @@
                 <div id="content">                    
 
                     <!-- Begin Page Content -->
-                    <div id="ctn_alerta" class="alert alert-dismissible fade" role="alert">                        
-                    </div>
+                    <div id="ctn_alerta"></div>
                     <div id="ctn_conteudo" class="container-fluid">
 
                     </div>
@@ -192,22 +212,67 @@
     </body>
 
     <script type="text/javascript" >
+        
+        var msg_tipo = "${param.msg_tipo}";
+        var msg = "${param.msg}";
+        
+        if (msg != "") {
+            alertar(msg_tipo, msg);
+        }
+        
         function alertar(tipo, mensagem) {
-            if (tipo == "warning" || tipo == "success" || tipo == "danger") {                
-                $("#ctn_alerta").removeClass("alert-warning");
-                $("#ctn_alerta").removeClass("alert-danger");
-                $("#ctn_alerta").removeClass("alert-success");
-                $("#ctn_alerta").addClass("alert-" + tipo);
-                $("#ctn_alerta").addClass("show");
+            if (tipo == "warning" || tipo == "success" || tipo == "danger") {
                 $("#ctn_alerta").empty();
-                $("#ctn_alerta").append(mensagem);
                 $("#ctn_alerta").append(
-                    "<button type='button' class='close' data-dismiss='alert' aria-label='Fechar'>"
-                        +"<span aria-hidden='true'>&times;</span>"
-                    +"</button>"
+                    "<div id='ctn_alerta' class='alert-"+tipo+" show alert alert-dismissible fade' role='alert'>"
+                        +mensagem
+                        +"<button type='button' class='close' data-dismiss='alert' aria-label='Fechar'>"
+                            +"<span aria-hidden='true'>&times;</span>"
+                        +"</button>"
+                    +"</div>"
                 );
                 $("html, body").animate({ scrollTop: 0 }, "slow");
             }            
+        }
+
+        function atualizarMenu(menuAtivo) {
+            $(".collapse").removeClass("show");
+            $(".nav-item").removeClass("active");
+            $(".collapse-item").removeClass("active");
+            switch (menuAtivo) {
+                case "itens" :                
+                    $("#menu_produtos").addClass("show");
+                    $("#menu_produtos").parent(".nav-item").addClass("active");
+                    $("#menu_item_itens").addClass("active");
+                    break;
+                case "generos" :
+                    $("#menu_produtos").addClass("show");
+                    $("#menu_generos").parent(".nav-item").addClass("active");
+                    $("#menu_item_generos").addClass("active");
+                    break;
+                case "complementos" :
+                    $("#menu_produtos").addClass("show");
+                    $("#menu_complementos").parent(".nav-item").addClass("active");
+                    $("#menu_item_complementos").addClass("active");
+                    break;
+                case "ingredientes" :
+                    $("#menu_produtos").addClass("show");
+                    $("#menu_ingredientes").parent(".nav-item").addClass("active");
+                    $("#menu_item_ingredientes").addClass("active");
+                    break;
+                case "index" :
+                    break;
+                case "clientes" :
+                    $("#menu_clientes").addClass("show");
+                    $("#menu_clientes").parent(".nav-item").addClass("active");
+                    $("#menu_cliente_todos").addClass("active");
+                    break;
+                case "cupons" :
+                    $("#menu_cupons").addClass("show");
+                    $("#menu_cupons").parent(".nav-item").addClass("active");
+                    $("#menu_cupom_todos").addClass("active"); 
+                    break;
+            }
         }
     </script>
 

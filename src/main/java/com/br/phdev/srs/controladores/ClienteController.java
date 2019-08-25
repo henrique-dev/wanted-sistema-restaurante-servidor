@@ -13,6 +13,8 @@ import com.br.phdev.srs.models.Carrinho;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.ConfirmaPedido;
 import com.br.phdev.srs.models.ConfirmacaoPedido;
+import com.br.phdev.srs.models.CupomDesconto;
+import com.br.phdev.srs.models.CupomDesconto2;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -27,6 +29,7 @@ import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,17 +138,47 @@ public class ClienteController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(listaItens, httpHeaders, httpStatus);
     }
+    
+    @PostMapping("cliente/cadastrar-cupom")
+    public ResponseEntity<Mensagem> cadastrarCupom(@RequestBody CupomDesconto cupom, HttpSession sessao) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try {
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            mensagem = this.dao.cadastrarCupomDesconto(cliente, cupom.getCodigo());
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+    
+    @PostMapping("cliente/listar-cupons")
+    public ResponseEntity<List<CupomDesconto2>> listarCupons(HttpSession sessao) {
+        HttpStatus httpStatus = HttpStatus.OK;        
+        List<CupomDesconto2> cuponsDescontos = new ArrayList<>();
+        try {
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            cuponsDescontos = this.dao.getCuponsDescontos(cliente);
+        } catch (DAOException e) {
+            
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(cuponsDescontos, httpHeaders, httpStatus);
+    }
 
     @PostMapping(value = "cliente/listar-favoritos")
     public ResponseEntity<ListaItens> getFavoritos(HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         ListaItens listaItens = null;
         try {
-
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             listaItens = this.dao.getItensFavoritos(cliente);
         } catch (DAOException e) {
-            e.printStackTrace();
+            
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

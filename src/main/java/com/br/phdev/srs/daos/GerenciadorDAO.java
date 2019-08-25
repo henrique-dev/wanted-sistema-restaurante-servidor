@@ -12,6 +12,7 @@ import com.br.phdev.srs.exceptions.StorageException;
 import com.br.phdev.srs.models.Arquivo;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
+import com.br.phdev.srs.models.CupomDesconto;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -25,6 +26,7 @@ import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
+import com.br.phdev.srs.models.TipoCupomDesconto;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
@@ -64,7 +66,7 @@ public class GerenciadorDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
+    }    
 
     public List<Item> getItens() throws DAOException {
         List<Item> itens = new ArrayList<>();
@@ -372,7 +374,7 @@ public class GerenciadorDAO {
                     idItem = item.getId();
                 } else {
                     idItem = rs.getLong(1);
-                }                
+                }
                 sql = "DELETE FROM item_tipo WHERE id_item=?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, idItem);
@@ -395,7 +397,7 @@ public class GerenciadorDAO {
                     sql = "INSERT INTO item_complemento VALUES (?,?)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
-                        stmt2.setLong(2, c.getId());                        
+                        stmt2.setLong(2, c.getId());
                         stmt2.execute();
                     }
                 }
@@ -414,7 +416,7 @@ public class GerenciadorDAO {
                 }
 
                 ServicoArmazenamento sa = new ServicoArmazenamento();
-                
+
                 for (Arquivo arquivo : item.getFotos()) {
                     if (arquivo.getId() == 0) {
                         sql = "INSERT INTO arquivo VALUES (default, null)";
@@ -435,23 +437,23 @@ public class GerenciadorDAO {
                         sql = "DELETE FROM item_arquivo WHERE id_item=? AND id_arquivo=?";
                         try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                             stmt2.setLong(1, idItem);
-                            stmt2.setLong(2, arquivo.getId()*-1);
+                            stmt2.setLong(2, arquivo.getId() * -1);
                             stmt2.execute();
                         }
                         sql = "DELETE FROM arquivo WHERE id_arquivo=?";
                         try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                            stmt2.setLong(1, arquivo.getId()*-1);
+                            stmt2.setLong(1, arquivo.getId() * -1);
                             stmt2.execute();
                         }
-                        sa.excluir(arquivo.getId()*-1);
-                    } else {                        
+                        sa.excluir(arquivo.getId() * -1);
+                    } else {
                         sa.salvar(arquivo.getMultipartFile(), arquivo.getId());
                     }
                 }
             }
         } catch (SQLException | StorageException e) {
             e.printStackTrace();
-            throw new DAOException(e, 200);            
+            throw new DAOException(e, 200);
         }
     }
 
@@ -600,222 +602,81 @@ public class GerenciadorDAO {
         return item;
     }
 
-    public void adicionarGeneros(List<Genero> generos) throws DAOException {
-        String sql = "CALL gerenciador_inserir_genero(?)";
-        for (Genero genero : generos) {
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setString(1, genero.getNome());
-                stmt.execute();
-            } catch (SQLException e) {
-                throw new DAOException(e, 200);
-            }
-        }
-    }
-
-    public void removerGeneros(List<Genero> generos) throws DAOException, SQLIntegrityConstraintViolationException {
-        String sql = "CALL gerenciador_remover_genero(?)";
-        for (Genero genero : generos) {
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setLong(1, genero.getId());
-                stmt.execute();
-            } catch (SQLException e) {
-                if (e instanceof SQLIntegrityConstraintViolationException) {
-                    throw new SQLIntegrityConstraintViolationException("Algum genero está sendo utilizado e não pode ser excluido.");
-                } else {
-                    throw new DAOException(e, 200);
-                }
-            }
-        }
-    }
-
-    public void adicionarTipos(List<Tipo> tipos) throws DAOException {
-        String sql = "CALL gerenciador_inserir_tipo(?)";
-        for (Tipo tipo : tipos) {
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setString(1, tipo.getNome());
-                stmt.execute();
-            } catch (SQLException e) {
-                throw new DAOException(e, 200);
-            }
-        }
-    }
-
-    public void removerTipos(List<Tipo> tipos) throws DAOException, SQLIntegrityConstraintViolationException {
-        String sql = "CALL gerenciador_remover_tipo(?)";
-        for (Tipo tipo : tipos) {
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setLong(1, tipo.getId());
-                stmt.execute();
-            } catch (SQLException e) {
-                if (e instanceof SQLIntegrityConstraintViolationException) {
-                    throw new SQLIntegrityConstraintViolationException("Algum tipo está sendo utilizado e não pode ser excluido.");
-                } else {
-                    throw new DAOException(e, 200);
-                }
-            }
-        }
-    }
-
-    public void adicionarComplemento(Complemento complemento) throws DAOException {
-        String sql = "CALL gerenciador_inserir_complemento(?,?,?)";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql.toString())) {
-            stmt.setString(1, complemento.getNome());
-            stmt.setDouble(2, complemento.getPreco());
-            stmt.setDouble(3, complemento.getFoto().getId());
-            stmt.execute();
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-    }
-
-    public void removerComplementos(List<Complemento> complementos) throws DAOException, SQLIntegrityConstraintViolationException {
-        List<Complemento> complementosParaApagarFoto = new ArrayList<>();
-        for (Complemento complemento : complementos) {
-            try {
-                String sql = "CALL gerenciador_remover_complemento(?)";
-                PreparedStatement stmt = this.conexao.prepareStatement(sql);
-                stmt.setLong(1, complemento.getFoto().getId());
-                stmt.execute();
-                stmt.close();
-                sql = "CALL gerenciador_remover_arquivo(?)";
-                stmt = this.conexao.prepareStatement(sql);
-                stmt.setLong(1, complemento.getId());
-                stmt.execute();
-                stmt.close();
-                complementosParaApagarFoto.add(complemento);
-            } catch (SQLException e) {
-                if (e instanceof SQLIntegrityConstraintViolationException) {
-                    //throw new SQLIntegrityConstraintViolationException("Algum complmento está sendo utilizado e não pode ser excluido.");
-                }
-                throw new DAOException(e, 200);
-            }
-        }
-        complementos.clear();
-        complementos.addAll(complementosParaApagarFoto);
-    }
-
-    public void adicionarIngrediente(List<Ingrediente> ingredientes) throws DAOException {
-        String sql = "CALL gerenciador_inserir_ingrediente(?)";
-        for (Ingrediente ingrediente : ingredientes) {
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setString(1, ingrediente.getNome());
-                stmt.execute();
-            } catch (SQLException e) {
-                throw new DAOException(e, 200);
-            }
-        }
-    }
-
-    public void removerIngredientes(List<Ingrediente> ingredientes) throws DAOException, SQLIntegrityConstraintViolationException {
-        String sql = "CALL gerenciador_remover_ingrediente(?)";
-        for (Ingrediente ingrediente : ingredientes) {
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-                stmt.setLong(1, ingrediente.getId());
-                stmt.execute();
-            } catch (SQLException e) {
-                if (e instanceof SQLIntegrityConstraintViolationException) {
-                    throw new SQLIntegrityConstraintViolationException("Algum ingrediente está sendo utilizado e não pode ser excluido.");
-                } else {
-                    throw new DAOException(e, 200);
-                }
-            }
-        }
-    }
-
-    public void __adicionarItem(Item item) throws DAOException {
-        try (PreparedStatement stmt = this.conexao.prepareStatement("CALL gerenciador_inserir_item(?,?,?,?,?,?)")) {
-            stmt.setString(1, item.getNome());
-            stmt.setDouble(2, item.getPreco());
-            stmt.setString(3, item.getDescricao());
-            stmt.setLong(4, item.getGenero().getId());
-            stmt.setBoolean(5, item.isModificavel());
-            stmt.setBoolean(6, item.isModificavelIngrediente());
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                item.setId(rs.getLong("id"));
-                for (Tipo tipo : item.getTipos()) {
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_tipo(?,?)")) {
-                        stmt2.setLong(1, item.getId());
-                        stmt2.setLong(2, tipo.getId());
-                        stmt2.execute();
-                    }
-                }
-                if (item.isModificavel()) {
-                    for (Complemento complemento : item.getComplementos()) {
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_complemento(?,?)")) {
-                            stmt2.setLong(1, item.getId());
-                            stmt2.setLong(2, complemento.getId());
-                            stmt2.execute();
-                        }
-                    }
-                }
-                if (item.isModificavelIngrediente()) {
-                    for (Ingrediente ingrediente : item.getIngredientes()) {
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_ingrediente(?,?)")) {
-                            stmt2.setLong(1, item.getId());
-                            stmt2.setLong(2, ingrediente.getId());
-                            stmt2.execute();
-                        }
-                    }
-                }
-                if (item.getVariacoes() != null && !item.getVariacoes().isEmpty()) {
-                    for (int i = 0; i < item.getVariacoes().size(); i++) {
-                        GrupoVariacao gv = item.getVariacoes().get(i);
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_grupo_variacao(?,?,?,?)")) {
-                            stmt2.setString(1, gv.getNome());
-                            stmt2.setInt(2, i);
-                            stmt2.setInt(3, gv.getMax());
-                            stmt2.setLong(4, item.getId());;
-                            ResultSet rs2 = stmt2.executeQuery();
-                            if (rs2.next()) {
-                                long idGrupoVariacao = rs2.getLong("id");
-                                for (Variacao v : gv.getVariacoes()) {
-                                    try (PreparedStatement stmt3 = this.conexao.prepareStatement("CALL gerenciador_inserir_variacao(?,?,?,?)")) {
-                                        stmt3.setString(1, v.getNome());
-                                        stmt3.setDouble(2, v.getPreco());
-                                        stmt3.setInt(3, v.getOrdem());
-                                        stmt3.setLong(4, idGrupoVariacao);
-                                        stmt3.execute();
-                                    }
-                                }
-                            } else {
-                                throw new SQLException();
-                            }
-                        }
-                    }
-                }
-                for (Foto foto : item.getFotos()) {
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement("CALL gerenciador_inserir_item_arquivo(?,?)")) {
-                        stmt2.setLong(1, item.getId());
-                        stmt2.setLong(2, foto.getId());
-                        stmt2.execute();
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        }
-    }
-
-    public long adicionarArquivo() throws DAOException {
-        String sql = "CALL gerenciador_inserir_arquivo";
+    public List<TipoCupomDesconto> getTipoCupomDescontos() throws DAOException {
+        List<TipoCupomDesconto> tipoCupomDescontos = new ArrayList<>();
+        String sql = "SELECT id_cupomdesconto_tipo, descricao FROM cupomdesconto_tipo";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getLong("id");
+            while (rs.next()) {
+                TipoCupomDesconto tipo = new TipoCupomDesconto();
+                tipo.setId(rs.getLong("id_cupomdesconto_tipo"));
+                tipo.setDescricao(rs.getString("descricao"));
+                tipoCupomDescontos.add(tipo);
             }
-            return -1;
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
+
+        return tipoCupomDescontos;
     }
 
-    public void removerArquivo(Foto foto) throws DAOException {
-        String sql = "CALL gerenciador_remover_arquivo(?)";
+    public boolean checarExistenciaCupomCodigo(String codigo) throws DAOException {
+        String sql = "SELECT 1 FROM cupomdesconto WHERE codigo=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, foto.getId());
+            stmt.setString(1, codigo);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return false;
+    }
+    
+    public List<CupomDesconto> getCupomDescontos() throws DAOException {
+        List<CupomDesconto> cupomDescontos = new ArrayList<>();
+        String sql = "SELECT * FROM cupomdesconto "
+                + "LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo ";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                CupomDesconto cupom = new CupomDesconto();
+                cupom.setId(rs.getLong("id_cupomdesconto"));
+                cupom.setTipo(new TipoCupomDesconto(rs.getLong("cupomdesconto_tipo.id_cupomdesconto_tipo"), rs.getString("cupomdesconto_tipo.descricao")));
+                cupom.setCodigo(rs.getString("codigo"));
+                cupom.setDescricao(rs.getString("descricao"));
+                cupom.setQuantidade(rs.getLong("quantidade"));
+                cupom.setValidade(rs.getTimestamp("validade"));
+                cupom.setAtivo(rs.getBoolean("ativo"));
+                cupom.setPercentual(rs.getBoolean("percentual"));
+                cupom.setValor(rs.getDouble("valor"));
+                cupomDescontos.add(cupom);
+            }
+        } catch (SQLException e)  {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return cupomDescontos;
+    }
+
+    public void inserirCupom(CupomDesconto cupom) throws DAOException {
+        String sql = "INSERT INTO cupomdesconto (id_cupomdesconto_tipo, codigo, descricao, quantidade, validade, ativo, percentual, valor) "
+                + " VALUES (?,?,?,?,?,?,?,?)";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cupom.getTipo().getId());
+            stmt.setString(2, cupom.getCodigo());
+            stmt.setString(3, cupom.getDescricao());
+            stmt.setLong(4, cupom.getQuantidade());
+            stmt.setObject(5, cupom.getValidade());
+            stmt.setBoolean(6, cupom.getAtivo());
+            stmt.setBoolean(7, cupom.getPercentual());
+            stmt.setDouble(8, cupom.getValor());
             stmt.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
     }
@@ -839,6 +700,7 @@ public class GerenciadorDAO {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
     }
@@ -850,6 +712,7 @@ public class GerenciadorDAO {
             stmt.setString(2, notificacao.getMensagem());
             stmt.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
     }

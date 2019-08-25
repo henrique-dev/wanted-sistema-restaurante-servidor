@@ -9,16 +9,10 @@
 
 <script type="text/javascript">
     
-    $("#ctn_conteudo").append($("#ctn_index"));
+    $("#ctn_conteudo").append($("#ctn_index"));    
     
-    $(document).ready(function() {
-        $(".collapse").removeClass("show");
-        $(".nav-item").removeClass("active");
-        $(".collapse-item").removeClass("active");
-
-        $("#menu_produtos").addClass("show");
-        $("#menu_ingredientes").parent(".nav-item").addClass("active");
-        $("#menu_item_ingredientes").addClass("active");
+    $(document).ready(function() {        
+        atualizarMenu("ingredientes");                
     });
     
 </script>

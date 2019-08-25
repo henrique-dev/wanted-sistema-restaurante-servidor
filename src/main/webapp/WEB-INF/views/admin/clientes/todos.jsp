@@ -61,13 +61,7 @@
     });
     
     $(document).ready(function() {
-        $(".collapse").removeClass("show");
-        $(".nav-item").removeClass("active");
-        $(".collapse-item").removeClass("active");
-
-        $("#menu_clientes").addClass("show");
-        $("#menu_clientes").parent(".nav-item").addClass("active");
-        $("#menu_cliente_todos").addClass("active");
+        atualizarMenu("clientes");                         
     });
     
 </script>
