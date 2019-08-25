@@ -12,6 +12,7 @@ import com.br.phdev.srs.models.Usuario;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
@@ -31,7 +32,6 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
         System.out.println(uri + " - " + request.getSession().getId());
-        //new HttpUtils().showHeaders(request);
         if (request.getSession().getAttribute("usuario") != null) {
             return true;
         } else if (request.getSession().getAttribute("admin") != null) {
@@ -64,7 +64,12 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
-    private boolean validarSessao(HttpServletRequest request) throws DAOException {        
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        super.postHandle(request, response, handler, modelAndView); //To change body of generated methods, choose Tools | Templates        
+    }
+
+    private boolean validarSessao(HttpServletRequest request) throws DAOException {
         String usuario = request.getHeader("h-usuario");
         String telefone = request.getHeader("h-passe");
         String segredo = request.getHeader("h-segredo");

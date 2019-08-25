@@ -24,6 +24,7 @@ import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class GerenciadorController {
     public GerenciadorController(GerenciadorDAO dao) {
         this.dao = dao;
     }    
-
+    
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
@@ -72,7 +73,7 @@ public class GerenciadorController {
     }
     
     @GetMapping("gerenciador/pedido")
-    public String pedido(Integer id, Model modelo) { 
+    public String pedido(Integer id, Model modelo) {        
         try {
             Pedido pedido = this.dao.getPedido();
             modelo.addAttribute("pedido", pedido);
@@ -124,15 +125,16 @@ public class GerenciadorController {
     
     @PostMapping("gerenciador/item/salvar")
     @ResponseBody
-    public void adicionarItem(Integer id, String nome, String descricao, String preco, String tempoPreparo, String tiposJSON, String genero,
+    public String adicionarItem(Integer id, String nome, String descricao, String preco, String tempoPreparo, String tiposJSON, String genero,
             String ingredientesJSON, String complementosJSON, String arquivosexcluirJSON, String arquivosmantidosJSON, MultipartFile arquivo0, MultipartFile arquivo1,
-            MultipartFile arquivo2, MultipartFile arquivo3) {
+            MultipartFile arquivo2, MultipartFile arquivo3) throws JsonProcessingException {
+        Mensagem mensagem = new Mensagem();
         try {
             Item2 item = new Item2();
             item.setId(id);
             item.setNome(nome);
             item.setDescricao(descricao);
-            item.setPreco(Double.parseDouble(preco));
+            item.setPreco(Double.parseDouble(preco == null ? "0" : preco));
             item.setTempoPreparo(tempoPreparo);
             item.setGenero(new Genero(Long.parseLong(genero)));
             
@@ -149,41 +151,60 @@ public class GerenciadorController {
             List<Arquivo> arquivosParaExcluir = mapeador.readValue(arquivosexcluirJSON == null ? "[]" : arquivosexcluirJSON,
                     new TypeReference<List<Arquivo>>() {
             });
-            List<Arquivo> arquivosParaManter = mapeador.readValue(arquivosmantidosJSON == null ? "[]" : arquivosmantidosJSON,
-                    new TypeReference<List<Arquivo>>() {
-            });
             
             item.setTipos(tipos);
             item.setComplementos(complementos);
+            if (!item.getComplementos().isEmpty()) {
+                item.setModificavel(true);
+            }
             item.setIngredientes(ingredientes);
+            if (!item.getIngredientes().isEmpty()) {
+                item.setModificavelIngrediente(true);
+            }
             
             List<Arquivo> arquivos = new ArrayList<>();
             
-            if (arquivo0 != null) arquivos.add(new Arquivo(0, arquivo0));
-            if (arquivo1 != null) arquivos.add(new Arquivo(0, arquivo1));
-            if (arquivo2 != null) arquivos.add(new Arquivo(0, arquivo2));
-            if (arquivo3 != null) arquivos.add(new Arquivo(0, arquivo3));
+            if (arquivo0 != null) {
+                arquivos.add(new Arquivo(0l, arquivo0));
+            }
+            if (arquivo1 != null) {
+                arquivos.add(new Arquivo(0l, arquivo1));
+            }
+            if (arquivo2 != null) {
+                arquivos.add(new Arquivo(0l, arquivo2));
+            }
+            if (arquivo3 != null) {
+                arquivos.add(new Arquivo(0l, arquivo3));
+            }
             if (arquivosParaExcluir.size() > 0) {
-                for (int i=0; i<arquivosParaExcluir.size(); i++) {
+                for (int i = 0; i < arquivosParaExcluir.size(); i++) {
                     Arquivo arq = arquivosParaExcluir.get(i);
                     for (Arquivo arq2 : arquivos) {
-                        if (arq2.getId() == 0) {                            
+                        if (arq2.getId() == 0) {
                             arq2.setId(arq.getId());
+                            arq.setId(0l);
+                            break;
                         }
-                        arquivosParaExcluir.remove(arq);
-                        i--;
                     }
-                }                
+                }
+                for (Arquivo arq : arquivosParaExcluir) {
+                    if (arq.getId() != 0) {
+                        arq.setId(arq.getId() * -1);
+                        if (arquivos.size() < 4) {
+                            arquivos.add(arq);
+                        }                        
+                    }                    
+                }
             }
-                                     
+            
             item.setFotos(arquivos);
-            for (Arquivo arq2 : arquivos) {
-                System.out.println(arq2.getId());
-            }
-            //this.dao.adicionarItem(item);
-        } catch (Exception e) {
+            this.dao.adicionarItem(item);
+            mensagem.setCodigo(100);
+        } catch (DAOException | IOException e) {
+            mensagem.setCodigo(101);
             e.printStackTrace();
         }
+        return new ObjectMapper().writeValueAsString(mensagem);
     }
     
     @GetMapping("gerenciador/generos")
@@ -217,7 +238,7 @@ public class GerenciadorController {
             e.printStackTrace();
         }
         return "admin/produtos/ingredientes";
-    }        
+    }    
     
     @GetMapping("gerenciador/clientes")
     public String clientes(Model modelo) {
@@ -314,5 +335,5 @@ public class GerenciadorController {
         httpHeaders.setContentType(MediaType.IMAGE_PNG);
         return new ResponseEntity<>(bytes, httpHeaders, HttpStatus.OK);
     }
-
+    
 }

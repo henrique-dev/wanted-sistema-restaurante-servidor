@@ -45,8 +45,9 @@ public class ServicoArmazenamento {
         }        
     }
     
-    public void excluir(long path) throws SecurityException {
-        File file = new File(MASTER_PATH + path);
+    public void excluir(long id) throws SecurityException {
+        File file = new File(MASTER_PATH + id);
+        System.out.println(file.getName());
         file.delete();
     }
     

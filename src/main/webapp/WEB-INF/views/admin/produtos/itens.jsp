@@ -98,7 +98,7 @@
 
         });
         $('.btn-remover').click(function() {
-
+            $(this).attr('disabled', 'disabled');
         });
     });
     

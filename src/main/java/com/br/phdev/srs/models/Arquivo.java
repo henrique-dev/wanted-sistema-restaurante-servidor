@@ -13,22 +13,22 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class Arquivo {
 
-    private int id;
+    private Long id;
     private MultipartFile multipartFile;
 
     public Arquivo() {
     }
 
-    public Arquivo(int id, MultipartFile multipartFile) {
+    public Arquivo(Long id, MultipartFile multipartFile) {
         this.id = id;
         this.multipartFile = multipartFile;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

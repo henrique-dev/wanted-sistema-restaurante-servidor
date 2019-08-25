@@ -289,10 +289,17 @@
             processData: false,
             contentType: false,
             success: function(dadosIn) {
-                console.log(dadosIn);
-                alertar("success", "Item cadastrado com sucesso");
-                $("#btn_salvar").removeAttr('disabled');
-                limparCampos();
+                let mensagem = JSON.parse(dadosIn);
+                switch(mensagem.codigo) {
+                    case 100:
+                        alertar("success", "Item cadastrado com sucesso");
+                        limparCampos();
+                        break;
+                    default :
+                        alertar("danger", "Erro ao cadastrar o item");
+                        break;
+                }                
+                $("#btn_salvar").removeAttr('disabled');                
             }
         });
     }

@@ -340,7 +340,6 @@ public class ClienteController {
     public ResponseEntity<ConfirmaPedido> preConfirmaPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         try {
-
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             if (!this.dao.existePedidoAberto(cliente)) {
                 this.dao.inserirPrecos(confirmaPedido);

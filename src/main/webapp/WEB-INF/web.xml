@@ -24,6 +24,9 @@
     <session-config>
         <session-timeout>-1</session-timeout>
     </session-config>
+    <error-page>
+        <location>/errors</location>
+    </error-page>
     <!--security-constraint>
         <web-resource-collection>
             <web-resource-name>securedapp</web-resource-name>

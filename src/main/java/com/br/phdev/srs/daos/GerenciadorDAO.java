@@ -344,7 +344,7 @@ public class GerenciadorDAO {
         }
     }
 
-    public void adicionarItem(Item2 item) {
+    public void adicionarItem(Item2 item) throws DAOException {
         String sql = "INSERT INTO item (id_item, nome, descricao, preco, id_genero, modificavel, modificavel_ingrediente, tempo_preparo) "
                 + " values (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE nome=?, descricao=?, preco=?, id_genero=?, modificavel=?, modificavel_ingrediente=?, tempo_preparo=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -356,8 +356,8 @@ public class GerenciadorDAO {
             stmt.setBoolean(6, item.isModificavel());
             stmt.setBoolean(7, item.isModificavelIngrediente());
             stmt.setString(8, item.getTempoPreparo());
-            
-            stmt.setString(9 ,item.getNome());
+
+            stmt.setString(9, item.getNome());
             stmt.setString(10, item.getDescricao());
             stmt.setDouble(11, item.getPreco());
             stmt.setLong(12, item.getGenero().getId());
@@ -366,20 +366,23 @@ public class GerenciadorDAO {
             stmt.setString(15, item.getTempoPreparo());
             stmt.execute();
             ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                Long idItem = rs.getLong(1);
+            if (rs.next() || item.getId() != 0) {
+                Long idItem;
+                if (item.getId() != 0) {
+                    idItem = item.getId();
+                } else {
+                    idItem = rs.getLong(1);
+                }                
                 sql = "DELETE FROM item_tipo WHERE id_item=?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, idItem);
                     stmt2.execute();
                 }
-                for (Tipo t : item.getTipos()) {                    
+                for (Tipo t : item.getTipos()) {
                     sql = "INSERT INTO item_tipo VALUES (?,?)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
                         stmt2.setLong(2, t.getId());
-                        stmt2.setLong(3, idItem);
-                        stmt2.setLong(4, t.getId());
                         stmt2.execute();
                     }
                 }
@@ -389,12 +392,10 @@ public class GerenciadorDAO {
                     stmt2.execute();
                 }
                 for (Complemento c : item.getComplementos()) {
-                    sql = "INSERT INTO item_complemento VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_complemento=?";
+                    sql = "INSERT INTO item_complemento VALUES (?,?)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
-                        stmt2.setLong(2, c.getId());
-                        stmt2.setLong(3, idItem);
-                        stmt2.setLong(4, c.getId());
+                        stmt2.setLong(2, c.getId());                        
                         stmt2.execute();
                     }
                 }
@@ -404,39 +405,56 @@ public class GerenciadorDAO {
                     stmt2.execute();
                 }
                 for (Ingrediente i : item.getIngredientes()) {
-                    sql = "INSERT INTO item_ingrediente VALUES (?,?) ON DUPLICATE KEY UPDATE id_item=?, id_ingrediente=?";
+                    sql = "INSERT INTO item_ingrediente VALUES (?,?)";
                     try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
                         stmt2.setLong(2, i.getId());
-                        stmt2.setLong(3, idItem);
-                        stmt2.setLong(4, i.getId());
                         stmt2.execute();
                     }
                 }
-                
+
                 ServicoArmazenamento sa = new ServicoArmazenamento();
+                
                 for (Arquivo arquivo : item.getFotos()) {
-                    sql = "INSERT INTO arquivo VALUES (default, null)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                        stmt2.execute();
-                        ResultSet rs2 = stmt2.getGeneratedKeys();
-                        if (rs2.next()) {
-                            sa.salvar(arquivo.getMultipartFile(), rs2.getLong(1));
-                            sql = "INSERT INTO item_arquivo VALUES (?,?)";
-                            try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
-                                stmt3.setLong(1, idItem);
-                                stmt3.setLong(2, rs2.getLong(1));
-                                stmt3.execute();
+                    if (arquivo.getId() == 0) {
+                        sql = "INSERT INTO arquivo VALUES (default, null)";
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                            stmt2.execute();
+                            ResultSet rs2 = stmt2.getGeneratedKeys();
+                            if (rs2.next()) {
+                                sa.salvar(arquivo.getMultipartFile(), rs2.getLong(1));
+                                sql = "INSERT INTO item_arquivo VALUES (?,?)";
+                                try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
+                                    stmt3.setLong(1, idItem);
+                                    stmt3.setLong(2, rs2.getLong(1));
+                                    stmt3.execute();
+                                }
                             }
                         }
+                    } else if (arquivo.getId() < 0) {
+                        sql = "DELETE FROM item_arquivo WHERE id_item=? AND id_arquivo=?";
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                            stmt2.setLong(1, idItem);
+                            stmt2.setLong(2, arquivo.getId()*-1);
+                            stmt2.execute();
+                        }
+                        sql = "DELETE FROM arquivo WHERE id_arquivo=?";
+                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                            stmt2.setLong(1, arquivo.getId()*-1);
+                            stmt2.execute();
+                        }
+                        sa.excluir(arquivo.getId()*-1);
+                    } else {                        
+                        sa.salvar(arquivo.getMultipartFile(), arquivo.getId());
                     }
                 }
             }
         } catch (SQLException | StorageException e) {
             e.printStackTrace();
+            throw new DAOException(e, 200);            
         }
     }
-    
+
     public Item getItem(Item item) throws DAOException {
         if (item == null) {
             throw new DAOIncorrectData(300);
@@ -463,7 +481,7 @@ public class GerenciadorDAO {
                 item.setPreco(rs.getDouble("preco"));
                 item.setTempoPreparo(rs.getString("tempo_preparo"));
                 item.setModificavel(rs.getBoolean("modificavel"));
-                item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));                
+                item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
                 item.setGenero(new Genero(rs.getLong("id_genero"), rs.getString("genero")));
 
                 sql = "SELECT arquivo.id_arquivo "
@@ -581,26 +599,6 @@ public class GerenciadorDAO {
         }
         return item;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     public void adicionarGeneros(List<Genero> generos) throws DAOException {
         String sql = "CALL gerenciador_inserir_genero(?)";

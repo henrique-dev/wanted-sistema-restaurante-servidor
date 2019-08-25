@@ -95,10 +95,10 @@
                             <table id="tbl_tipos" class="table table-bordered" cellspacing="0">
                                 <tbody>
                                     <c:forEach items="${item.tipos}" var="tipo">
-                                        <tr>
+                                        <tr id='tr_${tipo.id}' data-id="${tipo.id}" data-nome="${tipo.nome}">
                                             <td width='80%'>${tipo.nome}</td>
-                                            <td width='20%'><center><button class='btn btn-danger btn-remover-tipo'>X</button></center></td>
-                                        </tr>
+                                            <td width='20%'><center><button class='btn btn-danger btn-remover-tipo'><i class='fa fa-trash'></button></center></td>
+                                        </tr>                                        
                                     </c:forEach>
                                 </tbody>
                             </table>
@@ -112,7 +112,7 @@
                 <div class="card col-md-12 col-sm-12 p-4">
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
-                            <models:listaComplemento id="fld_complementos" name="complementos" label="Complementos"  data="${complementos}"/>
+                            <models:listaComplemento id="fld_complementos" name="complementos" label="Complementos"  data="${complementos}" data_to_not_include="${item.complementos}"/>
                         </div>                
                     </div>
                     <div class="row">
@@ -130,6 +130,13 @@
                         <div class="col-md-12 col-sm-12" style="height: 280px; max-height: 280px; overflow-y: scroll;">
                             <table id="tbl_complementos" class="table table-bordered"cellspacing="0">
                                 <tbody>
+                                    <c:forEach items="${item.complementos}" var="complemento">
+                                        <tr id='tr_${complemento.id}' data-id="${complemento.id}" data-nome="${complemento.nome}"  data-preco="${complemento.preco}">
+                                            <td width='50%'>${complemento.nome}</td>
+                                            <td width='30%'>${complemento.preco}</td>
+                                            <td width='20%'><center><button class='btn btn-danger btn-remover-complemento'><i class='fa fa-trash'></button></center></td>
+                                        </tr>                                        
+                                    </c:forEach>
                                 </tbody>
                             </table>
                         </div>
@@ -142,7 +149,7 @@
                 <div class="card col-md-12 col-sm-12 p-4">
                     <div class="row">
                         <div class="col-md-12 col-sm-12">
-                            <models:listaIngrediente id="fld_ingredientes" name="ingredientes" label="Ingredientes"  data="${ingredientes}"/>
+                            <models:listaIngrediente id="fld_ingredientes" name="ingredientes" label="Ingredientes"  data="${ingredientes}" data_to_not_include="${item.ingredientes}"/>
                         </div>
                     </div>
                     <div class="row">
@@ -159,6 +166,12 @@
                         <div class="col-md-12 col-sm-12" style="height: 280px; max-height: 280px; overflow-y: scroll;">
                             <table id="tbl_ingredientes" class="table table-bordered" id="dataTable" cellspacing="0">
                                 <tbody>
+                                    <c:forEach items="${item.ingredientes}" var="ingrediente">
+                                        <tr id='tr_${ingrediente.id}' data-id="${ingrediente.id}" data-nome="${ingrediente.nome}">
+                                            <td width='80%'>${ingrediente.nome}</td>
+                                            <td width='20%'><center><button class='btn btn-danger btn-remover-ingrediente'><i class='fa fa-trash'></button></center></td>
+                                        </tr>                                        
+                                    </c:forEach>
                                 </tbody>
                             </table>
                         </div>
@@ -279,39 +292,7 @@
             return null;
         }
         
-    }
-
-    function limparCampos() {
-        $("#fld_nome").val("");
-        $("#fld_descricao").val("");
-        $("#fld_preco").val(0);
-        $("#fld_tempo_preparo").val("");
-        $('#fld_genero').val(0);
-        $("#tbl_tipos").children("tbody").find("tr").each(function() {
-            let tr = $(this);
-            $("#fld_tipos").append(
-                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
-            );
-            tr.remove();
-        });
-        $("#tbl_complementos").children("tbody").find("tr").each(function() {
-            let tr = $(this);
-            $("#fld_complementos").append(
-                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"' data-preco='"+tr.data("preco")+"'>"+tr.data("nome")+"</option>"
-            );
-            tr.remove();
-        });
-        $("#tbl_ingredientes").children("tbody").find("tr").each(function() {
-            let tr = $(this);
-            $("#fld_ingredientes").append(
-                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
-            );
-            tr.remove();
-        });
-        $(".spartan_remove_row").each(function() {
-            $(this).trigger('click');
-        });
-    }
+    }    
     
     function processarDados(dados) {
         $("#btn_salvar").attr('disabled');
@@ -322,8 +303,17 @@
             processData: false,
             contentType: false,
             success: function(dadosIn) {
-                $("#btn_salvar").removeAttr('disabled', 'disabled');
-                limparCampos();
+                let mensagem = JSON.parse(dadosIn);
+                switch(mensagem.codigo) {
+                    case 100:
+                        alertar("success", "Item atualizado com sucesso");
+                        window.location.replace("../itens");
+                        break;
+                    default :
+                        alertar("danger", "Erro ao cadastrar o item");
+                        break;
+                }                
+                $("#btn_salvar").removeAttr('disabled');                
             }
         });
     }
@@ -360,7 +350,7 @@
             $("#tbl_tipos").children("tbody").append(
                 "<tr id='tr_"+option.data("id")+"' data-id="+option.data("id")+" data-nome="+option.data("nome")+">"
                     +   "<td width='80%'>"+option.data("nome")+"</td>"
-                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-tipo'>X</button></center></td>"
+                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-tipo'><i class='fa fa-trash'></button></center></td>"
                 +"</tr>"
             );
             option.remove();
@@ -370,7 +360,7 @@
                     "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
                 );
                 tr.remove();
-            });            
+            });
         });
 
         $("#fld_complementos").change(function() {
@@ -379,7 +369,7 @@
                 "<tr id='tr_"+option.data("id")+"' data-id='"+option.data("id")+"' data-nome='"+option.data("nome")+"' data-preco='"+option.data("preco")+"'>"
                     +   "<td width='50%'>"+option.data("nome")+"</td>"
                     +   "<td width='30%'>"+option.data("preco")+"</td>"
-                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-complemento'>X</button></center></td>"
+                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-complemento'><i class='fa fa-trash'></i></button></center></td>"
                 +"</tr>"
             );
             option.remove();
@@ -397,7 +387,7 @@
             $("#tbl_ingredientes").children("tbody").append(
                 "<tr id='tr_"+option.data("id")+"' data-id="+option.data("id")+" data-nome="+option.data("nome")+">"
                     +   "<td width='80%'>"+option.data("nome")+"</td>"
-                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-ingrediente'>X</button></center></td>"
+                    +   "<td width='20%'><center><button class='btn btn-danger btn-remover-ingrediente'><i class='fa fa-trash'></button></center></td>"
                 +"</tr>"
             );
             option.remove();
@@ -433,10 +423,27 @@
             }            
         });
 
-        //$('#tbl_tipos').DataTable({searching: false, info: false, lengthChange: false});
-        //$('#tbl_complementos').DataTable({searching: false, info: false, lengthChange: false});
-        //$('#tbl_ingredientes').DataTable({searching: false, info: false, lengthChange: false});
-
+        $(".btn-remover-tipo").click(function() {
+            let tr = $(this).parent().parent().parent();
+            $("#fld_tipos").append(
+                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
+            );
+            tr.remove();
+        });
+        $(".btn-remover-complemento").click(function() {
+            let tr = $(this).parent().parent().parent();
+            $("#fld_complementos").append(
+                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"' data-preco='"+tr.data("preco")+"'>"+tr.data("nome")+"</option>"
+            );
+            tr.remove();
+        });            
+        $(".btn-remover-ingrediente").click(function() {
+            let tr = $(this).parent().parent().parent();
+            $("#fld_ingredientes").append(
+                "<option data-id='"+tr.data("id")+"' data-nome='"+tr.data("nome")+"'>"+tr.data("nome")+"</option>"
+            );
+            tr.remove();
+        });            
 
     });
     
