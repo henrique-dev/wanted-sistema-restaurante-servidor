@@ -377,6 +377,10 @@ public class ClienteDAO {
         }
         return listaItens;
     }
+    
+    public void getItem(ItemPedido item, Cliente cliente) throws DAOException {
+        getItem((Item)item, cliente);
+    }
 
     public Item getItem(Item item, Cliente cliente) throws DAOException {
         if (item == null) {
@@ -849,7 +853,7 @@ public class ClienteDAO {
                 for (ItemPedido ipf : confirmaPedido.getItens()) {
                     ItemPedido ip = new ItemPedido();
                     ip.setId(ipf.getId());
-                    getItem(ip, cliente);
+                    getItem((Item)ip, cliente);
                     ip.setQuantidade(ipf.getQuantidade());
                     for (Complemento c : ip.getComplementos()) {
                         for (Complemento cf : ipf.getComplementos()) {
