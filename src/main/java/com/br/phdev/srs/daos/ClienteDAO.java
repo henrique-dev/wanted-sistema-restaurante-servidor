@@ -399,6 +399,7 @@ public class ClienteDAO {
             Set<Ingrediente> ingredientes = new HashSet<>();
             Set<Complemento> complementos = new HashSet<>();
             Set<Tipo> tipos = new HashSet<>();
+            Set<Foto> fotos = new HashSet<>();
             List<GrupoVariacao> variacoes = new ArrayList<>();
             long itemAtual = -1;
             while (rs.next()) {
@@ -418,14 +419,12 @@ public class ClienteDAO {
                         + " WHERE item.id_item = ?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
-                    ResultSet rs2 = stmt2.executeQuery();
-                    Set<Foto> fotos = new HashSet<>();
+                    ResultSet rs2 = stmt2.executeQuery();                    
                     while (rs2.next()) {
                         Foto foto = new Foto();
                         foto.setId(rs2.getLong("id_arquivo"));
                         fotos.add(ServicoArmazenamento.setTamanho(foto));
                     }
-                    item.setFotos(fotos);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -442,7 +441,6 @@ public class ClienteDAO {
                         tipo.setNome(rs2.getString("nome"));
                         tipos.add(tipo);
                     }
-                    item.setTipos(tipos);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -515,6 +513,8 @@ public class ClienteDAO {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
+                item.setFotos(fotos);
+                item.setTipos(tipos);
                 item.setComplementos(complementos);
                 item.setIngredientes(ingredientes);
                 item.setVariacoes(variacoes);
@@ -691,7 +691,7 @@ public class ClienteDAO {
             valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
             ip.setPrecoTotal(valorItem.doubleValue());
             valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade() == 0 ? 1 : ip.getQuantidade())));
-        }        
+        }
         if (confirmaPedido.getCupom() != null) {
             if (confirmaPedido.getCupom().getPercentual()) {
                 BigDecimal porcentagem = new BigDecimal(confirmaPedido.getCupom().getValor()).divide(new BigDecimal(100));
@@ -700,14 +700,14 @@ public class ClienteDAO {
                     valorTotal = new BigDecimal(0);
                 }
             } else {
-                BigDecimal desconto = new BigDecimal(confirmaPedido.getCupom().getValor());                
+                BigDecimal desconto = new BigDecimal(confirmaPedido.getCupom().getValor());
                 valorTotal = valorTotal.subtract(desconto);
                 if (valorTotal.doubleValue() < 0) {
                     valorTotal = new BigDecimal(0);
                 }
             }
         }
-        confirmaPedido.setPrecoTotal(valorTotal.doubleValue());        
+        confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
         return confirmaPedido;
     }
 
@@ -1053,7 +1053,8 @@ public class ClienteDAO {
                 pedido.setFrete(rs.getDouble("frete"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 ObjectMapper mapeador = new ObjectMapper();
-                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {});
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
+                });
                 pedido.setItens(itens);
                 if (rs.getObject("id_cupomdesconto") != null) {
                     CupomDesconto2 cupom = new CupomDesconto2();
@@ -1099,7 +1100,8 @@ public class ClienteDAO {
                 pedido.setEndereco(endereco);
 
                 ObjectMapper mapeador = new ObjectMapper();
-                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {});                
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
+                });
                 pedido.setItens(itens);
                 if (rs.getObject("id_cupomdesconto") != null) {
                     CupomDesconto2 cupom = new CupomDesconto2();
@@ -1306,7 +1308,7 @@ public class ClienteDAO {
         }
         return mensagem;
     }
-    
+
     public CupomDesconto verificarCupomDesconto(Cliente cliente) throws DAOException {
         CupomDesconto cupom = null;
         String sql = "SELECT cupomdesconto.id_cupomdesconto, percentual, valor, controle FROM cupomdesconto_cliente "
