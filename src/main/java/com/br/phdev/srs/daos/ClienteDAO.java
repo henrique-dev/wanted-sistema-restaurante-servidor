@@ -696,6 +696,9 @@ public class ClienteDAO {
             if (confirmaPedido.getCupom().getPercentual()) {
                 BigDecimal porcentagem = new BigDecimal(confirmaPedido.getCupom().getValor()).divide(new BigDecimal(100));
                 valorTotal = valorTotal.subtract(new BigDecimal(valorTotal.doubleValue()).multiply(porcentagem));
+                if (valorTotal.doubleValue() < 0) {
+                    valorTotal = new BigDecimal(0);
+                }
             } else {
                 BigDecimal desconto = new BigDecimal(confirmaPedido.getCupom().getValor());                
                 valorTotal = valorTotal.subtract(desconto);
