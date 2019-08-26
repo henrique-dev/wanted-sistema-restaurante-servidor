@@ -398,6 +398,7 @@ public class ClienteDAO {
             ResultSet rs = stmt.executeQuery();
             Set<Ingrediente> ingredientes = new HashSet<>();
             Set<Complemento> complementos = new HashSet<>();
+            Set<Tipo> tipos = new HashSet<>();
             List<GrupoVariacao> variacoes = new ArrayList<>();
             long itemAtual = -1;
             while (rs.next()) {
@@ -435,7 +436,6 @@ public class ClienteDAO {
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
-                    Set<Tipo> tipos = new HashSet<>();
                     while (rs2.next()) {
                         Tipo tipo = new Tipo();
                         tipo.setId(rs2.getLong("id_tipo"));
