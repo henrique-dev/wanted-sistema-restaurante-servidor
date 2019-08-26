@@ -117,6 +117,7 @@ public class CadastroController {
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
             }
         } catch (DAOException e) {
+            e.printStackTrace();
             mensagem.setCodigo(e.codigo);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             e.printStackTrace();
