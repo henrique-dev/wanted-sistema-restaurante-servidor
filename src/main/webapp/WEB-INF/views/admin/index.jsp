@@ -29,7 +29,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        
+                        <c:forEach items="${pedidos}" var="pedido">
+                            <tr>
+                                <td><a href='pedido?id=${pedido.id}'>${pedido.id}</a></td>
+                                <td>${pedido.status}</td>
+                                <td>${pedido.precoTotal}</td>
+                                <td><center><button data-id='${pedido.id}' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>
+                            </tr>
+                        </c:forEach>
                     </tbody>
                 </table>
             </div>
@@ -65,10 +72,15 @@
     
     $("#ctn_conteudo").append($("#ctn_index"));
 
-    var _ja_carregou_datatable = false;
+    var ja_carregou_datatable = false;
     var sock = null;
 
-    function carregarTabela(pedidos = null) {        
+    var tbl_pedidos = null;
+    var tbl_confirmacoes = null;
+
+    function carregarTabela(pedidos = null) {             
+
+        $("#tbl_pedidos").DataTable().destroy();
 
         if (pedidos != null) {
             $("#tbl_pedidos").children("tbody").find("tr").each(function() {
@@ -91,76 +103,46 @@
                     $(".btn-atualizar-estado").click(function() {
                         atualizarEstadoPedido($(this).data("id"));
                     });
-                }
-                let qtd = 5 - (pedidos.length % 5);
-                qtd = qtd == 5 ? 0 : qtd;
-                for (let i=0; i<qtd; i++) {
-                    $("#tbl_pedidos").children("tbody").append("<tr style='height: 50px'><td colspan=4></td></tr>");
-                }
+                }                
             } else {
                 $("#tbl_pedidos").children("tbody").append(
                     "<tr>"                    
                     +   "<td colspan='5'>Sem pedidos</td>"                    
                     +"<tr>"
                 );
-                for (let i=0; i<4; i++) {
-                    $("#tbl_pedidos").children("tbody").append("<tr style='height: 50px'><td colspan=4></td></tr>");
-                }
             }
         }
+
+        $("#tbl_pedidos").DataTable().draw();
 
         
     }
 
-    function carregarDataTable() {
-        if ( _ja_carregou_datatable == false ) {            
-            _ja_carregou_datatable = true;
-            $('#tbl_pedidos').DataTable({
-                responsive: true,
-                fixedColumns: true,
-                searching: false,
-                lengthChange: false,
-                language: {
-                    lengthMenu: "Exibir _MENU_ linhas por página",
-                    zeroRecords: "Sem pedidos",
-                    info: "Exibindo pagina _PAGE_ de _PAGES_",
-                    infoEmpty: "Vazio",
-                    infoFiltered: "(filtrados de _MAX_ registros)",
-                    search: "Critério:",
-                    paginate: {
-                            next: "Próximo",
-                            previous: "Anterior"
-                        }
-                    },
-                lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
-            });
-            $('#tbl_confirmacoes').DataTable({
-                responsive: true,
-                fixedColumns: true,
-                searching: false,
-                lengthChange: false,
-                language: {
-                    lengthMenu: "Exibir _MENU_ linhas por página",
-                    zeroRecords: "Sem confirmações",
-                    info: "Exibindo pagina _PAGE_ de _PAGES_",
-                    infoEmpty: "Vazio",
-                    infoFiltered: "(filtrados de _MAX_ registros)",
-                    search: "Critério:",
-                    paginate: {
-                            next: "Próximo",
-                            previous: "Anterior"
-                        }
-                    },
-                lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
-            });
-        } else {
-            //$("#tbl_processo").DataTable().page('first').draw( 'page' );
-        }
+    function carregarDataTable() {      
+        tbl_pedidos = $('#tbl_pedidos').DataTable({
+            responsive: true,
+            fixedColumns: true,
+            searching: false,
+            lengthChange: false,
+            language: {
+                lengthMenu: "Exibir _MENU_ linhas por página",
+                zeroRecords: "Sem pedidos",
+                info: "Exibindo pagina _PAGE_ de _PAGES_",
+                infoEmpty: "Vazio",
+                infoFiltered: "(filtrados de _MAX_ registros)",
+                search: "Critério:",
+                paginate: {
+                        next: "Próximo",
+                        previous: "Anterior"
+                    }
+                },
+            lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
+        });
     }
 
     function connect() {
-        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        //var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
             processarRetornoWebSocket(e);
         };
@@ -193,8 +175,8 @@
     }
     
     $(document).ready(function() {
-        carregarDataTable();
-        carregarTabela();       
+        //carregarDataTable();
+        //carregarTabela();       
         connect();
 
         $(".btn-atualizar-estado").click(function() {

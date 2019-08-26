@@ -228,7 +228,7 @@ public class GerenciadorDAO {
         List<Pedido2> pedidos = null;
         String sql = "SELECT * FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
-                + " WHERE pedido_estado.controle != 'FINAL'";
+                + " WHERE pedido.id_pedido IN (4,8,9,10,11)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             pedidos = new ArrayList<>();

@@ -406,6 +406,7 @@ public class ClienteDAO {
                 item.setId(rs.getLong("id_item"));
                 item.setNome(rs.getString("nome"));
                 item.setPreco(rs.getDouble("preco"));
+                item.setDescricao(rs.getString("descricao"));
                 item.setTempoPreparo(rs.getString("tempo_preparo"));
                 item.setModificavel(rs.getBoolean("modificavel"));
                 item.setModificavelIngrediente(rs.getBoolean("modificavel_ingrediente"));
@@ -921,7 +922,7 @@ public class ClienteDAO {
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
-        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, 1, ?, ?, ?)";
+        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, ?, ?, ?, ?)";
         // inserir_pedido
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -931,9 +932,10 @@ public class ClienteDAO {
             stmt.setLong(3, pedido.getFormaPagamento().getId());
             stmt.setLong(4, cliente.getId());
             stmt.setLong(5, pedido.getEndereco().getId());
-            stmt.setString(6, pedido.getObservacaoEntrega());
-            stmt.setDouble(7, pedido.getFrete());
-            stmt.setLong(8, pedido.getCupom() == null ? null : pedido.getCupom().getId());
+            stmt.setInt(6, pedido.getEstado());
+            stmt.setString(7, pedido.getObservacaoEntrega());
+            stmt.setDouble(8, pedido.getFrete());
+            stmt.setLong(9, pedido.getCupom() == null ? null : pedido.getCupom().getId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);

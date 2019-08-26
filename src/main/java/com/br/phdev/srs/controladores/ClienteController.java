@@ -428,6 +428,7 @@ public class ClienteController {
                 pedido.setFrete(RepositorioProdutos.getInstancia().frete);
                 switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
                     case 0:
+                        pedido.setEstado(4);
                         this.dao.inserirPedido(pedido, cliente);
                         confirmacaoPedido.setStatus(0);
                         sessao.setAttribute("pre-pedido-itens", null);
