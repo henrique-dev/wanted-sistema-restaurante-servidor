@@ -378,8 +378,23 @@ public class ClienteDAO {
         return listaItens;
     }
     
-    public void getItem(ItemPedido item, Cliente cliente) throws DAOException {
-        getItem((Item)item, cliente);
+    public ItemPedido getItem(ItemPedido item, Cliente cliente) throws DAOException {
+        Item i = getItem((Item)item, cliente);
+        item.setId(i.getId());
+        item.setNome(i.getNome());
+        item.setPreco(i.getPreco());
+        item.setDescricao(i.getDescricao());
+        item.setTempoPreparo(i.getTempoPreparo());
+        item.setModificavel(i.isModificavel());
+        item.setModificavelIngrediente(i.isModificavelIngrediente());
+        item.setFavorito(i.isFavorito());
+        item.setGenero(i.getGenero());
+        item.setFotos(i.getFotos());
+        item.setTipos(i.getTipos());
+        item.setComplementos(i.getComplementos());
+        item.setIngredientes(i.getIngredientes());
+        item.setVariacoes(i.getVariacoes());   
+        return item;
     }
 
     public Item getItem(Item item, Cliente cliente) throws DAOException {
@@ -853,7 +868,7 @@ public class ClienteDAO {
                 for (ItemPedido ipf : confirmaPedido.getItens()) {
                     ItemPedido ip = new ItemPedido();
                     ip.setId(ipf.getId());
-                    getItem((Item)ip, cliente);
+                    ip = getItem(ip, cliente);
                     ip.setQuantidade(ipf.getQuantidade());
                     for (Complemento c : ip.getComplementos()) {
                         for (Complemento cf : ipf.getComplementos()) {

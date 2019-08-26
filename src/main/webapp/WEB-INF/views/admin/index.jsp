@@ -113,7 +113,7 @@
             }
         }
 
-        $("#tbl_pedidos").DataTable().draw();
+        carregarDataTable();
 
         
     }
