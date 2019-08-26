@@ -22,12 +22,13 @@ public class Pedido2 {
     private List<ItemPedido> itens;
     private FormaPagamento formaPagamento;    
     private Endereco endereco;
+    private CupomDesconto2 cupom;
     private String status;
     private String observacaoEntrega;
     private double frete;
     
     public void calcularPedido() {
-        BigDecimal valorTotal = new BigDecimal("0.00");
+        BigDecimal valorTotal = new BigDecimal("0.00").subtract(new BigDecimal(this.frete));
         for (ItemPedido ip : this.getItens()) {            
             BigDecimal valorItem = new BigDecimal("0.00");
             if (ip.getComplementos() != null) {
@@ -48,6 +49,18 @@ public class Pedido2 {
             valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
             ip.setPrecoTotal(valorItem.doubleValue());
             valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
+        }
+        if (this.cupom != null) {
+            if (this.cupom.getPercentual()) {
+                BigDecimal porcentagem = new BigDecimal(this.cupom.getValor()).divide(new BigDecimal(100));
+                valorTotal = valorTotal.subtract(new BigDecimal(valorTotal.doubleValue()).multiply(porcentagem));
+            } else {
+                BigDecimal desconto = new BigDecimal(this.cupom.getValor());                
+                valorTotal = valorTotal.subtract(desconto);
+                if (valorTotal.doubleValue() < 0) {
+                    valorTotal = new BigDecimal(0);
+                }
+            }
         }
         this.setPrecoTotal(valorTotal.doubleValue());
     }
@@ -122,6 +135,14 @@ public class Pedido2 {
 
     public void setFrete(double frete) {
         this.frete = frete;
+    }       
+
+    public CupomDesconto2 getCupom() {
+        return cupom;
+    }
+
+    public void setCupom(CupomDesconto2 cupom) {
+        this.cupom = cupom;
     }        
     
 }

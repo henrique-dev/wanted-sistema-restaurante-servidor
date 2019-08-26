@@ -1022,11 +1022,13 @@ public class ClienteDAO {
             pagina *= 10;
         }
         String sql = "SELECT pedido.id_pedido, pedido.itens, pedido.data, pedido.precototal, pedido.id_endereco, pedido.estado, pedido.frete, "
-                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao "
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao, "
+                + " pedido.id_cupomdesconto, percentual, valor, codigo "
                 + " FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
+                + " LEFT JOIN cupomdesconto ON pedido.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
                 + " WHERE pedido.id_cliente = ? "
                 + " ORDER BY pedido.data DESC LIMIT ?, 10";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -1046,12 +1048,17 @@ public class ClienteDAO {
                 endereco.setDescricao(rs.getString("endereco_descricao"));
                 pedido.setEndereco(endereco);
                 pedido.setFrete(rs.getDouble("frete"));
-                System.out.println(rs.getString("pedido_estado.descricao"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 ObjectMapper mapeador = new ObjectMapper();
-                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
-                });
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {});
                 pedido.setItens(itens);
+                if (rs.getObject("id_cupomdesconto") != null) {
+                    CupomDesconto2 cupom = new CupomDesconto2();
+                    cupom.setCodigo(rs.getString("codigo"));
+                    cupom.setPercentual(rs.getBoolean("percentual"));
+                    cupom.setValor(rs.getDouble("valor"));
+                    pedido.setCupom(cupom);
+                }
                 pedido.calcularPedido();
                 pedidos.add(pedido);
             }
@@ -1063,11 +1070,13 @@ public class ClienteDAO {
 
     public void getPedido(Pedido2 pedido, Cliente cliente) throws DAOException, IOException {
         String sql = "SELECT pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
-                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao "
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao, "
+                + " pedido.id_cupomdesconto, percentual, valor, codigo "
                 + " FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
+                + " LEFT JOIN cupomdesconto ON pedido.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
                 + " WHERE pedido.id_cliente = ? AND pedido.id_pedido = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
@@ -1087,9 +1096,15 @@ public class ClienteDAO {
                 pedido.setEndereco(endereco);
 
                 ObjectMapper mapeador = new ObjectMapper();
-                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
-                });
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {});                
                 pedido.setItens(itens);
+                if (rs.getObject("id_cupomdesconto") != null) {
+                    CupomDesconto2 cupom = new CupomDesconto2();
+                    cupom.setCodigo(rs.getString("codigo"));
+                    cupom.setPercentual(rs.getBoolean("percentual"));
+                    cupom.setValor(rs.getDouble("valor"));
+                    pedido.setCupom(cupom);
+                }
                 pedido.calcularPedido();
             }
         } catch (SQLException e) {
