@@ -184,7 +184,7 @@ public class CadastroDAO {
             String tokenLoginUsuario = new ServicoGeracaoToken().gerarSHA256(cadastro.getTelefone());
             String tokenLoginSegredo = new ServicoGeracaoToken().gerarSHA256(cadastro.getSenhaUsuario());
             
-            String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true "
+            String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true, "
                     + " token_login_usuario = ?, token_login_segredo = ? "
                     + " WHERE usuario.id_usuario = ?";
             try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
