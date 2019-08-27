@@ -410,13 +410,14 @@ public class ClienteController {
         return new ResponseEntity<>(confirmaPedido, httpHeaders, httpStatus);
     }
     
-    @PostMapping("cliente/confirmar-pedido")
+    @PostMapping(value = "cliente/confirmar-pedido")
     public ResponseEntity<ConfirmacaoPedido> confirmarPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
         ConfirmacaoPedido confirmacaoPedido = new ConfirmacaoPedido();
         Pedido pedido;
         try {
             if (sessao.getAttribute("pre-pedido-preco") != null && sessao.getAttribute("pre-pedido-itens") != null) {
+                System.out.println("HERE1");
                 Cliente cliente = (Cliente) sessao.getAttribute("cliente");
                 pedido = new Pedido();
                 pedido.setEndereco(confirmaPedido.getEnderecos().get(0));
@@ -424,10 +425,12 @@ public class ClienteController {
                 pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
                 if (sessao.getAttribute("pre-pedido-cupom") != null) {
                     pedido.setCupom((CupomDesconto) sessao.getAttribute("pre-pedido-cupom"));
-                }                
+                }
+                System.out.println("HERE2");
                 pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
                 pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
                 pedido.setFrete(RepositorioProdutos.getInstancia().frete);
+                System.out.println("HERE3");
                 switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
                     case 0:
                         pedido.setEstado(4);
