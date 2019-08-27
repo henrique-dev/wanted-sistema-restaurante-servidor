@@ -954,7 +954,7 @@ public class ClienteDAO {
             stmt.setInt(6, pedido.getEstado());
             stmt.setString(7, pedido.getObservacaoEntrega());
             stmt.setDouble(8, pedido.getFrete());
-            stmt.setLong(9, pedido.getCupom() == null ? null : pedido.getCupom().getId());
+            stmt.setObject(9, pedido.getCupom() == null ? null : pedido.getCupom().getId());
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();
