@@ -422,7 +422,9 @@ public class ClienteController {
                 pedido.setEndereco(confirmaPedido.getEnderecos().get(0));
                 pedido.setFormaPagamento(confirmaPedido.getFormaPagamentos().get(0));
                 pedido.convertItemParaItemFacil((List<ItemPedido>) sessao.getAttribute("pre-pedido-itens"));
-                pedido.setCupom((CupomDesconto) sessao.getAttribute("pre-pedido-cupom"));
+                if (sessao.getAttribute("pre-pedido-cupom") != null) {
+                    pedido.setCupom((CupomDesconto) sessao.getAttribute("pre-pedido-cupom"));
+                }                
                 pedido.setPrecoTotal((Double) sessao.getAttribute("pre-pedido-preco"));
                 pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
                 pedido.setFrete(RepositorioProdutos.getInstancia().frete);
