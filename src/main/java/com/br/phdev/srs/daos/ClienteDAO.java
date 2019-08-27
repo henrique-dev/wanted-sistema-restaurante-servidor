@@ -957,8 +957,10 @@ public class ClienteDAO {
             stmt.setLong(9, pedido.getCupom() == null ? null : pedido.getCupom().getId());
             stmt.execute();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             throw new DAOException(e, 307);
         }
     }
