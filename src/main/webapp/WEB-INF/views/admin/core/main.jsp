@@ -140,6 +140,16 @@
                     </div>
                 </li>
 
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/sessao/sair-2">
+                        <i class="fas fa-fw fa-logout"></i>
+                        <span>Sair</span></a>
+                </li>
+
             </ul>
             <!-- End of Sidebar -->
 

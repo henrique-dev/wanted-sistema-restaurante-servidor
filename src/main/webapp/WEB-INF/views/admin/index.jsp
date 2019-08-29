@@ -274,8 +274,8 @@
     }    
 
     function connect() {
-        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        //var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
             processarRetornoWebSocket(e);
         };

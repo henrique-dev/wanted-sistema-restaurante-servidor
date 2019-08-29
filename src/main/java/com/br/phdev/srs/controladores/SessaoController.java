@@ -13,9 +13,6 @@ import com.br.phdev.srs.models.Admin;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Usuario;
-import com.br.phdev.srs.utils.ServicoGeracaoToken;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -144,6 +141,13 @@ public class SessaoController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @GetMapping("sessao/sair-2")
+    public String sair2(HttpSession sessao, HttpServletResponse res) {
+        sessao.removeAttribute("admin");
+        sessao.invalidate();
+        return "redirect:login";
     }
     
 }

@@ -27,43 +27,47 @@
 
     </head>
 
-    <body class="bg-gradient-primary">
+    <style>
+        #ctn_background {
+            background: url(${pageContext.request.contextPath}/resources/img/logo-wanted.png) no-repeat center center;
+            background-size: 50%;
+        }
 
-        <div class="container">
+        .center {
+            margin: auto;
+            width: 35%;
+            text-align: center; 
+            vertical-align: middle
+        }
 
-            <!-- Outer Row -->
-            <div class="row justify-content-center">
-                <div class="col-lg-6">
-                    <div class="card o-hidden border-0 shadow-lg my-5">
-                        <div class="card-body p-0">
-                            <!-- Nested Row within Card Body -->
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="p-5">
-                                        <div class="text-center">
-                                            <h1 class="h4 text-gray-900 mb-4">Wanted Admin</h1>
-                                        </div>
-                                        <form class="user" id="formLogin" method="POST" action="${pageContext.request.contextPath}/sessao/autenticar-2">
-                                            <div class="form-group">
-                                                <input type="text" class="form-control form-control-user" id="nome" name="nomeUsuario" aria-describedby="emailHelp" placeholder="Usuário">
-                                            </div>
-                                            <div class="form-group">
-                                                <input type="password" class="form-control form-control-user" id="senha" name="senhaUsuario" placeholder="Senha">
-                                            </div>
-                                            <div class="form-group">
-                                                <input type="submit" class="btn btn-primary btn-user btn-block" value="Entrar">
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+        .center-cmp {
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>    
+
+    <body style="background: #000; overflow-y: hidden">
+
+        <div id="ctn_background" style="height: 100vh;" class="text-center">
+            
+        </div>
+        <div id="ctn_login" style="height: 100vh;">
+            <div class="row center h-100">
+                <div class="col justify-content-center" style="margin-top: 30vh;">
+                    <form class="user" id="formLogin" method="POST" action="${pageContext.request.contextPath}/sessao/autenticar-2">
+                        <p><img src="${pageContext.request.contextPath}/resources/img/logo-wanted-escura.png" width="auto" height="100px" class="pb-3"></p>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="nome" name="nomeUsuario" aria-describedby="emailHelp" placeholder="Usuário">
                         </div>
-                    </div>
-
+                        <div class="form-group">
+                            <input type="password" class="form-control" id="senha" name="senhaUsuario" placeholder="Senha">
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-warning btn-block text-dark" value="Entrar">
+                        </div>
+                    </form>
                 </div>
-
             </div>
-
         </div>
 
         <!-- Bootstrap core JavaScript-->
@@ -75,6 +79,43 @@
 
         <!-- Custom scripts for all pages-->
         <script src="${pageContext.request.contextPath}/resources/js/sb-admin-2.min.js"></script>
+
+        <script>
+
+            var login = false;
+
+            $(document).mousemove(function() {
+                if (login == false) {
+                    $('html, body').animate({
+                        scrollTop: $("#ctn_login").offset().top
+                    }, {
+                        step: function(i,j) {
+                            let unR = 143 / j.end;
+                            let unG = 123 / j.end;
+                            let unB = 95 / j.end;
+                            let R = parseInt(i * unR);
+                            let G = parseInt(i * unG);
+                            let B = parseInt(i * unB);                            
+                            let cor = "rgb(" + R.toString() 
+                                + "," + G.toString() 
+                                + "," + B.toString() + ")";
+                            console.log(cor);
+                            $("body").css("background", cor);
+                        },
+                        duration: 2000
+                    });
+                    login = true;
+                }                
+            }); 
+
+            $(document).ready(function() {
+                $('html, body').animate({
+                    scrollTop: $("#ctn_background").offset().top
+                }, 1000, function() {
+
+                });
+            });
+        </script>
 
     </body>
 
