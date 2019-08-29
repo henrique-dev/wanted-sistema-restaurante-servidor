@@ -25,73 +25,80 @@
     <div class="row p-3 h-100">
         <div class="col-lg-6 col-md-12 col-sm-12 p-1 pr-3 h-100">
             <div class="card p-2 h-100">
-                <h3>Confirmaçoes</h3>                
-                <div class="card mb-3">
-                    <div class="card-body border">
-                        <div class="row">
-                            <div class="col">
-                                <h5 class="card-title">#${pedidoPendente.id}</h5>
+                <h3>Confirmaçoes</h3>
+                <c:choose>
+                    <c:when test="${pedidoPendente != null}">
+                        <div class="card mb-3">
+                            <div class="card-body border">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="card-title">#${pedidoPendente.id}</h5>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3">
+                                        Cliente:
+                                    </div>
+                                    <div class="col">
+                                        <strong>${pedidoPendente.cliente.nome}</strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3">
+                                        Telefone:
+                                    </div>
+                                    <div class="col">
+                                        <strong>${pedidoPendente.cliente.telefone}</strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3">
+                                        Logradouro:
+                                    </div>
+                                    <div class="col">
+                                        <strong>${pedidoPendente.endereco.logradouro}</strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3">
+                                        Bairro:
+                                    </div>
+                                    <div class="col">
+                                        <strong>${pedidoPendente.endereco.bairro}</strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3">
+                                        Descrição:
+                                    </div>
+                                    <div class="col">
+                                        <strong>${pedidoPendente.endereco.descricao}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-header border" style="overflow-y: scroll; max-height: 50vh; min-height: 31vh;">
+                                <div class="row">
+                                    <div class="col-3">
+                                        Itens:
+                                    </div>
+                                    <div class="col">
+                                        <c:forEach items="${pedidoPendente.itens}" var="item">
+                                            <p><strong>${item.quantidade} x ${item.nome}</strong></p>
+                                        </c:forEach>
+                                    </div>
+                                </div>                        
+                            </div>                    
+                            <div class="card-body border">                        
+                                <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedidoPendente.precoTotal)}</p>
+                                <button data-id='${pedidoPendente.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
+                                <button data-id='${pedidoPendente.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-3">
-                                Cliente:
-                            </div>
-                            <div class="col">
-                                <strong>${pedidoPendente.cliente.nome}</strong>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3">
-                                Telefone:
-                            </div>
-                            <div class="col">
-                                <strong>${pedidoPendente.cliente.telefone}</strong>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3">
-                                Logradouro:
-                            </div>
-                            <div class="col">
-                                <strong>${pedidoPendente.endereco.logradouro}</strong>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3">
-                                Bairro:
-                            </div>
-                            <div class="col">
-                                <strong>${pedidoPendente.endereco.bairro}</strong>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3">
-                                Descrição:
-                            </div>
-                            <div class="col">
-                                <strong>${pedidoPendente.endereco.descricao}</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-header border" style="overflow-y: scroll; max-height: 50vh; min-height: 31vh;">
-                        <div class="row">
-                            <div class="col-3">
-                                Itens:
-                            </div>
-                            <div class="col">
-                                <c:forEach items="${pedidoPendente.itens}" var="item">
-                                    <p><strong>${item.quantidade} x ${item.nome}</strong></p>
-                                </c:forEach>
-                            </div>
-                        </div>                        
-                    </div>                    
-                    <div class="card-body border">                        
-                        <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedidoPendente.precoTotal)}</p>
-                        <button data-id='${pedidoPendente.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
-                        <button data-id='${pedidoPendente.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
-                    </div>
-                </div>
+                    </c:when>
+                    <c:otherwise>
+                        
+                    </c:otherwise>
+                </c:choose>                            
             </div>
         </div>
         <div class="col-lg-6 col-md-12 col-sm-12 p-1 pl-3 h-100">

@@ -66,7 +66,7 @@ public class GerenciadorController {
         try {
             List<Pedido3> pedidosPendentes = this.dao.getPedidos().get(0);
             List<Pedido3> pedidosConfirmados = this.dao.getPedidos().get(1);
-            modelo.addAttribute("pedidoPendente", pedidosPendentes.get(0));
+            modelo.addAttribute("pedidoPendente", (pedidosPendentes.isEmpty() ? null : pedidosPendentes.get(0)));
             modelo.addAttribute("pedidosConfirmados", pedidosConfirmados);
         } catch (DAOException e) {
             e.printStackTrace();
