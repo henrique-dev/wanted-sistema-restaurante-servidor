@@ -157,17 +157,7 @@
                     <!-- /.container-fluid -->
 
                 </div>
-                <!-- End of Main Content -->
-
-                <!-- Footer -->
-                <footer class="sticky-footer bg-white">
-                    <div class="container my-auto">
-                        <div class="copyright text-center my-auto">
-                            <span>Copyright &copy; Paulo Henrique G. Bacelar - henrique.phgb@gmail.com</span>
-                        </div>
-                    </div>
-                </footer>
-                <!-- End of Footer -->
+                <!-- End of Main Content -->                
 
             </div>
             <!-- End of Content Wrapper -->

@@ -21,15 +21,18 @@ import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Item2;
+import com.br.phdev.srs.models.ItemPedido;
 import com.br.phdev.srs.models.ItemPedidoFacil;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
+import com.br.phdev.srs.models.Pedido3;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.TipoCupomDesconto;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -224,24 +227,49 @@ public class GerenciadorDAO {
         return clientes;
     }
 
-    public List<Pedido2> getPedidos() throws DAOException {
-        List<Pedido2> pedidos = null;
+    public List<Pedido3> getPedidos() throws DAOException {
+        List<Pedido3> pedidos = null;
         String sql = "SELECT * FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
-                + " WHERE pedido.id_pedido IN (4,8,9,10,11)";
+                + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
+                + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco " 
+                + " WHERE pedido.estado IN (4,8,9,10,11)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             pedidos = new ArrayList<>();
             while (rs.next()) {
-                Pedido2 pedido = new Pedido2();
+                Pedido3 pedido = new Pedido3();
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
+                
+                Cliente cliente = new Cliente();
+                cliente.setNome(rs.getString("cliente.nome"));
+                cliente.setTelefone(rs.getString("cliente.telefone"));
+                pedido.setCliente(cliente);
+                
+                Endereco endereco = new Endereco();
+                endereco.setLogradouro(rs.getString("logradouro"));
+                endereco.setBairro(rs.getString("bairro"));
+                endereco.setDescricao(rs.getString("endereco.descricao"));
+                pedido.setEndereco(endereco);
+                
+                ObjectMapper mapeador = new ObjectMapper();
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
+                });
+                pedido.setItens(itens);
+                
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(pedido);
+                pedido.setJson(json);
+                
                 pedidos.add(pedido);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | JsonProcessingException e) {
             e.printStackTrace();
             throw new DAOException(200);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return pedidos;
     }

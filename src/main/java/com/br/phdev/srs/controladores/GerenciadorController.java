@@ -18,11 +18,11 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Item2;
-import com.br.phdev.srs.models.ItemPedido;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
+import com.br.phdev.srs.models.Pedido3;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,7 +30,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
@@ -65,7 +64,7 @@ public class GerenciadorController {
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
-            List<Pedido2> pedidos = this.dao.getPedidos();
+            List<Pedido3> pedidos = this.dao.getPedidos();
             modelo.addAttribute("pedidos", pedidos);
         } catch (DAOException e) {
             e.printStackTrace();
