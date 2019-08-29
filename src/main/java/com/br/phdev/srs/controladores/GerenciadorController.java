@@ -64,10 +64,8 @@ public class GerenciadorController {
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
-            List<Pedido3> pedidosPendentes = this.dao.getPedidos().get(0);
-            List<Pedido3> pedidosConfirmados = this.dao.getPedidos().get(1);
-            modelo.addAttribute("pedidoPendente", (pedidosPendentes.isEmpty() ? null : pedidosPendentes.get(0)));
-            modelo.addAttribute("pedidosConfirmados", pedidosConfirmados);
+            List<Pedido3> pedidos = this.dao.getPedidos();
+            modelo.addAttribute("pedidos", pedidos);            
         } catch (DAOException e) {
             e.printStackTrace();
         }

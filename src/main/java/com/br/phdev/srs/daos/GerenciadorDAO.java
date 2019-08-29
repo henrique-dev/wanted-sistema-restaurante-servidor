@@ -227,10 +227,8 @@ public class GerenciadorDAO {
         return clientes;
     }
 
-    public List<List<Pedido3>> getPedidos() throws DAOException {
-        List<List<Pedido3>> pedidos = new ArrayList<>();
-        List<Pedido3> pedidosPendentes;
-        List<Pedido3> pedidosConfirmados;
+    public List<Pedido3> getPedidos() throws DAOException {        
+        List<Pedido3> pedidos = new ArrayList<>();
         String sql = "SELECT * FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
@@ -238,13 +236,13 @@ public class GerenciadorDAO {
                 + " WHERE pedido.estado IN (4,5,8,9,10)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            pedidosConfirmados = new ArrayList<>();
-            pedidosPendentes = new ArrayList<>();
+            Boolean pedidoPendente = false;
             while (rs.next()) {
                 Pedido3 pedido = new Pedido3();
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
+                pedido.setEstado(rs.getInt("pedido.estado"));
                 
                 Cliente cliente = new Cliente();
                 cliente.setNome(rs.getString("cliente.nome"));
@@ -262,20 +260,16 @@ public class GerenciadorDAO {
                 });
                 pedido.setItens(itens);                               
                 
-                if (rs.getInt("estado") == 4) {
-                    if (pedidosPendentes.isEmpty()) {
-                        pedidosPendentes.add(pedido);
-                    }                    
-                } else {
+                if (rs.getInt("estado") == 4 && !pedidoPendente) {;
+                    pedidos.add(pedido);
+                    pedidoPendente = true;                    
+                } else if (rs.getInt("estado") != 4){
                     ObjectMapper objectMapper = new ObjectMapper();
                     String json = objectMapper.writeValueAsString(pedido);
                     pedido.setJson(json);
-                    pedidosConfirmados.add(pedido);
+                    pedidos.add(pedido);
                 }                
             }
-            pedidos.add(pedidosPendentes);
-            pedidos.add(pedidosConfirmados);
-            
         } catch (SQLException | JsonProcessingException e) {
             e.printStackTrace();
             throw new DAOException(200);

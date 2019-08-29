@@ -88,15 +88,17 @@ public class ServicoDAO {
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco " 
-                + " WHERE pedido.estado IN (5,8,9,10)";
+                + " WHERE pedido.estado IN (4,5,8,9,10)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             List<Pedido2> pedidos = new ArrayList<>();
+            Boolean pedidoPendente = false;
             while (rs.next()) {
                 Pedido2 pedido = new Pedido2();
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
+                pedido.setEstado(rs.getInt("pedido.estado"));
                 
                 Cliente cliente = new Cliente();
                 cliente.setNome(rs.getString("cliente.nome"));
@@ -113,7 +115,15 @@ public class ServicoDAO {
                 List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
                 });
                 pedido.setItens(itens);
-                pedidos.add(pedido);
+                
+                if (rs.getInt("estado") == 4 && !pedidoPendente) {;
+                    pedidos.add(pedido);
+                    pedidoPendente = true;                    
+                } else if (rs.getInt("estado") != 4){
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String json = objectMapper.writeValueAsString(pedido);
+                    pedidos.add(pedido);
+                }                
             }
             notificacaoPedido.setPedidos(pedidos);
             sql = "SELECT * FROM websocket_admin WHERE id_usuario=1";

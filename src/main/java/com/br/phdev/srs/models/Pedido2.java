@@ -22,6 +22,7 @@ public class Pedido2 {
     private FormaPagamento formaPagamento;
     private Endereco endereco;
     private CupomDesconto2 cupom;
+    private Integer estado;
     private String status;
     private String observacaoEntrega;
     private double frete;
@@ -151,6 +152,14 @@ public class Pedido2 {
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+
+    public Integer getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Integer estado) {
+        this.estado = estado;
     }
 
 }
