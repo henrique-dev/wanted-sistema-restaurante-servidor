@@ -12,8 +12,7 @@ package com.br.phdev.srs.models;
  */
 public class Pedido3 extends Pedido2 {
     
-    private long id;    
-    private Cliente cliente;
+    private long id;
     private String json;
 
     public long getId() {
@@ -30,14 +29,6 @@ public class Pedido3 extends Pedido2 {
 
     public void setJson(String json) {
         this.json = json;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
     }
     
 }

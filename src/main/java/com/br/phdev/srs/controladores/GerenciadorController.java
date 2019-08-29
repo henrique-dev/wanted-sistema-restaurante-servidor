@@ -64,8 +64,10 @@ public class GerenciadorController {
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
-            List<Pedido3> pedidos = this.dao.getPedidos();
-            modelo.addAttribute("pedidos", pedidos);
+            List<Pedido3> pedidosPendentes = this.dao.getPedidos().get(0);
+            List<Pedido3> pedidosConfirmados = this.dao.getPedidos().get(1);
+            modelo.addAttribute("pedidoPendente", pedidosPendentes.get(0));
+            modelo.addAttribute("pedidosConfirmados", pedidosConfirmados);
         } catch (DAOException e) {
             e.printStackTrace();
         }
@@ -310,6 +312,38 @@ public class GerenciadorController {
         try {
             Admin admin = (Admin) sessao.getAttribute("admin");
             this.dao.cadastrarTokenAlerta(admin, token);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @PostMapping("gerenciador/confirmar-pedido")
+    @ResponseBody
+    public void confirmarPedido(Integer id, Model modelo, HttpSession sessao) {
+        try {
+            Admin admin = (Admin) sessao.getAttribute("admin");
+            if (admin != null) {
+                Pedido pedido = new Pedido();
+                pedido.setId(id);
+                pedido.setEstado(5);
+                this.dao.atualizarEstadoPedido2(pedido);
+            }            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @PostMapping("gerenciador/cancelar-pedido")
+    @ResponseBody
+    public void cancelarPedido(Integer id, Model modelo, HttpSession sessao) {
+        try {
+            Admin admin = (Admin) sessao.getAttribute("admin");
+            if (admin != null) {
+                Pedido pedido = new Pedido();
+                pedido.setId(id);
+                pedido.setEstado(6);
+                this.dao.atualizarEstadoPedido2(pedido);
+            }            
         } catch (DAOException e) {
             e.printStackTrace();
         }

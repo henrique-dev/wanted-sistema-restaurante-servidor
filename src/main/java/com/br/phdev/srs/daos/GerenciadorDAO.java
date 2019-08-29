@@ -227,16 +227,19 @@ public class GerenciadorDAO {
         return clientes;
     }
 
-    public List<Pedido3> getPedidos() throws DAOException {
-        List<Pedido3> pedidos = null;
+    public List<List<Pedido3>> getPedidos() throws DAOException {
+        List<List<Pedido3>> pedidos = new ArrayList<>();
+        List<Pedido3> pedidosPendentes;
+        List<Pedido3> pedidosConfirmados;
         String sql = "SELECT * FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco " 
-                + " WHERE pedido.estado IN (4,8,9,10,11)";
+                + " WHERE pedido.estado IN (4,5,8,9,10)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            pedidos = new ArrayList<>();
+            pedidosConfirmados = new ArrayList<>();
+            pedidosPendentes = new ArrayList<>();
             while (rs.next()) {
                 Pedido3 pedido = new Pedido3();
                 pedido.setId(rs.getLong("id_pedido"));
@@ -257,14 +260,22 @@ public class GerenciadorDAO {
                 ObjectMapper mapeador = new ObjectMapper();
                 List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
                 });
-                pedido.setItens(itens);
+                pedido.setItens(itens);                               
                 
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(pedido);
-                pedido.setJson(json);
-                
-                pedidos.add(pedido);
+                if (rs.getInt("estado") == 4) {
+                    if (pedidosPendentes.isEmpty()) {
+                        pedidosPendentes.add(pedido);
+                    }                    
+                } else {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String json = objectMapper.writeValueAsString(pedido);
+                    pedido.setJson(json);
+                    pedidosConfirmados.add(pedido);
+                }                
             }
+            pedidos.add(pedidosPendentes);
+            pedidos.add(pedidosConfirmados);
+            
         } catch (SQLException | JsonProcessingException e) {
             e.printStackTrace();
             throw new DAOException(200);
@@ -347,9 +358,55 @@ public class GerenciadorDAO {
             throw new DAOException(e, 200);
         }
     }
+    
+    public void confirmarPedido(Pedido pedido) throws DAOException {
+        String sql = "UPDATE pedido SET estado=5 WHERE id_pedido=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, pedido.getId());
+            stmt.execute();
+            sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle, id_cupomdesconto FROM pedido "
+                    + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
+                    + " WHERE id_pedido=? ";
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                stmt2.setLong(1, pedido.getId());
+                ResultSet rs = stmt2.executeQuery();
+                if (rs.next()) {                    
+                    if (rs.getInt("estado") == 5 && rs.getObject("id_cupomdesconto") != null) {
+                        sql = "UPDATE cupomdesconto_cliente SET usado = true, proxima_compra = false WHERE id_cliente = ? AND id_cupomdesconto = ?";
+                        try (PreparedStatement stmt3 = this.conexao.prepareStatement(sql)) {
+                            stmt3.setLong(1, rs.getLong("id_cliente"));
+                            stmt3.setLong(2, rs.getLong("id_cupomdesconto"));
+                            stmt3.execute();
+                        }
+                    }
+                    
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", "
+                            + " \"estado_id\":" + rs.getInt("estado") + ", "
+                            + " \"estado_descricao\" : \"" + rs.getString("pedido_estado.descricao") + "\", "
+                            + " \"estado_controle\" : \"" + rs.getString("pedido_estado.controle") + "\"}");
+                    this.adicionarNotificacao(notificacao);
+                }
+            }            
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
 
     public void atualizarEstadoPedido2(Pedido pedido) throws DAOException {
-        String sql = "UPDATE pedido SET estado=(IF(estado < 11, estado + 1, 11)) WHERE id_pedido=?";
+        String sql = "";
+        switch (pedido.getEstado()) {
+            case 5:
+                sql = "UPDATE pedido SET estado=5 WHERE id_pedido=?";
+                break;
+            case 6:
+                sql = "UPDATE pedido SET estado=6 WHERE id_pedido=?";
+                break;
+            default:
+                sql = "UPDATE pedido SET estado=(IF(estado < 11 AND estado != 5, estado + 1, (IF(estado = 5, 8, 11)))) WHERE id_pedido=?";
+                break;
+        }        
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             stmt.execute();

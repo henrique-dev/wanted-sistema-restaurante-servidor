@@ -9,10 +9,16 @@ package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Cliente;
+import com.br.phdev.srs.models.Endereco;
+import com.br.phdev.srs.models.ItemPedido;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.NotificacaoPedido;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
+import com.br.phdev.srs.models.Pedido3;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -80,7 +86,9 @@ public class ServicoDAO {
         notificacaoPedido.setTipo("atualizacao");
         String sql = "SELECT * FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
-                + " WHERE pedido_estado.controle != 'FINAL'";
+                + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
+                + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco " 
+                + " WHERE pedido.estado IN (5,8,9,10)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             List<Pedido2> pedidos = new ArrayList<>();
@@ -89,6 +97,22 @@ public class ServicoDAO {
                 pedido.setId(rs.getLong("id_pedido"));
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
+                
+                Cliente cliente = new Cliente();
+                cliente.setNome(rs.getString("cliente.nome"));
+                cliente.setTelefone(rs.getString("cliente.telefone"));
+                pedido.setCliente(cliente);
+                
+                Endereco endereco = new Endereco();
+                endereco.setLogradouro(rs.getString("logradouro"));
+                endereco.setBairro(rs.getString("bairro"));
+                endereco.setDescricao(rs.getString("endereco.descricao"));
+                pedido.setEndereco(endereco);
+                
+                ObjectMapper mapeador = new ObjectMapper();
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
+                });
+                pedido.setItens(itens);
                 pedidos.add(pedido);
             }
             notificacaoPedido.setPedidos(pedidos);
@@ -100,6 +124,9 @@ public class ServicoDAO {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(200);
+        } catch (IOException e) {
             e.printStackTrace();
             throw new DAOException(200);
         }

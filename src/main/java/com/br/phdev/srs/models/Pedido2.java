@@ -7,7 +7,6 @@
 package com.br.phdev.srs.models;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -15,21 +14,22 @@ import java.util.List;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 public class Pedido2 {
-    
+
     private long id;
     private double precoTotal;
     private String data;
     private List<ItemPedido> itens;
-    private FormaPagamento formaPagamento;    
+    private FormaPagamento formaPagamento;
     private Endereco endereco;
     private CupomDesconto2 cupom;
     private String status;
     private String observacaoEntrega;
     private double frete;
-    
+    private Cliente cliente;
+
     public void calcularPedido() {
         BigDecimal valorTotal = new BigDecimal("0.00").subtract(new BigDecimal(this.frete));
-        for (ItemPedido ip : this.getItens()) {            
+        for (ItemPedido ip : this.getItens()) {
             BigDecimal valorItem = new BigDecimal("0.00");
             if (ip.getComplementos() != null) {
                 for (Complemento c : ip.getComplementos()) {
@@ -37,7 +37,7 @@ public class Pedido2 {
                 }
             }
             if (ip.getVariacoes() != null) {
-                List<GrupoVariacao> variacoes = ip.getVariacoes();                
+                List<GrupoVariacao> variacoes = ip.getVariacoes();
                 for (GrupoVariacao gv : variacoes) {
                     if (gv.getVariacoes() != null) {
                         for (Variacao v : gv.getVariacoes()) {
@@ -55,7 +55,7 @@ public class Pedido2 {
                 BigDecimal porcentagem = new BigDecimal(this.cupom.getValor()).divide(new BigDecimal(100));
                 valorTotal = valorTotal.subtract(new BigDecimal(valorTotal.doubleValue()).multiply(porcentagem));
             } else {
-                BigDecimal desconto = new BigDecimal(this.cupom.getValor());                
+                BigDecimal desconto = new BigDecimal(this.cupom.getValor());
                 valorTotal = valorTotal.subtract(desconto);
                 if (valorTotal.doubleValue() < 0) {
                     valorTotal = new BigDecimal(0);
@@ -119,7 +119,7 @@ public class Pedido2 {
 
     public void setStatus(String status) {
         this.status = status;
-    }      
+    }
 
     public String getObservacaoEntrega() {
         return observacaoEntrega;
@@ -127,7 +127,7 @@ public class Pedido2 {
 
     public void setObservacaoEntrega(String observacaoEntrega) {
         this.observacaoEntrega = observacaoEntrega;
-    }        
+    }
 
     public double getFrete() {
         return frete;
@@ -135,7 +135,7 @@ public class Pedido2 {
 
     public void setFrete(double frete) {
         this.frete = frete;
-    }       
+    }
 
     public CupomDesconto2 getCupom() {
         return cupom;
@@ -143,6 +143,14 @@ public class Pedido2 {
 
     public void setCupom(CupomDesconto2 cupom) {
         this.cupom = cupom;
-    }        
-    
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
 }

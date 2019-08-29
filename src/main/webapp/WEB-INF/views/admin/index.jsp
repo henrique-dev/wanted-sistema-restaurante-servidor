@@ -21,42 +21,102 @@
     }
 </style>
 
-<div id="ctn_index" class="container col-12">
-    <div class="row mt-3">
-        <div class="col-lg-6 col-md-12 col-sm-12 p-1 pr-3">          
-            <div class="card p-2">
+<div id="ctn_index" class="container col-12 h-100">
+    <div class="row p-3 h-100">
+        <div class="col-lg-6 col-md-12 col-sm-12 p-1 pr-3 h-100">
+            <div class="card p-2 h-100">
                 <h3>Confirmaçoes</h3>                
-                <c:forEach items="${pedidos}" var="pedido">
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col">
-                                    <h5 class="card-title">${pedido.id} - ${pedido.cliente.nome}</h5>
-                                </div>
-                                <div class="col-auto">                                    
-                                    <button  data-id='${pedido.id}' data-pedido='${pedido.json}' class='btn btn-primary btn-detalhes-pedido'>Detalhes</button>                                    
-                                </div>                                                                
-                            </div>                            
-                            <small>${pedido.cliente.telefone}</small>
+                <div class="card mb-3">
+                    <div class="card-body border">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title">#${pedidoPendente.id}</h5>
+                            </div>
                         </div>
-                        <div class="card-body">                                                                                    
-                            <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedido.precoTotal)}</p>                            
-                            
+                        <div class="row">
+                            <div class="col-3">
+                                Cliente:
+                            </div>
+                            <div class="col">
+                                <strong>${pedidoPendente.cliente.nome}</strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                Telefone:
+                            </div>
+                            <div class="col">
+                                <strong>${pedidoPendente.cliente.telefone}</strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                Logradouro:
+                            </div>
+                            <div class="col">
+                                <strong>${pedidoPendente.endereco.logradouro}</strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                Bairro:
+                            </div>
+                            <div class="col">
+                                <strong>${pedidoPendente.endereco.bairro}</strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                Descrição:
+                            </div>
+                            <div class="col">
+                                <strong>${pedidoPendente.endereco.descricao}</strong>
+                            </div>
                         </div>
                     </div>
-                </c:forEach>                
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12 p-1 pl-3">
-            <div class="card p-2">
-                <h3>Pedidos</h3>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Special title treatment</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    <div class="card-header border" style="overflow-y: scroll; max-height: 50vh; min-height: 31vh;">
+                        <div class="row">
+                            <div class="col-3">
+                                Itens:
+                            </div>
+                            <div class="col">
+                                <c:forEach items="${pedidoPendente.itens}" var="item">
+                                    <p><strong>${item.quantidade} x ${item.nome}</strong></p>
+                                </c:forEach>
+                            </div>
+                        </div>                        
+                    </div>                    
+                    <div class="card-body border">                        
+                        <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedidoPendente.precoTotal)}</p>
+                        <button data-id='${pedidoPendente.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
+                        <button data-id='${pedidoPendente.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12 p-1 pl-3 h-100">
+            <div class="card p-2 h-100">
+                <h3>Pedidos</h3>
+                <div id="ctn_pedidos" style="overflow-y: auto; max-height: 80vh">
+                    <c:forEach items="${pedidosConfirmados}" var="pedido">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <div class="row">
+                                    <div class="col">
+                                        <p><h5 class="card-title">#${pedido.id}</h5></p>
+                                        <p><h6>${pedido.status}</h6></p>
+                                    </div>
+                                    <div class="col-auto">                                    
+                                        <button  data-id='${pedido.id}' data-pedido='${pedido.json}' class='btn btn-warning btn-detalhes-pedido'>Detalhes</button>
+                                    </div>                                                                
+                                </div>
+                            </div>
+                            <div class="card-body">                                                                                    
+                                <button data-id='${pedido.id}' class='btn btn-primary btn-atualizar-estado-pedido'>Atualizar status</button>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>                
             </div>
         </div>
     </div>
@@ -64,7 +124,7 @@
 
 <!-- Modal -->
 <div id="modal_detalhe_pedido" class="modal fade" id="modalExemplo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modal_detalhe_pedido_titulo"></h5>
@@ -72,13 +132,7 @@
                 <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                
-            </div>
-            <div class="modal-footer">                
-                <button data-id='${pedido.id}' data-dismiss="modal" class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
-                <button data-id='${pedido.id}' data-dismiss="modal"class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
-            </div>
+            <div class="modal-body"></div>
         </div>
     </div>
 </div>
@@ -89,33 +143,43 @@
 
     var sock = null;    
 
-    function carregarTabela(pedidos = null) {
+    function atualizarPedidosConfirmados(pedidos) {
 
         if (pedidos != null) {            
             if (pedidos.length > 0) {
-                $("#tbl_pedidos").append("<tbody></tbody>");
+                $("#ctn_pedidos").empty();
                 for (let i=0; i<pedidos.length; i++) {
                     let pedido = pedidos[i];
-                    $("#tbl_pedidos").children("tbody").append(
-                        "<tr data-child-value='"+pedido["id"]+"' data-id='"+pedido["id"]+"' id='tr_"+pedido["id"]+"' style='height: 50px'>"
-                        +   "<td width='10%'><a href='pedido?id="+pedido["id"]+"'>"+pedido["id"]+"</a></td>"
-                        +   "<td width='45%'>"+pedido.status+"</td>"
-                        +   "<td width='30%'>"+(parseFloat(pedido["precoTotal"]).toFixed(2))+"</td>"                        
-                        +   "<td width='15%'><center><button data-id='"+pedido["id"]+"' class='btn btn-success btn-atualizar-estado'>Atualizar</button></center></td>"                        
-                        +"<tr>"
+                    $("#ctn_pedidos").append(
+                        "<div class='card mb-3'>"
+                            +"<div class='card-header'>"
+                                +"<div class='row'>"
+                                    +"<div class='col'>"
+                                        +"<h5 class='card-title'>#"+pedido["id"]+"</h5>"
+                                        +"<p><h6>"+pedido["status"]+"</h6></p>"
+                                    +"</div>"
+                                    +"<div class='col-auto'>"
+                                        +"<button data-id='"+pedido["id"]+"' data-pedido='"+JSON.stringify(pedido)+"' class='btn btn-warning btn-detalhes-pedido'>Detalhes</button>"
+                                    +"</div>"
+                                +"</div>"
+                            +"</div>"
+                            +"<div class='card-body'>"
+                                +"<button  data-id='"+pedido["id"]+"' class='btn btn-primary btn-atualizar-estado-pedido'>Próximo status</button>"
+                            +"</div>"
+                        +"</div>"
                     );
-                    $(".btn-atualizar-estado").off().click(function() {
+                    $(".btn-detalhes-pedido").off().click(detalhesPedido);
+                    $(".btn-atualizar-estado-pedido").off().click(function() {
                         atualizarEstadoPedido($(this).data("id"));
                     });
                 }
             }
         }
-        
     }    
 
     function connect() {
-        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        //var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
             processarRetornoWebSocket(e);
         };
@@ -127,8 +191,20 @@
         });
     }
 
-    function acao(id) {
-        $.post("atualizar-estado-pedido2?id=" + id, function(dados) {
+    function acao(acao, complemento) {
+        let url = "";
+        switch(acao) {
+            case "confirmar" :
+                url = "confirmar-pedido?id=" + complemento;
+                break;
+            case "cancelar" :
+                url = "cancelar-pedido?id=" + complemento;
+                break;
+            case "atualizar" :
+                url = "atualizar-estado-pedido2?id=" + complemento;
+                break;
+        }
+        $.post(url, function(dados) {
             location.reload(true);
         });
     }
@@ -142,48 +218,51 @@
                 break;
             case "atualizacao" :
                 let pedidos = dados.pedidos;
-                carregarTabela(pedidos);
+                atualizarPedidosConfirmados(pedidos);
                 break;
         }        
     }
+
+    function detalhesPedido() {
+        let json = $(this).data("pedido");
+        let modal_body = $("#modal_detalhe_pedido").find(".modal-body");
+
+        $("#modal_detalhe_pedido_titulo").empty().text("#" + json.id);
+        
+        let itens = json.itens;
+        let itens_html = "";
+        for (let i=0; i<itens.length; i++) {
+            itens_html += "<p><strong>"
+            +itens[i].quantidade + " x " + itens[i].nome
+            +"</strong></p>"
+        }
+
+        modal_body.empty().append(
+            "<div class='row'><p><div class='col-4'>Cliente:</div><div class='col'><strong>"+json.cliente.nome+"</strong></p></div></div>"
+            +"<div class='row'><p><div class='col-4'>Telefone:</div><div class='col'><strong>"+json.cliente.telefone+"</strong></p></div></div>"
+            +"<div class='row'><p><div class='col-4'>Logradouro:</div><div class='col'><strong>"+(json.endereco.logradouro == "" ? "&nbsp" : json.endereco.logradouro)+"</strong></p></div></div>"
+            +"<div class='row'><p><div class='col-4'>Bairro:</div><div class='col'><strong>"+(json.endereco.bairro == "" ? "&nbsp" : json.endereco.bairro)+"</strong></p></div></div>"
+            +"<div class='row'><p><div class='col-4'>Descricao:</div><div class='col'><strong>"+json.endereco.descricao+"</strong></p></div></div>"
+            +"<div class='row'><p><div class='col-4'>Itens do pedido: </p></div></div>"
+            +"<div class='row'><div class='col-4'></div><div class='col'>"+itens_html+"</div></div>"
+        );
+        
+        $("#modal_detalhe_pedido").modal('show');
+    }
     
     $(document).ready(function() {
-        //carregarDataTable();
-        carregarTabela();
+
         connect();
 
-        $(".btn-detalhes-pedido").click(function() {
-            let json = $(this).data("pedido");
-            let modal_body = $("#modal_detalhe_pedido").find(".modal-body");
-
-            $("#modal_detalhe_pedido_titulo").empty().text("#" + json.id);
-            
-            let itens = json.itens;
-            let itens_html = "";
-            for (let i=0; i<itens.length; i++) {
-                itens_html += "<p><strong>"
-                +itens[i].quantidade + " x " + itens[i].nome
-                +"</strong></p>"
-            }
-
-            modal_body.empty().append(
-                "<div class='row'><p><div class='col-3'>Cliente:</div><div class='col'><strong>"+json.cliente.nome+"</strong></p></div></div>"
-                +"<div class='row'><p><div class='col-3'>Telefone:</div><div class='col'><strong>"+json.cliente.telefone+"</strong></p></div></div>"
-                +"<div class='row'><p><div class='col-3'>Logradouro:</div><div class='col'><strong>"+(json.endereco.logradouro == "" ? "&nbsp" : json.endereco.logradouro)+"</strong></p></div></div>"
-                +"<div class='row'><p><div class='col-3'>Bairro:</div><div class='col'><strong>"+(json.endereco.bairro == "" ? "&nbsp" : json.endereco.bairro)+"</strong></p></div></div>"
-                +"<div class='row'><p><div class='col-3'>Descricao:</div><div class='col'><strong>"+json.endereco.descricao+"</strong></p></div></div>"
-                +"<div class='row'><p><div class='col-3'>Itens do pedido: </p></div></div>"
-                +"<div class='row'><div class='col-3'></div><div class='col'>"+itens_html+"</div></div>"
-            );
-            console.log(json);
-            
-            $("#modal_detalhe_pedido").modal('show');
-        });
+        $(".btn-detalhes-pedido").click(detalhesPedido);
         $(".btn-confirmar-pedido").click(function() {
             acao("confirmar", $(this).data("id"));
         });
         $(".btn-cancelar-pedido").click(function() {
             acao("cancelar", $(this).data("id"));
+        });
+        $(".btn-atualizar-estado-pedido").off().click(function() {
+            acao("atualizar", $(this).data("id"));
         });
     });
     
