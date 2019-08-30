@@ -39,137 +39,160 @@
         -webkit-transform: translateX(-50%) translateY(-50%);
         transform: translateX(-50%) translateY(-50%);
     }
+
+    .ctn-card {
+        border-radius: 8px;
+        border: 1px;
+        padding: 5px;
+    }
 </style>
 
-<div id="ctn_index" class="container col-12 h-100">
+<div id="ctn_index" class="container h-100">
     <div class="row h-100">
-        <div class="col-lg-6 col-md-12 col-sm-12 pt-4 pb-4 h-100">
-            <div class="card h-100 p-2">
-                <h3>Confirmaçoes</h3>
-                <div id="ctn_pedidos_pendentes" class="h-100">
-                    <c:choose>
-                        <c:when test="${pedidoPendente != null}">
-                            <div class="card mb-3 h-100">
-                                <div class="card-header border h-auto">
-                                    <div class="row">
-                                        <div class="col">
-                                            <strong><h5 class="card-title">#${pedidoPendente.id}</h5></strong>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-3">
-                                            Cliente:
-                                        </div>
-                                        <div class="col">
-                                            <strong>${pedidoPendente.cliente.nome}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-3">
-                                            Telefone:
-                                        </div>
-                                        <div class="col">
-                                            <strong>${pedidoPendente.cliente.telefone}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-3">
-                                            Logradouro:
-                                        </div>
-                                        <div class="col">
-                                            <strong>${pedidoPendente.endereco.logradouro}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-3">
-                                            Bairro:
-                                        </div>
-                                        <div class="col">
-                                            <strong>${pedidoPendente.endereco.bairro}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-3">
-                                            Descrição:
-                                        </div>
-                                        <div class="col">
-                                            <strong>${pedidoPendente.endereco.descricao}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body border h-100 bg-light">
-                                    <div class="row h-100">
-                                        <div class="col-12 h-10">
+        <div class="col-lg-6 col-md-12 col-sm-12 p-4 h-100">
+            <div id="ctn_pedido_pendente" class="row h-100 ctn-card border mbg-sub-card">
+                <div class="col-12 h-100">
+                    <div class="row h-auto inline-block ctn-card-header">
+                        <div class="col-12 h-100 p-2">                            
+                            <h3>Confirmações&nbsp;<small><span class="badge badge-dark align-top">${pedidos.quantidadePedidosPendentes}</span></small></h3>
+                        </div>
+                    </div>
+                    <div class="row inline-block ctn-card-body">
+                        <c:choose>
+                            <c:when test="${pedidos.pedidoPendente != null}">
+                                <div class="col-12 h-100">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <strong><h5 class="card-title">#${pedidos.pedidoPendente.id}</h5></strong>
+                                                </div>
+                                            </div>
                                             <div class="row">
                                                 <div class="col-3">
-                                                    Itens:
+                                                    Cliente:
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col">
+                                                    <strong>${pedidos.pedidoPendente.cliente.nome}</strong>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-12 h-auto">
                                             <div class="row">
-                                                <div class="col-3"></div>
-                                                <div class="col bg-white" style="max-height: 40vh; min-height: 40vh">
-                                                    <table class="table">
-                                                        <tbody>
-                                                            <c:forEach items="${pedidoPendente.itens}" var="item">
-                                                                <tr><td><p><strong>${item.quantidade} x ${item.nome}</strong></p></td></tr>
-                                                            </c:forEach>
-                                                        </tbody>
-                                                    </table>
+                                                <div class="col-3">
+                                                    Telefone:
+                                                </div>
+                                                <div class="col">
+                                                    <strong>${pedidos.pedidoPendente.cliente.telefone}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-3">
+                                                    Logradouro:
+                                                </div>
+                                                <div class="col">
+                                                    <strong>${pedidos.pedidoPendente.endereco.logradouro}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-3">
+                                                    Bairro:
+                                                </div>
+                                                <div class="col">
+                                                    <strong>${pedidos.pedidoPendente.endereco.bairro}</strong>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-3">
+                                                    Descrição:
+                                                </div>
+                                                <div class="col">
+                                                    <strong>${pedidos.pedidoPendente.endereco.descricao}</strong>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>                        
-                                </div>                    
-                                <footer>
-                                    <div class="card-body border bg-light">
-                                        <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedidoPendente.precoTotal)}</p>
-                                        <button data-id='${pedidoPendente.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
-                                        <button data-id='${pedidoPendente.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
-                                    </div>
-                                </footer>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="h-100 w-100 bg-light">
-                                <div class="container-center">
-                                    <p>Sem confirmacoes</p>
-                                </div>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>  
-                </div>                                                      
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12 p-1 pl-3 h-100">
-            <div class="card p-2 h-100">
-                <h3>Pedidos</h3>
-                <div id="ctn_pedidos" style="overflow-y: auto; max-height: 80vh">
-                    <c:forEach items="${pedidos}" var="pedido">
-                        <c:choose>
-                            <c:when test="${pedido.estado != 4}">
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <div class="row">
-                                            <div class="col">
-                                                <p><h5 class="card-title">#${pedido.id}</h5></p>
-                                                <p><h6>${pedido.status}</h6></p>
-                                            </div>
-                                            <div class="col-auto">                                    
-                                                <button  data-id='${pedido.id}' data-pedido='${pedido.json}' class='btn btn-warning btn-detalhes-pedido'>Detalhes</button>
-                                            </div>                                                                
+                                        <div class="card-body bg-light" style="max-height: 0px">
+                                            <c:forEach items="${pedidos.pedidoPendente.itens}" var="item">
+                                                <p><strong>${item.quantidade} x ${item.nome}</strong></p>
+                                            </c:forEach>
                                         </div>
-                                    </div>
-                                    <div class="card-body">                                                                                    
-                                        <button data-id='${pedido.id}' class='btn btn-primary btn-atualizar-estado-pedido'>Atualizar status</button>
+                                        <div class="card-footer bg-light">
+                                            <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedidos.pedidoPendente.precoTotal)}</p>
+                                            <button data-id='${pedidos.pedidoPendente.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
+                                            <button data-id='${pedidos.pedidoPendente.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
+                                        </div>
                                     </div>
                                 </div>
                             </c:when>
+                            <c:otherwise>
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <p>Sem confirmações</p>
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12 p-4 h-100 w-100">
+            <div id="ctn_pedidos" class="row h-100 mbg-sub-card ctn-card border w-100">
+                <div class="col-12 h-100">
+                    <div class="row h-auto ctn-card-header">
+                        <div class="col-12 h-100 p-2">
+                            <h3>Pedidos&nbsp;<small><span class="badge badge-dark align-top">${pedidos.quantidadePedidos}</span></small></h3>
+                        </div>
+                    </div>
+                    <div class="row ctn-card-body w-100 overflow-auto h-100 pr-0">
+                        <c:choose>
+                            <c:when test="${pedidos.pedidos != null}">
+                                <div class="col-12 pr-0">
+                                    <c:forEach items="${pedidos.pedidos}" var="pedido">
+                                        <c:choose>
+                                            <c:when test="${pedido.estado != 4}">
+                                                <div class="row w-100 ctn-card-piece pr-0 pb-1">
+                                                    <div class="col-12">
+                                                        <div class="card border">
+                                                            <div class="card-header">                                            
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        #${pedido.id} - ${pedido.status}
+                                                                    </div>                                                    
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-body bg-light">
+                                                                <button data-id='${pedido.id}' class='btn btn-primary btn-atualizar-estado-pedido'>Atualizar</button>
+                                                                <button data-id='${pedido.id}' data-pedido='${pedido.json}' class='btn btn-warning btn-detalhes-pedido'>Detalhes</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </c:when>
+                                        </c:choose>                        
+                                    </c:forEach>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="col-12 h-100">
+                                    <div class="card h-100 bg-light">
+                                        <div class="card-body h-100">
+                                            <div class="row h-100">
+                                                <div class="col-12 h-100 w-100">
+                                                    <p>Sem pedidos</p>
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:otherwise>
                         </c:choose>                        
-                    </c:forEach>
-                </div>                
+                    </div>                    
+                </div>
             </div>
         </div>
     </div>
@@ -194,13 +217,12 @@
     
     $("#ctn_conteudo").append($("#ctn_index"));
 
-    var sock = null;    
+    var sock = null;
 
     function atualizarPedidos(pedidos) {
-
         if (pedidos != null) {
             if (pedidos.length > 0) {
-                $("#ctn_pedidos").empty();
+                $("#ctn_pedidos").find(".ctn-card-body").empty();
                 for (let i=0; i<pedidos.length; i++) {
                     let pedido = pedidos[i];
                     if (parseInt(pedido["estado"]) == 4) {
@@ -210,12 +232,13 @@
                             let item = itens[j];
                             htmlItens +="<p><strong>"+item.quantidade+" x "+item.nome+"</strong></p>";
                         }
-                        $("#ctn_pedidos_pendentes").empty().append(
-                            "<div class='card mb-3'>"
-                                +"<div class='card-body border'>"
+                        $("#ctn_pedido_pendente").find(".ctn-card-body").empty().append(
+                            "<div class='col-12 h-100'>"
+                            +"<div class='card h-100'>"
+                                +"<div class='card-header'>"
                                     +"<div class='row'>"
                                         +"<div class='col'>"
-                                            +"<h5 class='card-title'>#"+pedido.id+"</h5>"
+                                            +"<strong><h5 class='card-title'>#"+pedido.id+"</h5></strong>"
                                         +"</div>"
                                     +"</div>"
                                     +"<div class='row'>"
@@ -259,22 +282,16 @@
                                         +"</div>"
                                     +"</div>"
                                 +"</div>"
-                                +"<div class='card-header border' style='overflow-y: scroll; max-height: 50vh; min-height: 31vh;'>"
-                                    +"<div class='row'>"
-                                        +"<div class='col-3'>"
-                                            +"Itens:"
-                                        +"</div>"
-                                        +"<div class='col'>"
-                                            +htmlItens
-                                        +"</div>"
-                                    +"</div>"
+                                +"<div class='card-body bg-light' style='max-height: 0px'>"
+                                    +htmlItens
                                 +"</div>"
-                                +"<div class='card-body border'>"
-                                    +"<p class='card-text'>Valor do pedido: R$ "+pedido.precoTotal+"</p>"
+                                +"<div class='card-footer'>"
+                                    +"<p class='card-text'>Valor do pedido: R$ "+pedido.precoTotal.toFixed(2).replace(".", ",")+"</p>"
                                     +"<button data-id='"+pedido.id+"' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>"
-                                    +"&nbsp<button data-id='"+pedido.id+"' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>"
+                                    +"&nbsp;<button data-id='"+pedido.id+"' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>"
                                 +"</div>"
                             +"</div>"
+                        +"</div>"
                         );
                         $(".btn-confirmar-pedido").off().click(function() {
                             acao("confirmar", $(this).data("id"));
@@ -282,22 +299,26 @@
                         $(".btn-cancelar-pedido").off().click(function() {
                             acao("cancelar", $(this).data("id"));
                         });
+                        reajustarCardPedidosPendentes();
                     } else {
-                        $("#ctn_pedidos").append(
-                            "<div class='card mb-3'>"
-                                +"<div class='card-header'>"
-                                    +"<div class='row'>"
-                                        +"<div class='col'>"
-                                            +"<h5 class='card-title'>#"+pedido["id"]+"</h5>"
-                                            +"<p><h6>"+pedido["status"]+"</h6></p>"
-                                        +"</div>"
-                                        +"<div class='col-auto'>"
-                                            +"<button data-id='"+pedido["id"]+"' data-pedido='"+JSON.stringify(pedido)+"' class='btn btn-warning btn-detalhes-pedido'>Detalhes</button>"
+                        $("#ctn_pedidos").find(".ctn-card-body").append(
+                            "<div class='col-12 pr-0'>"
+                                +"<div class='row w-100 ctn-card-piece pr-0 pb-1'>"
+                                    +"<div class='col-12'>"
+                                        +"<div class='card border'>"
+                                            +"<div class='card-header'>"
+                                                +"<div class='row'>"
+                                                    +"<div class='col-12'>"
+                                                        +pedido["id"]+" - "+pedido["status"]
+                                                    +"</div>"
+                                                +"</div>"
+                                            +"</div>"
+                                            +"<div class='card-body bg-light'>"
+                                                +"<button data-id='"+pedido["id"]+"' class='btn btn-primary btn-atualizar-estado-pedido'>Atualizar</button>"
+                                                +"<button data-id='"+pedido["id"]+"' data-pedido='"+JSON.stringify(pedido)+"' class='btn btn-warning btn-detalhes-pedido'>Detalhes</button>"
+                                            +"</div>"
                                         +"</div>"
                                     +"</div>"
-                                +"</div>"
-                                +"<div class='card-body'>"
-                                    +"<button  data-id='"+pedido["id"]+"' class='btn btn-primary btn-atualizar-estado-pedido'>Próximo status</button>"
                                 +"</div>"
                             +"</div>"
                         );
@@ -305,6 +326,7 @@
                         $(".btn-atualizar-estado-pedido").off().click(function() {
                             acao("atualizar", $(this).data("id"));
                         });
+                        reajustarCardPedidosPendentes();
                     }                                        
                 }
             }
@@ -312,10 +334,9 @@
     }    
 
     function connect() {
-        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        //var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
-            return;
             processarRetornoWebSocket(e);
         };
     }
@@ -346,7 +367,7 @@
     
     function processarRetornoWebSocket(e) {
         dados = JSON.parse(e.data);
-        console.log(dados);
+        //console.log(dados);
         switch(dados.tipo) {
             case "conexao_estabelecida":
                 let token = dados.token;
@@ -385,6 +406,33 @@
         
         $("#modal_detalhe_pedido").modal('show');
     }
+
+    function reajustarCardPedidosPendentes() {
+        let container = $("#ctn_pedido_pendente");
+        let containerHeader = container.find(".ctn-card-header");
+        let containerBody = container.find(".ctn-card-body");
+        let cardHeader = container.find(".card-header");
+        let cardBody = container.find(".card-body");
+        let cardFooter = container.find(".card-footer");            
+        containerBody.css("height", container.height() - containerHeader.height());
+        cardBody.css("height", containerBody.innerHeight() - cardHeader.innerHeight() - cardFooter.innerHeight());
+        cardBody.css("max-height", containerBody.innerHeight() - cardHeader.innerHeight() - cardFooter.innerHeight());
+        <c:if test="${pedidoPendente != null}">
+            cardBody.css("overflow-y", "scroll");
+        </c:if>
+    }
+
+    function reajustarCardPedidos() {        
+        let container = $("#ctn_pedidos");
+        let containerORG = $("#ctn_pedido_pendente");
+        let cardBodyORG = $("#ctn_pedido_pendente").find(".ctn-card-body");        
+        let containerHeader = container.find(".ctn-card-header");
+        let containerBody = container.find(".ctn-card-body");                        
+        containerBody.css("height", cardBodyORG.height());
+        containerBody.css("max-height", cardBodyORG.height());
+        container.css("height", containerORG.innerHeight());
+        container.css("min-height", containerORG.innerHeight());
+    }
     
     $(document).ready(function() {
 
@@ -400,6 +448,14 @@
         $(".btn-atualizar-estado-pedido").off().click(function() {
             acao("atualizar", $(this).data("id"));
         });
+
+        $("#ctn_pedido_pendente").each(function() {            
+            $("#ctn_pedidos").css("height", $(this).innerHeight());
+            $("#ctn_pedidos").css("min-height", $(this).innerHeight());
+            $("#ctn_pedidos").css("max-height", $(this).innerHeight());
+            reajustarCardPedidosPendentes();
+            reajustarCardPedidos();
+        })
     });
     
 </script>

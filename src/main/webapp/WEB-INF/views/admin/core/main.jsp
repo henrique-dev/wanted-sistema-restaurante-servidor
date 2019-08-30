@@ -6,15 +6,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
     <head>
 
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta name="description" content="">
-        <meta name="author" content="">
 
         <title>WantedAdmin</title>
 
@@ -27,13 +25,37 @@
 
     </head>
 
+    <style>
+        .mbg-primary {
+            background-color: #614820; 
+        }
+        .mbg-card {
+            background-color: #d1c5b2;
+            color: #000;
+        }
+        .mbg-sub-card {
+            background-color: #f5f6ce;
+            color: #000;
+        }
+
+        .mbtn-primary {
+            background-color: #614820;
+            color: white;
+        }
+
+        .mbtn-primary:hover {
+            background-color: #614840;
+            color: white;
+        }
+    </style>
+
     <body id="page-top">
 
         <!-- Page Wrapper -->
         <div id="wrapper">
 
             <!-- Sidebar -->
-            <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">                
+            <ul class="navbar-nav mbg-primary sidebar sidebar-dark accordion" id="accordionSidebar">                
 
                 <br>
 
@@ -157,7 +179,7 @@
             <div id="content-wrapper" class="d-flex flex-column">
 
                 <!-- Main Content -->
-                <div id="content">                    
+                <div id="content" class="">
 
                     <!-- Begin Page Content -->
                     <div id="ctn_alerta"></div>

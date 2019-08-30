@@ -18,6 +18,7 @@ import com.br.phdev.srs.models.Genero;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Item2;
+import com.br.phdev.srs.models.ListaPedidos;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
@@ -64,13 +65,7 @@ public class GerenciadorController {
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
-            List<Pedido3> pedidos = this.dao.getPedidos();
-            modelo.addAttribute("pedidoPendente", null);
-            for (Pedido3 p : pedidos) {
-                if (p.getEstado() == 4) {
-                    modelo.addAttribute("pedidoPendente", p);
-                }
-            }
+            ListaPedidos pedidos = this.dao.getPedidos();
             modelo.addAttribute("pedidos", pedidos);
         } catch (DAOException e) {
             e.printStackTrace();

@@ -16,48 +16,58 @@
     table {
         overflow-x: hidden;
     }
+
+    .ctn-card {
+        border-radius: 8px;
+        border: 1px;
+        padding: 5px;
+    }
 </style>
   
-  <div id="ctn_index" class="container col-12">
-    <div class="row mt-3">
-        <div class="col-lg-3 col-md-3 col-sm-3 p-1">
-            <a href="item/novo" class="btn btn-primary btn-icon-split">
-                <span class="icon text-white-50">
-                    <i class="fas fa-plus"></i>
-                </span>
-                <span class="text">Novo item</span>
-            </a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 p-1">
-            <table class="table table-bordered" id="tbl_itens" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Nome</th>
-                        <th>Gênero</th>
-                        <th>Preço</th>
-                        <th>Açao</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach items="${itens}" var="item">
-                        <tr>
-                            <td width='5%'>${item.id}</td>
-                            <td >${item.nome}</td>
-                            <td width='20%'>${item.genero.nome}</td>
-                            <td width='15%' align="right">${String.format("%.2f", item.preco)}</td> 
-                            <th width='15%' style='min-width:210px;'>
-                                <center>
-                                    <models:botaoHref link="item/atualizar?id=${item.id}" label="Atualizar" icon="fas fa-delete" clas="btn btn-success btn-atualizar"/>
-                                    <models:botaoHref link="item/remover?id=${item.id}"  label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/>                                    
-                                </center>
-                            </th>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+  <div id="ctn_index" class="container h-100">
+    <div class="row h-100">        
+        <div class="col-lg-12 col-md-12 col-sm-12 p-4 h-100">
+            <div class="row pb-4">
+                <div class="col-12">                    
+                    <a href="item/novo" class="btn mbtn-primary btn-icon-split">
+                        <span class="icon text-white">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span class="text">Novo item</span>
+                    </a>
+                </div>
+            </div>
+            <div class="row h-100 ctn-card border mbg-sub-card pt-4">
+                <div class="col-12">
+                    <table class="table table-bordered bg-white" id="tbl_itens" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Nome</th>
+                                <th>Gênero</th>
+                                <th>Preço</th>
+                                <th>Açao</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${itens}" var="item">
+                                <tr>
+                                    <td width='5%'>${item.id}</td>
+                                    <td >${item.nome}</td>
+                                    <td width='20%'>${item.genero.nome}</td>
+                                    <td width='15%' align="right">${String.format("%.2f", item.preco)}</td> 
+                                    <th width='15%' style='min-width:210px;'>
+                                        <center>
+                                            <models:botaoHref link="item/atualizar?id=${item.id}" label="Atualizar" icon="fas fa-delete" clas="btn btn-success btn-atualizar"/>
+                                            <models:botaoHref link="item/remover?id=${item.id}"  label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/>                                    
+                                        </center>
+                                    </th>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+            </div>    
         </div>
     </div>    
 </div>
@@ -74,6 +84,7 @@
             responsive: true,
             fixedColumns: true,
             lengthChange: false,
+            searching: false,
             language: {
                 lengthMenu: "Exibir _MENU_ linhas por página",
                 zeroRecords: "Sem pedidos",

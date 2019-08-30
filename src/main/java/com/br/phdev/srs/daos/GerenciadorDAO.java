@@ -23,6 +23,7 @@ import com.br.phdev.srs.models.Item;
 import com.br.phdev.srs.models.Item2;
 import com.br.phdev.srs.models.ItemPedido;
 import com.br.phdev.srs.models.ItemPedidoFacil;
+import com.br.phdev.srs.models.ListaPedidos;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
@@ -227,8 +228,10 @@ public class GerenciadorDAO {
         return clientes;
     }
 
-    public List<Pedido3> getPedidos() throws DAOException {        
+    public ListaPedidos getPedidos() throws DAOException {        
+        ListaPedidos listaPedidos = new ListaPedidos();
         List<Pedido3> pedidos = new ArrayList<>();
+        List<Pedido3> pedidosPendentes = new ArrayList<>();
         String sql = "SELECT * FROM pedido "
                 + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                 + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
@@ -236,7 +239,6 @@ public class GerenciadorDAO {
                 + " WHERE pedido.estado IN (4,5,8,9,10)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            Boolean pedidoPendente = false;
             while (rs.next()) {
                 Pedido3 pedido = new Pedido3();
                 pedido.setId(rs.getLong("id_pedido"));
@@ -260,9 +262,8 @@ public class GerenciadorDAO {
                 });
                 pedido.setItens(itens);                               
                 
-                if (rs.getInt("estado") == 4 && !pedidoPendente) {;
-                    pedidos.add(pedido);
-                    pedidoPendente = true;                    
+                if (rs.getInt("estado") == 4) {;
+                    pedidosPendentes.add(pedido);
                 } else if (rs.getInt("estado") != 4){
                     ObjectMapper objectMapper = new ObjectMapper();
                     String json = objectMapper.writeValueAsString(pedido);
@@ -270,13 +271,17 @@ public class GerenciadorDAO {
                     pedidos.add(pedido);
                 }                
             }
+            listaPedidos.setPedidoPendente(pedidosPendentes.isEmpty() ? null : pedidosPendentes.get(0));
+            listaPedidos.setQuantidadePedidosPendentes(pedidosPendentes.size());
+            listaPedidos.setPedidos(pedidos.isEmpty() ? null : pedidos);
+            listaPedidos.setQuantidadePedidos(pedidos.size());
         } catch (SQLException | JsonProcessingException e) {
             e.printStackTrace();
             throw new DAOException(200);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return pedidos;
+        return listaPedidos;
     }
 
     public Pedido getPedido() throws DAOException, IOException {
