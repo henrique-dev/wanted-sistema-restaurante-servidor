@@ -65,7 +65,13 @@ public class GerenciadorController {
     public String main(Model modelo) {
         try {
             List<Pedido3> pedidos = this.dao.getPedidos();
-            modelo.addAttribute("pedidos", pedidos);            
+            modelo.addAttribute("pedidoPendente", null);
+            for (Pedido3 p : pedidos) {
+                if (p.getEstado() == 4) {
+                    modelo.addAttribute("pedidoPendente", p);
+                }
+            }
+            modelo.addAttribute("pedidos", pedidos);
         } catch (DAOException e) {
             e.printStackTrace();
         }

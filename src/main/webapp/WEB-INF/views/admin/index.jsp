@@ -19,89 +19,127 @@
     .info-button {
         border-radius: 50%;
     }
+
+    .center {
+        margin: auto;
+        width: 35%;
+        text-align: center; 
+        vertical-align: middle
+    }
+
+    .center-cmp {
+        vertical-align: middle;
+    }
+
+    .container-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+    }
 </style>
 
 <div id="ctn_index" class="container col-12 h-100">
-    <div class="row p-3 h-100">
-        <div class="col-lg-6 col-md-12 col-sm-12 p-1 pr-3 h-100">
-            <div class="card p-2 h-100">
+    <div class="row h-100">
+        <div class="col-lg-6 col-md-12 col-sm-12 pt-4 pb-4 h-100">
+            <div class="card h-100 p-2">
                 <h3>Confirmaçoes</h3>
-                <div id="ctn_pedidos_pendentes" >
-                    <c:forEach items="${pedidos}" var="pedido">
-                        <c:choose>
-                            <c:when test="${pedido.estado == 4}">
-                                <div class="card mb-3">
-                                    <div class="card-body border">
-                                        <div class="row">
-                                            <div class="col">
-                                                <h5 class="card-title">#${pedido.id}</h5>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-3">
-                                                Cliente:
-                                            </div>
-                                            <div class="col">
-                                                <strong>${pedido.cliente.nome}</strong>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-3">
-                                                Telefone:
-                                            </div>
-                                            <div class="col">
-                                                <strong>${pedido.cliente.telefone}</strong>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-3">
-                                                Logradouro:
-                                            </div>
-                                            <div class="col">
-                                                <strong>${pedido.endereco.logradouro}</strong>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-3">
-                                                Bairro:
-                                            </div>
-                                            <div class="col">
-                                                <strong>${pedido.endereco.bairro}</strong>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-3">
-                                                Descrição:
-                                            </div>
-                                            <div class="col">
-                                                <strong>${pedido.endereco.descricao}</strong>
-                                            </div>
+                <div id="ctn_pedidos_pendentes" class="h-100">
+                    <c:choose>
+                        <c:when test="${pedidoPendente != null}">
+                            <div class="card mb-3 h-100">
+                                <div class="card-header border h-auto">
+                                    <div class="row">
+                                        <div class="col">
+                                            <strong><h5 class="card-title">#${pedidoPendente.id}</h5></strong>
                                         </div>
                                     </div>
-                                    <div class="card-header border" style="overflow-y: scroll; max-height: 50vh; min-height: 31vh;">
-                                        <div class="row">
-                                            <div class="col-3">
-                                                Itens:
-                                            </div>
-                                            <div class="col">
-                                                <c:forEach items="${pedido.itens}" var="item">
-                                                    <p><strong>${item.quantidade} x ${item.nome}</strong></p>
-                                                </c:forEach>
-                                            </div>
-                                        </div>                        
-                                    </div>                    
-                                    <div class="card-body border">                        
-                                        <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedido.precoTotal)}</p>
-                                        <button data-id='${pedido.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
-                                        <button data-id='${pedido.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            Cliente:
+                                        </div>
+                                        <div class="col">
+                                            <strong>${pedidoPendente.cliente.nome}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            Telefone:
+                                        </div>
+                                        <div class="col">
+                                            <strong>${pedidoPendente.cliente.telefone}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            Logradouro:
+                                        </div>
+                                        <div class="col">
+                                            <strong>${pedidoPendente.endereco.logradouro}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            Bairro:
+                                        </div>
+                                        <div class="col">
+                                            <strong>${pedidoPendente.endereco.bairro}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-3">
+                                            Descrição:
+                                        </div>
+                                        <div class="col">
+                                            <strong>${pedidoPendente.endereco.descricao}</strong>
+                                        </div>
                                     </div>
                                 </div>
-                            </c:when>
-                            <c:otherwise>
-                                
-                            </c:otherwise>
-                        </c:choose>   
-                    </c:forEach>   
+                                <div class="card-body border h-100 bg-light">
+                                    <div class="row h-100">
+                                        <div class="col-12 h-10">
+                                            <div class="row">
+                                                <div class="col-3">
+                                                    Itens:
+                                                </div>
+                                                <div class="col"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 h-auto">
+                                            <div class="row">
+                                                <div class="col-3"></div>
+                                                <div class="col bg-white" style="max-height: 40vh; min-height: 40vh">
+                                                    <table class="table">
+                                                        <tbody>
+                                                            <c:forEach items="${pedidoPendente.itens}" var="item">
+                                                                <tr><td><p><strong>${item.quantidade} x ${item.nome}</strong></p></td></tr>
+                                                            </c:forEach>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                        
+                                </div>                    
+                                <footer>
+                                    <div class="card-body border bg-light">
+                                        <p class="card-text">Valor do pedido: R$ ${String.format("%.2f", pedidoPendente.precoTotal)}</p>
+                                        <button data-id='${pedidoPendente.id}' class='btn btn-success btn-confirmar-pedido'>Confirmar</button>
+                                        <button data-id='${pedidoPendente.id}' class='btn btn-danger btn-cancelar-pedido'>Cancelar</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="h-100 w-100 bg-light">
+                                <div class="container-center">
+                                    <p>Sem confirmacoes</p>
+                                </div>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>  
                 </div>                                                      
             </div>
         </div>
@@ -274,9 +312,10 @@
     }    
 
     function connect() {
-        var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
-        //var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
+        //var sock = new WebSocket('wss://headred.com.br/wanted/notificacao');
+        var sock = new WebSocket('ws://localhost:8080/wanted/notificacao');
         sock.onmessage = function(e) {
+            return;
             processarRetornoWebSocket(e);
         };
     }
@@ -307,6 +346,7 @@
     
     function processarRetornoWebSocket(e) {
         dados = JSON.parse(e.data);
+        console.log(dados);
         switch(dados.tipo) {
             case "conexao_estabelecida":
                 let token = dados.token;

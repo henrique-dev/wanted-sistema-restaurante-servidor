@@ -35,7 +35,7 @@
 
         .center {
             margin: auto;
-            width: 35%;
+            width: 25%;
             text-align: center; 
             vertical-align: middle
         }
@@ -99,7 +99,6 @@
                             let cor = "rgb(" + R.toString() 
                                 + "," + G.toString() 
                                 + "," + B.toString() + ")";
-                            console.log(cor);
                             $("body").css("background", cor);
                         },
                         duration: 2000
