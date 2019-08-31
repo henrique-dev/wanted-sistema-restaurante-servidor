@@ -18,53 +18,57 @@
     }
 </style>
   
-  <div id="ctn_index" class="container col-12">
-    <div class="row mt-3">
-        <div class="col-lg-3 col-md-3 col-sm-3 p-1">
-            <a href="cupom/novo" class="btn btn-primary btn-icon-split">
-                <span class="icon text-white-50">
-                    <i class="fas fa-plus"></i>
-                </span>
-                <span class="text">Novo cupom</span>
-            </a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 p-1">
-            <table class="table table-bordered" id="tbl_cupons" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Tipo</th>
-                        <th>Descricao</th>
-                        <th>Codigo</th>
-                        <th>Quantidade</th>
-                        <th>Validade</th>
-                        <th>Ativo</th>
-                        <th>Valor</th>
-                        <th>Açao</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach items="${cupons}" var="cupom">
-                        <tr>
-                            <td width='5%'>${cupom.id}</td>
-                            <td width='10%'>${cupom.tipo.descricao}</td>
-                            <td >${cupom.descricao}</td>
-                            <td width='10%'>${cupom.codigo}</td>
-                            <td width='10%'>${cupom.quantidade}</td>
-                            <td width='10%'>${cupom.validade}</td>
-                            <td width='10%'>${cupom.ativo ? "Sim" : "Nao"}</td>
-                            <td width='15%' align="right">${String.format("%.2f", cupom.valor)}</td> 
-                            <th width='10%' style='min-width:115px;'>
-                                <center>                                    
-                                    <models:botaoHref link="cupom/remover?id=${item.id}"  label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/>                                    
-                                </center>
-                            </th>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+  <div id="ctn_index" class="w-100">
+    <div class="row">        
+        <div class="col-lg-12 col-md-12 col-sm-12 p-4">
+            <div class="row pb-4">
+                <div class="col-12">                    
+                    <a href="cupom/novo" class="btn btn-primary btn-icon-split">
+                        <span class="icon text-white">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span class="text">Novo item</span>
+                    </a>
+                </div>
+            </div>
+            <div class="row ctn-card border mbg-sub-card pt-4 mb-4">
+                <div class="col-12 h-auto">
+                    <table class="table table-bordered bg-white" id="tbl_cupons" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Tipo</th>
+                                <th>Descricao</th>
+                                <th>Codigo</th>
+                                <th>Quantidade</th>
+                                <th>Validade</th>
+                                <th>Ativo</th>
+                                <th>Valor</th>
+                                <th>Açao</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${cupons}" var="cupom">
+                                <tr>
+                                    <td width='5%'>${cupom.id}</td>
+                                    <td width='10%'>${cupom.tipo.descricao}</td>
+                                    <td >${cupom.descricao}</td>
+                                    <td width='10%'>${cupom.codigo}</td>
+                                    <td width='10%'>${cupom.quantidade}</td>
+                                    <td width='10%'>${cupom.validade}</td>
+                                    <td width='10%'>${cupom.ativo ? "Sim" : "Nao"}</td>
+                                    <td width='15%' align="right">${String.format("%.2f", cupom.valor)}</td> 
+                                    <th width='10%' style='min-width:115px;'>
+                                        <center>                                    
+                                            <models:botaoHref link="cupom/remover?id=${item.id}"  label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/>                                    
+                                        </center>
+                                    </th>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+            </div>    
         </div>
     </div>    
 </div>
@@ -80,7 +84,7 @@
         $('#tbl_cupons').DataTable({
             responsive: true,
             fixedColumns: true,
-            lengthChange: false,
+            lengthChange: false, 
             language: {
                 lengthMenu: "Exibir _MENU_ linhas por página",
                 zeroRecords: "Sem pedidos",

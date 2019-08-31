@@ -20,31 +20,35 @@
     }
 </style>
   
-<div id="ctn_index">    
-    <div class="row">
-        <div class="col-12">
-            <table class="table table-bordered" id="dataTable" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th width="5%">Id</th>
-                        <th width="40%">Nome</th>
-                        <th width="20">Telefone</th>
-                        <th width="20%">Email</th>
-                        <th width="15%">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach items="${clientes}" var="cliente">
-                        <tr id="tr_${cliente.id}" data-id="${cliente.id}" class="tr-item">
-                            <td>${cliente.id}</td>
-                            <td>${cliente.nome}</td>
-                            <td>${cliente.telefone}</td>
-                            <td>${cliente.email}</td>
-                            <th><center><models:botao label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/></center></th>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+<div id="ctn_index" class="w-100">
+    <div class="row">        
+        <div class="col-lg-12 col-md-12 col-sm-12 p-4">            
+            <div class="row ctn-card border mbg-sub-card pt-4 mb-4">
+                <div class="col-12 h-auto">
+                    <table class="table table-bordered bg-white" id="tbl_clientes" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th width="5%">Id</th>
+                                <th width="40%">Nome</th>
+                                <th width="20">Telefone</th>
+                                <th width="20%">Email</th>
+                                <th width="15%">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${clientes}" var="cliente">
+                                <tr id="tr_${cliente.id}" data-id="${cliente.id}" class="tr-item">
+                                    <td>${cliente.id}</td>
+                                    <td>${cliente.nome}</td>
+                                    <td>${cliente.telefone}</td>
+                                    <td>${cliente.email}</td>
+                                    <th><center><models:botao label="Excluir" icon="fas fa-delete" clas="btn btn-danger btn-remover"/></center></th>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+            </div>    
         </div>
     </div>    
 </div>
@@ -52,6 +56,25 @@
 <script type="text/javascript">
     
     $("#ctn_conteudo").append($("#ctn_index"));
+
+    $('#tbl_clientes').DataTable({
+        responsive: true,
+        fixedColumns: true,
+        lengthChange: false, 
+        language: {
+            lengthMenu: "Exibir _MENU_ linhas por página",
+            zeroRecords: "Sem pedidos",
+            info: "Exibindo pagina _PAGE_ de _PAGES_",
+            infoEmpty: "Vazio",
+            infoFiltered: "(filtrados de _MAX_ registros)",
+            search: "Critério:",
+            paginate: {
+                    next: "Próximo",
+                    previous: "Anterior"
+                }
+            },
+        lengthMenu: [[10, 25, 35, 50, -1], [10, 25, 35, 50, "Todos"]]
+    });
 
     $(".btn-remover").click(function() {
         let id = $(this).parent().parent().parent().data("id");

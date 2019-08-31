@@ -12,19 +12,18 @@
 <script src="${pageContext.request.contextPath}/resources/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="${pageContext.request.contextPath}/resources/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-<style>
-    table {
-        overflow-x: hidden;
-    }
+<style>    
 
     .ctn-card {
         border-radius: 8px;
         border: 1px;
         padding: 5px;
     }
+
+    
 </style>
   
-  <div id="ctn_index" class="container h-100">
+<div id="ctn_index" class="h-100 w-100">
     <div class="row h-100">        
         <div class="col-lg-12 col-md-12 col-sm-12 p-4 h-100">
             <div class="row pb-4">
@@ -37,8 +36,8 @@
                     </a>
                 </div>
             </div>
-            <div class="row h-100 ctn-card border mbg-sub-card pt-4">
-                <div class="col-12">
+            <div class="row h-100 ctn-card border mbg-sub-card pt-4 mb-4">
+                <div class="col-12 h-auto">
                     <table class="table table-bordered bg-white" id="tbl_itens" cellspacing="0">
                         <thead>
                             <tr>
@@ -77,14 +76,13 @@
     $("#ctn_conteudo").append($("#ctn_index"));
     
     $(document).ready(function() {
-        
+                
         atualizarMenu("itens");
 
         $('#tbl_itens').DataTable({
             responsive: true,
             fixedColumns: true,
-            lengthChange: false,
-            searching: false,
+            lengthChange: false, 
             language: {
                 lengthMenu: "Exibir _MENU_ linhas por página",
                 zeroRecords: "Sem pedidos",

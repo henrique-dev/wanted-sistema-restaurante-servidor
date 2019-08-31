@@ -35,7 +35,6 @@
 
         .center {
             margin: auto;
-            width: 25%;
             text-align: center; 
             vertical-align: middle
         }
@@ -53,7 +52,8 @@
         </div>
         <div id="ctn_login" style="height: 100vh;">
             <div class="row center h-100">
-                <div class="col justify-content-center" style="margin-top: 30vh;">
+                <div class="col"></div>                
+                <div class="col-lg-3 col-md-6 col-sm-9 justify-content-center" style="margin-top: 30vh;">
                     <form class="user" id="formLogin" method="POST" action="${pageContext.request.contextPath}/sessao/autenticar-2">
                         <p><img src="${pageContext.request.contextPath}/resources/img/logo-wanted-escura.png" width="auto" height="100px" class="pb-3"></p>
                         <div class="form-group">
@@ -67,6 +67,7 @@
                         </div>
                     </form>
                 </div>
+                <div class="col"></div>
             </div>
         </div>
 

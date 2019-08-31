@@ -42,15 +42,16 @@
 
     .ctn-card {
         border-radius: 8px;
+        border-color: #999 !important;
         border: 1px;
         padding: 5px;
     }
 </style>
 
-<div id="ctn_index" class="container h-100">
+<div id="ctn_index" class="h-100 w-100">
     <div class="row h-100">
-        <div class="col-lg-6 col-md-12 col-sm-12 p-4 h-100">
-            <div id="ctn_pedido_pendente" class="row h-100 ctn-card border mbg-sub-card">
+        <div class="col-lg-6 col-md-12 col-sm-12 p-4 h-100 w-100">
+            <div id="ctn_pedido_pendente" class="h-100 ctn-card border mbg-sub-card w-100">
                 <div class="col-12 h-100">
                     <div class="row h-auto inline-block ctn-card-header">
                         <div class="col-12 h-100 p-2">                            
@@ -69,7 +70,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-3">
+                                                <div class="col-4">
                                                     Cliente:
                                                 </div>
                                                 <div class="col">
@@ -77,7 +78,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-3">
+                                                <div class="col-4">
                                                     Telefone:
                                                 </div>
                                                 <div class="col">
@@ -85,7 +86,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-3">
+                                                <div class="col-4">
                                                     Logradouro:
                                                 </div>
                                                 <div class="col">
@@ -93,7 +94,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-3">
+                                                <div class="col-4">
                                                     Bairro:
                                                 </div>
                                                 <div class="col">
@@ -101,7 +102,7 @@
                                                 </div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-3">
+                                                <div class="col-4">
                                                     Descrição:
                                                 </div>
                                                 <div class="col">
@@ -218,6 +219,8 @@
     $("#ctn_conteudo").append($("#ctn_index"));
 
     var sock = null;
+    var cardHeight = null;
+    var cardHeaderHeight = null;
 
     function atualizarPedidos(pedidos) {
         if (pedidos != null) {
@@ -366,6 +369,7 @@
     }
     
     function processarRetornoWebSocket(e) {
+        return;
         dados = JSON.parse(e.data);
         //console.log(dados);
         switch(dados.tipo) {
@@ -413,7 +417,7 @@
         let containerBody = container.find(".ctn-card-body");
         let cardHeader = container.find(".card-header");
         let cardBody = container.find(".card-body");
-        let cardFooter = container.find(".card-footer");            
+        let cardFooter = container.find(".card-footer");        
         containerBody.css("height", container.height() - containerHeader.height());
         cardBody.css("height", containerBody.innerHeight() - cardHeader.innerHeight() - cardFooter.innerHeight());
         cardBody.css("max-height", containerBody.innerHeight() - cardHeader.innerHeight() - cardFooter.innerHeight());
@@ -429,6 +433,7 @@
         let containerHeader = container.find(".ctn-card-header");
         let containerBody = container.find(".ctn-card-body");                        
         containerBody.css("height", cardBodyORG.height());
+        containerBody.css("min-height", cardBodyORG.height());
         containerBody.css("max-height", cardBodyORG.height());
         container.css("height", containerORG.innerHeight());
         container.css("min-height", containerORG.innerHeight());
@@ -449,10 +454,12 @@
             acao("atualizar", $(this).data("id"));
         });
 
-        $("#ctn_pedido_pendente").each(function() {            
-            $("#ctn_pedidos").css("height", $(this).innerHeight());
-            $("#ctn_pedidos").css("min-height", $(this).innerHeight());
-            $("#ctn_pedidos").css("max-height", $(this).innerHeight());
+        $("#ctn_pedido_pendente").each(function() {           
+            cardHeight = $(this).height();
+            cardHeaderHeight = $(this).find(".ctn-card-header").height();
+            $("#ctn_pedidos").css("height", cardHeight);
+            $("#ctn_pedidos").css("min-height", cardHeight);
+            $("#ctn_pedidos").css("max-height", cardHeight);
             reajustarCardPedidosPendentes();
             reajustarCardPedidos();
         })

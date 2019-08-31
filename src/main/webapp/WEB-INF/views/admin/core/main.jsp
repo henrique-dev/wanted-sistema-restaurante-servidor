@@ -26,15 +26,21 @@
     </head>
 
     <style>
+        .mbg-content {
+            background-color: #ece9e4 !important;
+        }
+
         .mbg-primary {
             background-color: #614820; 
         }
+
         .mbg-card {
             background-color: #d1c5b2;
             color: #000;
         }
+
         .mbg-sub-card {
-            background-color: #f5f6ce;
+            background-color: #cfc8bc;
             color: #000;
         }
 
@@ -43,9 +49,78 @@
             color: white;
         }
 
+        .btn-primary {
+            background-color: #614820 !important;
+        }
+
         .mbtn-primary:hover {
             background-color: #614840;
             color: white;
+        }
+
+        table {
+            overflow-x: hidden;            
+        }
+        
+        thead {
+            background-color: #706554;
+            color: #fff;
+        }
+
+        tbody {
+            background-color: #efece8;
+            color: #000;
+        }
+
+        table, th, tr, td {
+            border: 1px solid #999 !important;
+        }        
+
+        .dataTables_filter {
+            width: auto;
+            float: right;
+            text-align: left;
+        }
+
+        .page-item.active .page-link {
+            color: #fff !important;
+            background-color: #614820 !important;
+            border-color: #614820 !important; 
+        }
+
+        .page-link {
+            color: #000 !important;
+            background-color: #fff !important;
+            border: 1px solid #dee2e6 !important; 
+        }
+
+        .page-link:hover {
+            color: #fff !important;
+            background-color: #614840 !important;
+            border-color: #614840 !important; 
+        }
+
+        a.active {
+            color:#614820 !important;
+        }
+
+        .form-control {
+            border-color: #999 !important;
+        }
+
+        .form-control:focus {
+            border-color: rgba(160, 145, 121, 0.5);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 10px rgba(160, 145, 121, 1);            
+        }
+
+        .card {
+            border-color: #999 !important;
+            background-color: #dfdad2;
+            color: black;
+        }
+
+        .ctn-card {
+            border-color: #999 !important;
         }
     </style>
 
@@ -67,10 +142,10 @@
                 <!-- Divider -->
                 <hr class="sidebar-divider d-none d-md-block">
 
-                <!-- Sidebar - Brand -->
+                <!-- Sidebar - Brand -->                
                 <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                     <div class="sidebar-brand-icon rotate-n-15">
-                        <i class="fas fa-laugh-wink"></i>
+                        <img class="img-thumbnail" src="${pageContext.request.contextPath}/resources/img/logo-wanted-escura.png">
                     </div>
                     <div class="sidebar-brand-text mx-3">Wanted Restaurante</div>
                 </a>
@@ -168,7 +243,7 @@
                 <!-- Nav Item - Dashboard -->
                 <li class="nav-item">
                     <a class="nav-link" href="${pageContext.request.contextPath}/sessao/sair-2">
-                        <i class="fas fa-fw fa-logout"></i>
+                        <i class="fas fa-fw fa-sign-out-alt"></i>
                         <span>Sair</span></a>
                 </li>
 
@@ -179,7 +254,7 @@
             <div id="content-wrapper" class="d-flex flex-column">
 
                 <!-- Main Content -->
-                <div id="content" class="">
+                <div id="content" class="mbg-content">
 
                     <!-- Begin Page Content -->
                     <div id="ctn_alerta"></div>
@@ -296,6 +371,27 @@
                     break;
             }
         }
+
+        $("#sidebarToggle, #sidebarToggleTop").off().on("click",function(){            
+            $("body").toggleClass("sidebar-toggled"),
+            $(".sidebar").toggleClass("toggled"),
+            $(".sidebar").hasClass("toggled")
+            &&
+            $(".sidebar .collapse").collapse("hide");
+            let sidebarOpened = $("body").hasClass("sidebar-toggled");
+            localStorage.setItem("sidebar", sidebarOpened);
+        });        
+
+        $(document).ready(function(){
+            if (typeof(Storage) !== "undefined") {
+                let sidebarOpened = localStorage.getItem("sidebar");
+                if (sidebarOpened != null) {
+                    if (sidebarOpened == "true") {
+                        $("#sidebarToggle").click();
+                    }
+                }
+            }            
+        });
     </script>
 
 </html>
