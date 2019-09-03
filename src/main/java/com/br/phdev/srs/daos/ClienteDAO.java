@@ -678,7 +678,7 @@ public class ClienteDAO extends BasicDAO {
 
     public boolean existePedidoAberto(Cliente cliente) throws DAOException {
         checarConexao();
-        String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 11";
+        String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND !(estado IN (11, 6))";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
