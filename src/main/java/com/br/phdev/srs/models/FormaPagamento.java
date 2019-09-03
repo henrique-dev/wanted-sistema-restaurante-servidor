@@ -11,23 +11,24 @@ package com.br.phdev.srs.models;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 public class FormaPagamento {
-    
-    private long id;
+
+    private Integer id;
     private String descricao;
+    private boolean favorito;
 
     public FormaPagamento() {
     }
 
-    public FormaPagamento(long id, String descricao) {
+    public FormaPagamento(Integer id, String descricao) {
         this.id = id;
         this.descricao = descricao;
     }
 
-    public long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -37,11 +38,14 @@ public class FormaPagamento {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
-    }    
+    }
 
-    @Override
-    public String toString() {
-        return "FormaPagamento{" + "id=" + id + ", descricao=" + descricao + '}';
-    }    
-    
+    public Boolean getFavorito() {
+        return favorito;
+    }
+
+    public void setFavorito(Boolean favorito) {
+        this.favorito = favorito;
+    }
+
 }

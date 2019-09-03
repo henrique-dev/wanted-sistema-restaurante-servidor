@@ -9,6 +9,7 @@ package com.br.phdev.srs.controladores;
 import com.br.phdev.srs.daos.ClienteDAO;
 import com.br.phdev.srs.daos.RepositorioProdutos;
 import com.br.phdev.srs.exceptions.DAOException;
+import com.br.phdev.srs.exceptions.PaymentException;
 import com.br.phdev.srs.models.Carrinho;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.ConfirmaPedido;
@@ -16,6 +17,7 @@ import com.br.phdev.srs.models.ConfirmacaoPedido;
 import com.br.phdev.srs.models.CupomDesconto;
 import com.br.phdev.srs.models.CupomDesconto2;
 import com.br.phdev.srs.models.Endereco;
+import com.br.phdev.srs.models.ExecutarPagamento;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
 import com.br.phdev.srs.models.Genero;
@@ -27,6 +29,7 @@ import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.TokenAlerta;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
+import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -429,7 +432,7 @@ public class ClienteController {
                 pedido.setObservacaoEntrega(confirmaPedido.getObservacaoEntrega());
                 pedido.setFrete(RepositorioProdutos.getInstancia().frete);
                 
-                switch ((int) confirmaPedido.getFormaPagamentos().get(0).getId()) {
+                switch (confirmaPedido.getFormaPagamentos().get(0).getId()) {
                     case 0:
                         pedido.setEstado(4);
                         this.dao.inserirPedido(pedido, cliente);
@@ -439,7 +442,26 @@ public class ClienteController {
                         sessao.setAttribute("pre-pedido-cupom", null);
                         break;
                     case 1:
-                        
+                        String tokenSessao;
+                            if (sessao.getAttribute("token_sessao_pagseguro") == null) {
+                                ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
+                                tokenSessao = servicoPagamento.criarTokenPagamento();
+                                if (tokenSessao == null) {
+                                    throw new PaymentException();
+                                }
+                                sessao.setAttribute("token_sessao_pagseguro", tokenSessao);
+                            } else {
+                                tokenSessao = (String) sessao.getAttribute("token_sessao_pagseguro");
+                            }
+                            System.out.println("Gerando pagamento pagseguro com token: " + tokenSessao);
+                            ExecutarPagamento pagamento = new ExecutarPagamento();
+                            pagamento.setCliente(cliente);
+                            pagamento.setPedido(pedido);
+                            pagamento.setEndereco(confirmaPedido.getEnderecos().get(0));
+                            sessao.setAttribute("executar-pagamento", pagamento);
+                            this.dao.inserirPrePedido(pedido, cliente, tokenSessao);
+                            confirmacaoPedido.setStatus(2);
+                            confirmacaoPedido.setLink(tokenSessao);
                         break;
                     case 2:
                         
@@ -452,7 +474,7 @@ public class ClienteController {
                         break;
                 }
             }
-        } catch (DAOException e) {
+        } catch (DAOException | PaymentException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -581,6 +603,24 @@ public class ClienteController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(formaPagamentos, httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("cliente/favoritar-forma-pagamento")
+    public ResponseEntity<Mensagem> favoritarFormaPagamento(@RequestBody FormaPagamento pagamento, HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try {
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.favoritarFormaPagamento(cliente, pagamento);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Forma de pagamento favoritada com sucesso");
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
     }
     
     @GetMapping("cliente/anunciantes")

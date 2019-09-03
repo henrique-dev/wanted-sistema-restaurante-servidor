@@ -626,15 +626,20 @@ public class ClienteDAO {
             throw new DAOIncorrectData(301);
         }
         List<FormaPagamento> formaPagamentos = null;
-        String sql = "SELECT id_formapagamento, descricao FROM formapagamento";
+        String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, "
+                    + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
+                    + " FROM formapagamento, formapagamentos_favoritas "
+                    + " WHERE formapagamentos_favoritas.id_cliente = ?";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             formaPagamentos = new ArrayList<>();
             while (rs.next()) {
                 FormaPagamento formaPagamento = new FormaPagamento();
-                formaPagamento.setId(rs.getLong("id_formapagamento"));
+                formaPagamento.setId(rs.getInt("id_formapagamento"));
                 formaPagamento.setDescricao(rs.getString("descricao"));
+                formaPagamento.setFavorito(rs.getBoolean("favorito"));
                 formaPagamentos.add(formaPagamento);
             }
         } catch (SQLException e) {
@@ -1208,6 +1213,20 @@ public class ClienteDAO {
         String sql = "UPDATE enderecos_favoritos SET id_endereco=? WHERE id_cliente = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, endereco.getId());
+            stmt.setLong(2, cliente.getId());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public void favoritarFormaPagamento(Cliente cliente, FormaPagamento pagamento) throws DAOIncorrectData, DAOException {
+        if (cliente == null || pagamento == null) {
+            throw new DAOIncorrectData(300);
+        }
+        String sql = "UPDATE formapagamentos_favoritas SET id_formapagamento=? WHERE id_cliente = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, pagamento.getId());
             stmt.setLong(2, cliente.getId());
             stmt.execute();
         } catch (SQLException e) {
