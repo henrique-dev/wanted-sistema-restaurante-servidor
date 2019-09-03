@@ -55,20 +55,15 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class ClienteDAO {
-
-    private Connection conexao;
+public class ClienteDAO extends BasicDAO {
 
     @Autowired
     ClienteDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        super(dataSource);
     }
 
     public void cadastrarTokenAlerta(Cliente cliente, String token) throws DAOException {
+        checarConexao();
         if (cliente == null) {
             throw new DAOException("Erro", 300);
         }
@@ -83,6 +78,7 @@ public class ClienteDAO {
     }
 
     public void getCliente(Cliente cliente) throws DAOException {
+        checarConexao();
         String sql = "SELECT nome, cpf, telefone, email"
                 + " FROM cliente"
                 + " WHERE cliente.id_cliente = ?";
@@ -104,6 +100,7 @@ public class ClienteDAO {
     }
 
     public ListaItens getItensDia(Cliente cliente) throws DAOException {
+        checarConexao();
         ListaItens listaItens = new ListaItens();
         String sql = " SELECT item.id_item FROM item "
                 + " GROUP BY id_item ORDER BY RAND() LIMIT 5;";
@@ -124,6 +121,7 @@ public class ClienteDAO {
     }
 
     public ListaItens getItensFavoritos(Cliente cliente) throws DAOException {
+        checarConexao();
         ListaItens listaItens = new ListaItens();
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
                 + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
@@ -201,6 +199,7 @@ public class ClienteDAO {
     }
 
     public void cadastrarItemFavorito(Cliente cliente, Item item) throws DAOException {
+        checarConexao();
         if (cliente == null || item == null) {
             throw new DAOIncorrectData(300);
         }
@@ -234,6 +233,7 @@ public class ClienteDAO {
     }
 
     public void removerItemFavorito(Cliente cliente, Item item) throws DAOException {
+        checarConexao();
         if (cliente == null || item == null) {
             throw new DAOIncorrectData(300);
         }
@@ -251,6 +251,7 @@ public class ClienteDAO {
     }
 
     public List<Genero> getGeneros() throws DAOException {
+        checarConexao();
         List<Genero> generos = new ArrayList<>();
         String sql = "SELECT genero.id_genero, genero.nome, item.id_item, item.nome, item_arquivo.id_arquivo FROM item "
                 + " RIGHT JOIN item_arquivo ON item.id_item = item_arquivo.id_item "
@@ -274,6 +275,7 @@ public class ClienteDAO {
     }
 
     public ListaItens getItens(Cliente cliente, Genero genero, Integer pagina, String buscar) throws DAOException {
+        checarConexao();
         ListaItens listaItens = new ListaItens();
         pagina--;
         if (pagina == null || pagina < 1) {
@@ -379,6 +381,7 @@ public class ClienteDAO {
     }
     
     public ItemPedido getItem(ItemPedido item, Cliente cliente) throws DAOException {
+        checarConexao();
         Item i = getItem((Item)item, cliente);
         item.setId(i.getId());
         item.setNome(i.getNome());
@@ -398,6 +401,7 @@ public class ClienteDAO {
     }
 
     public Item getItem(Item item, Cliente cliente) throws DAOException {
+        checarConexao();
         if (item == null) {
             throw new DAOIncorrectData(300);
         }
@@ -547,6 +551,7 @@ public class ClienteDAO {
     }
 
     public List<Endereco> getEnderecos(Cliente cliente) throws DAOException {
+        checarConexao();
         List<Endereco> enderecos = new ArrayList<>();
         if (cliente == null) {
             return enderecos;
@@ -582,6 +587,7 @@ public class ClienteDAO {
     }
 
     public Endereco getEndereco(Endereco endereco, Cliente cliente) throws DAOIncorrectData, DAOException {
+        checarConexao();
         if (cliente == null) {
             throw new DAOIncorrectData(300);
         }
@@ -619,6 +625,7 @@ public class ClienteDAO {
     }
 
     public List<FormaPagamento> getFormasPagamento(Cliente cliente) throws DAOException {
+        checarConexao();
         if (cliente == null) {
             throw new DAOIncorrectData(300);
         }
@@ -649,6 +656,7 @@ public class ClienteDAO {
     }
 
     public Foto getPublicFile(int idArquivo) throws DAOException {
+        checarConexao();
         if (idArquivo == 0) {
             throw new DAOIncorrectData(301);
         }
@@ -669,6 +677,7 @@ public class ClienteDAO {
     }
 
     public boolean existePedidoAberto(Cliente cliente) throws DAOException {
+        checarConexao();
         String sql = "SELECT estado FROM pedido WHERE id_cliente = ? AND estado != 11";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
@@ -683,6 +692,7 @@ public class ClienteDAO {
     }
 
     public ConfirmaPedido inserirPrecos(ConfirmaPedido confirmaPedido) throws DAOException, DAOIncorrectData {
+        checarConexao();
         if (confirmaPedido.getItens() == null) {
             throw new DAOIncorrectData(300);
         }
@@ -737,6 +747,7 @@ public class ClienteDAO {
     }
 
     private void inserirPrecosInterno(ConfirmaPedido confirmaPedido) throws DAOException, DAOIncorrectData {
+        checarConexao();
         if (confirmaPedido.getItens() == null) {
             throw new DAOIncorrectData(300);
         }
@@ -775,6 +786,7 @@ public class ClienteDAO {
     }
 
     public List<ItemPedido> recuperarPrePredido(Cliente cliente) throws DAOException {
+        checarConexao();
         List<ItemPedido> itens = null;
         // recuperar_pre_pedido
         try (PreparedStatement stmt = this.conexao.prepareStatement("SELECT itens, precototal FROM pre_pedido WHERE id_cliente = ?")) {
@@ -818,6 +830,7 @@ public class ClienteDAO {
     }
 
     public boolean possuiPrePredido(Cliente cliente) throws DAOException {
+        checarConexao();
         String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
         // existe_pre_pedido
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -833,6 +846,7 @@ public class ClienteDAO {
     }
 
     public void removerPrepedido(Cliente cliente) throws DAOException {
+        checarConexao();
         String sql = "SELECT id_pre_pedido FROM pre_pedido WHERE id_cliente = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             // invalidar_pre_pedido            
@@ -852,6 +866,7 @@ public class ClienteDAO {
     }
 
     public ConfirmaPedido refazerPedido(Cliente cliente, Pedido pedido) throws DAOException {
+        checarConexao();
         ConfirmaPedido confirmaPedido = new ConfirmaPedido();
         // recuperar_itens_pedido
         String sql = "SELECT itens, precototal, frete FROM pedido WHERE id_cliente = ? AND id_pedido = ?";
@@ -910,6 +925,7 @@ public class ClienteDAO {
     }
 
     public boolean inserirPrePedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
+        checarConexao();
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
@@ -943,6 +959,7 @@ public class ClienteDAO {
     }
 
     public void inserirPedido(Pedido pedido, Cliente cliente) throws DAOException {
+        checarConexao();
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
@@ -971,6 +988,7 @@ public class ClienteDAO {
     }
 
     public boolean atualizarTokenPrePedido(String idPagamento, String idComprador) throws DAOException {
+        checarConexao();
         if (idPagamento == null) {
             throw new DAOIncorrectData(300);
         }
@@ -996,6 +1014,7 @@ public class ClienteDAO {
     }
 
     public String recuperarSessaoClienteParaConfirmarCompra(String idComprador) throws DAOException {
+        checarConexao();
         // utils_recuperar_sessao_cliente_pra_pagamento
         String sql = "SELECT usuario.token_websocket FROM usuario "
                 + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
@@ -1014,6 +1033,7 @@ public class ClienteDAO {
     }
 
     public void inserirPedidoDePrePedido(String idPagamento) throws DAOException {
+        checarConexao();
         if (idPagamento == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1045,6 +1065,7 @@ public class ClienteDAO {
     }
 
     public List<Pedido2> getPedidos(Cliente cliente, Integer pagina) throws DAOException, IOException {
+        checarConexao();
         List<Pedido2> pedidos = null;
         pagina--;
         if (pagina == null || pagina < 1) {
@@ -1101,6 +1122,7 @@ public class ClienteDAO {
     }
 
     public void getPedido(Pedido2 pedido, Cliente cliente) throws DAOException, IOException {
+        checarConexao();
         String sql = "SELECT pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
                 + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao, "
                 + " pedido.id_cupomdesconto, percentual, valor, codigo "
@@ -1146,6 +1168,7 @@ public class ClienteDAO {
     }
 
     public void cadastrarEndereco(Cliente cliente, Endereco endereco) throws DAOException {
+        checarConexao();
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1176,6 +1199,7 @@ public class ClienteDAO {
     }
 
     public void removerEndereco(Cliente cliente, Endereco endereco) throws DAOException {
+        checarConexao();
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1204,6 +1228,7 @@ public class ClienteDAO {
     }
 
     public void favoritarEndereco(Cliente cliente, Endereco endereco) throws DAOIncorrectData, DAOException {
+        checarConexao();
         if (cliente == null || endereco == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1221,6 +1246,7 @@ public class ClienteDAO {
     }
     
     public void favoritarFormaPagamento(Cliente cliente, FormaPagamento pagamento) throws DAOIncorrectData, DAOException {
+        checarConexao();
         if (cliente == null || pagamento == null) {
             throw new DAOIncorrectData(300);
         }
@@ -1235,6 +1261,7 @@ public class ClienteDAO {
     }
 
     public List<CupomDesconto2> getCuponsDescontos(Cliente cliente) throws DAOException {
+        checarConexao();
         List<CupomDesconto2> cuponsDescontos = new ArrayList<>();
         String sql = "SELECT cupomdesconto.id_cupomdesconto, codigo, cupomdesconto.descricao, cupomdesconto_tipo.controle, "
                 + " cupomdesconto_tipo.descricao, validade, percentual, valor, proxima_compra, usado, (NOW() > validade) expirada "
@@ -1269,6 +1296,7 @@ public class ClienteDAO {
     }
 
     synchronized public Mensagem cadastrarCupomDesconto(Cliente cliente, CupomDesconto cupom) throws DAOException {
+        checarConexao();
         Mensagem mensagem = new Mensagem();
         String sql = "SELECT id_cupomdesconto id, controle, "
                 + " IF(controle = 'PRIMEIRA_COMPRA' AND (SELECT COUNT(*) FROM pedido WHERE id_cliente = ? AND estado = 11) > 0, true, false) primeira_compra, "
@@ -1315,6 +1343,7 @@ public class ClienteDAO {
     }
 
     public Mensagem ativarCupomDesconto(Cliente cliente, CupomDesconto cupom) throws DAOException {
+        checarConexao();
         Mensagem mensagem = new Mensagem();
         try {
             String sql = "SELECT validade FROM cupomdesconto_cliente "
@@ -1352,6 +1381,7 @@ public class ClienteDAO {
     }
 
     public CupomDesconto verificarCupomDesconto(Cliente cliente) throws DAOException {
+        checarConexao();
         CupomDesconto cupom = null;
         String sql = "SELECT cupomdesconto.id_cupomdesconto, percentual, valor, controle FROM cupomdesconto_cliente "
                 + " LEFT JOIN cupomdesconto ON cupomdesconto_cliente.id_cupomdesconto = cupomdesconto.id_cupomdesconto "

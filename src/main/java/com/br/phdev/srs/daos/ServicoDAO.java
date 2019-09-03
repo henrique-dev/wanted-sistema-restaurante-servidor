@@ -35,20 +35,15 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Goncalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class ServicoDAO {
-    
-    private Connection conexao;
+public class ServicoDAO extends BasicDAO {        
     
     @Autowired
     ServicoDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); 
-        }
+        super(dataSource);
     }
     
     public void confirmarRecebimentoNotificacao(Notificacao notificacao) {
+        checarConexao();
         String sql = "UPDATE notificacao SET entregue=1 WHERE id_notificacao=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, notificacao.getId());
@@ -59,6 +54,7 @@ public class ServicoDAO {
     }
     
     public HashSet<Notificacao> listarNotificacoes() throws DAOException {
+        checarConexao();
         HashSet<Notificacao> notificacoes = new HashSet<>();
         String sql = "SELECT * FROM notificacao "
                 + " LEFT JOIN websocket ON notificacao.id_cliente = websocket.id_cliente "
@@ -82,6 +78,7 @@ public class ServicoDAO {
     }
     
     public NotificacaoPedido listarPedidos() throws DAOException {
+        checarConexao();
         NotificacaoPedido notificacaoPedido = new NotificacaoPedido();
         notificacaoPedido.setTipo("atualizacao");
         String sql = "SELECT * FROM pedido "

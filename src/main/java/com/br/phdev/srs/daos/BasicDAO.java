@@ -14,28 +14,29 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class BasicDAO {
     
+    private BasicDataSource dataSource;
     protected Connection conexao;
-    private Integer tentativasConexao = 0;
-    
-    private final BasicDataSource dataSource;
     
     protected BasicDAO(BasicDataSource dataSource) {
         this.dataSource = dataSource;
-        this.conectar();
+        try {
+            this.conexao = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
     
-    synchronized protected void conectar() {
+    protected boolean checarConexao() {
         try {
-            if (this.conexao != null) {
-                if (this.conexao.isClosed()) {
-                    this.conexao = this.dataSource.getConnection();
-                }
-            } else {
+            if (this.conexao == null || this.conexao.isClosed()) {
                 this.conexao = this.dataSource.getConnection();
-            }            
+            } else {
+                return true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
     
 }

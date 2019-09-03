@@ -15,12 +15,10 @@ import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import com.br.phdev.srs.utils.Util;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -30,20 +28,15 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class CadastroDAO {
-    
-    private Connection conexao;    
+public class CadastroDAO extends BasicDAO {       
 
     @Autowired
     CadastroDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        super(dataSource);       
     }
 
     public MensagemCadastro verificarNumero(Cadastro cadastro) throws DAOException {
+        checarConexao();
         MensagemCadastro mensagem = new MensagemCadastro();
         if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
             return new MensagemCadastro(101, "Número de telefone inválido", null);
@@ -91,6 +84,7 @@ public class CadastroDAO {
     }
 
     public MensagemCadastro enviarCodigoAtivacao(Cadastro cadastro) throws DAOException {
+        checarConexao();
         MensagemCadastro mensagem = null;
         try {
             mensagem = this.verificarNumero(cadastro);
@@ -131,6 +125,7 @@ public class CadastroDAO {
     }
     
     public Usuario validarCodigoAtivacao(Cadastro cadastro, String tokenSessao) throws DAOException {
+        checarConexao();
         if (!cadastro.getTelefone().matches("^\\+{1}55[0-9]{2}[0-9]{9}$")) {
             return null;
         }
@@ -159,6 +154,7 @@ public class CadastroDAO {
     }
 
     public MensagemCadastro cadastrarCliente(Usuario usuario, Cadastro cadastro) throws DAOException {
+        checarConexao();
         MensagemCadastro mensagem = this.verificarNumero(cadastro);
         if (!(mensagem.getCodigo() == 104 || mensagem.getCodigo() == 106)) {
             return mensagem;
@@ -232,6 +228,7 @@ public class CadastroDAO {
     }    
     
     public Cliente getCliente(Usuario usuario) throws DAOException {
+        checarConexao();
         Cliente cliente = null;
         String sql = "SELECT * FROM cliente WHERE id_usuario=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {

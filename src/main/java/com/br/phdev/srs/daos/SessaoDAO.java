@@ -27,20 +27,15 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class SessaoDAO {
-    
-    private Connection conexao;
+public class SessaoDAO extends BasicDAO {
     
     @Autowired
     SessaoDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); 
-        }
+        super(dataSource);
     }
     
     public Cliente autenticar(Usuario usuario) throws DAOException {
+        checarConexao();
         if (usuario == null) {
             throw new DAOIncorrectData(300);
         }
@@ -73,6 +68,7 @@ public class SessaoDAO {
     }
     
     public Admin autenticar2(Usuario usuario) throws DAOException {
+        checarConexao();
         if (usuario == null) {
             throw new DAOIncorrectData(300);
         }
@@ -102,6 +98,7 @@ public class SessaoDAO {
     }
 
     public void gerarSessao(Usuario usuario, String token1) throws DAOException {
+        checarConexao();
         String sql = "UPDATE usuario SET token_sessao = ?, token_login_usuario = ?, token_login_segredo = ? "
                 + " WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -121,6 +118,7 @@ public class SessaoDAO {
     }
     
     public void gerarSessao2(Usuario usuario, String token1) throws DAOException {
+        checarConexao();
         String sql = "UPDATE usuario_admin SET token_sessao = ? WHERE usuario_admin.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token1);
@@ -132,6 +130,7 @@ public class SessaoDAO {
     }
 
     public void sairSessao(Usuario usuario, String token) throws DAOException {
+        checarConexao();
         if (usuario == null) {
             return;
         }
@@ -148,6 +147,7 @@ public class SessaoDAO {
     }
     
     public boolean verificarSessao(String sessaoId) throws DAOException {
+        checarConexao();
         if (sessaoId == null) {
             return false;
         }
@@ -168,6 +168,7 @@ public class SessaoDAO {
     }
     
     public Cliente verificarTokenLogin(String telefone, String usuario, String segredo) throws DAOException {
+        checarConexao();
         Cliente cliente = null;
         if (usuario == null || segredo == null) {
             return cliente;
