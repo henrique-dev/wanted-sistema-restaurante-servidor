@@ -63,7 +63,7 @@ public class Pedido2 {
                 }
             }
         }
-        valorTotal.add(new BigDecimal(this.frete));
+        valorTotal = valorTotal.add(new BigDecimal(this.frete));
         this.setPrecoTotal(valorTotal.doubleValue());
     }
 
