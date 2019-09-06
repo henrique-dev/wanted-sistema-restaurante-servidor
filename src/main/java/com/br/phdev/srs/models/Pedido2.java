@@ -29,7 +29,7 @@ public class Pedido2 {
     private Cliente cliente;
 
     public void calcularPedido() {
-        BigDecimal valorTotal = new BigDecimal("0.00").subtract(new BigDecimal(this.frete));
+        BigDecimal valorTotal = new BigDecimal("0.00").add(new BigDecimal(this.frete));
         for (ItemPedido ip : this.getItens()) {
             BigDecimal valorItem = new BigDecimal("0.00");
             if (ip.getComplementos() != null) {

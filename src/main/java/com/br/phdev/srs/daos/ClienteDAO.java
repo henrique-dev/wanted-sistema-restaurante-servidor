@@ -8,6 +8,7 @@ package com.br.phdev.srs.daos;
 
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.DAOIncorrectData;
+import com.br.phdev.srs.models.Cartao;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.ComplementoFacil;
@@ -1111,9 +1112,9 @@ public class ClienteDAO extends BasicDAO {
                     cupom.setPercentual(rs.getBoolean("percentual"));
                     cupom.setValor(rs.getDouble("valor"));
                     pedido.setCupom(cupom);
-                }
+                }                
                 pedido.calcularPedido();
-                pedidos.add(pedido);
+                pedidos.add(pedido);                
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -1240,6 +1241,57 @@ public class ClienteDAO extends BasicDAO {
             stmt.setLong(1, endereco.getId());
             stmt.setLong(2, cliente.getId());
             stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+    
+    public void cadastrarFormaPagamento(Cliente cliente, Cartao cartao) throws DAOException {
+        checarConexao();
+        if (cliente == null || cartao == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (cartao.getNome() == null || cartao.getNumero() == null || cartao.getValidade() == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (cartao.getNome().isEmpty() || cartao.getNumero().isEmpty() || cartao.getValidade().isEmpty()) {
+            throw new DAOIncorrectData(301);
+        }
+        String sql = "INSERT INTO formapagamento VALUES (default, ?, ?, ?)";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            stmt.setString(2, "PAGSEGURO");
+            stmt.setString(0, sql);
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
+
+    public void removerFormaPagamento(Cliente cliente, Endereco endereco) throws DAOException {
+        checarConexao();
+        if (cliente == null || endereco == null) {
+            throw new DAOIncorrectData(300);
+        }
+        if (endereco.getId() <= 0) {
+            throw new DAOIncorrectData(300);
+        }
+        String sql = "SELECT COUNT(id_endereco) FROM endereco WHERE endereco.id_endereco = idendereco AND endereco.id_cliente = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, cliente.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                sql = "UPDATE pedido SET id_endereco = null WHERE pedido.id_endereco = ?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, endereco.getId());
+                    stmt2.execute();
+                }
+                sql = "DELETE FROM endereco WHERE id_endereco = ?";
+                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    stmt2.setLong(1, endereco.getId());
+                    stmt2.execute();
+                }
+            }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }

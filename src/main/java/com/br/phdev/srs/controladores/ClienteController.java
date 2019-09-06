@@ -11,6 +11,7 @@ import com.br.phdev.srs.daos.RepositorioProdutos;
 import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.exceptions.PaymentException;
 import com.br.phdev.srs.models.Carrinho;
+import com.br.phdev.srs.models.Cartao;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.ConfirmaPedido;
 import com.br.phdev.srs.models.ConfirmacaoPedido;
@@ -490,10 +491,8 @@ public class ClienteController {
             
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             pedidos = this.dao.getPedidos(cliente, (pg == null ? 0 : pg));
-        } catch (DAOException e) {
+        } catch (DAOException | IOException e) {
             e.printStackTrace();
-        } catch (IOException ex) {
-            Logger.getLogger(ClienteController.class.getName()).log(Level.SEVERE, null, ex);
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -581,6 +580,43 @@ public class ClienteController {
             this.dao.favoritarEndereco(cliente, endereco);
             mensagem.setCodigo(100);
             mensagem.setDescricao("Endereço favoritado com sucesso");
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+    
+    @PostMapping("cliente/cadastrar-forma-pagamento")
+    public ResponseEntity<Mensagem> cadastrarFormaPagamento(@RequestBody Cartao cartao, HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try {
+            
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.cadastrarFormaPagamento(cliente, cartao);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Endereço cadastrado com sucesso");
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+    
+    @PostMapping("cliente/remover-forma-pagamento")
+    public ResponseEntity<Mensagem> removerFormaPagamento(@RequestBody Endereco endereco, HttpSession sessao, HttpServletRequest req) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try {
+            Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            this.dao.removerEndereco(cliente, endereco);
+            mensagem.setCodigo(100);
+            mensagem.setDescricao("Endereço removido com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
