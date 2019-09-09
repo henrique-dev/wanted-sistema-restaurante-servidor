@@ -45,6 +45,11 @@ public class SessaoController {
         return "login";
     }    
     
+    @GetMapping("teste")
+    public String teste() {
+        return "teste";
+    }    
+    
     @PostMapping("sessao/verificar-sessao")
     public ResponseEntity<Mensagem> verificarSessao(HttpServletRequest req) {
         Mensagem mensagem = new Mensagem();

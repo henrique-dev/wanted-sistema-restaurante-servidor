@@ -78,7 +78,7 @@ public class ClienteDAO extends BasicDAO {
         }
     }
 
-    public void getCliente(Cliente cliente) throws DAOException {
+    public Cliente getCliente(Cliente cliente) throws DAOException {
         checarConexao();
         String sql = "SELECT nome, cpf, telefone, email"
                 + " FROM cliente"
@@ -98,6 +98,7 @@ public class ClienteDAO extends BasicDAO {
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
+        return cliente;
     }
 
     public ListaItens getItensDia(Cliente cliente) throws DAOException {
@@ -596,7 +597,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         Endereco enderecoRetorno = null;
-        String sql = "SELECT endereco.id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, favorito "
+        String sql = "SELECT endereco.id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, "
                 + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
                 + " FROM endereco "
                 + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
@@ -923,48 +924,14 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
         return confirmaPedido;
-    }
+    }    
 
-    public boolean inserirPrePedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
+    public void inserirPedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
         checarConexao();
         if (pedido == null || cliente == null) {
             throw new DAOIncorrectData(300);
         }
-        // inserir_pre_pedido
-        String sql = "SELECT pre_pedido.id_cliente FROM pre_pedido WHERE pre_pedido.id_cliente = ?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, cliente.getId());
-            ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                sql = "INSERT INTO pre_pedido values (default, now(), ?, ?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    String json = objectMapper.writeValueAsString(pedido.getItens());
-                    stmt2.setString(1, json);
-                    stmt2.setDouble(2, pedido.getPrecoTotal());
-                    stmt2.setLong(3, pedido.getFormaPagamento().getId());
-                    stmt2.setLong(4, cliente.getId());
-                    stmt2.setLong(5, pedido.getEndereco().getId());
-                    stmt2.setString(6, token);
-                    stmt2.setString(7, pedido.getObservacaoEntrega());
-                    stmt2.execute();
-                    return true;
-                }
-            }
-        } catch (SQLException e) {
-            throw new DAOException(e, 200);
-        } catch (JsonProcessingException e) {
-            throw new DAOException(e, 307);
-        }
-        return false;
-    }
-
-    public void inserirPedido(Pedido pedido, Cliente cliente) throws DAOException {
-        checarConexao();
-        if (pedido == null || cliente == null) {
-            throw new DAOIncorrectData(300);
-        }
-        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, ?, ?, ?, ?)";
+        String sql = "INSERT INTO pedido VALUES (default, now(), ?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?)";
         // inserir_pedido
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -978,6 +945,7 @@ public class ClienteDAO extends BasicDAO {
             stmt.setString(7, pedido.getObservacaoEntrega());
             stmt.setDouble(8, pedido.getFrete());
             stmt.setObject(9, pedido.getCupom() == null ? null : pedido.getCupom().getId());
+            stmt.setString(10, token);
             stmt.execute();
         } catch (SQLException e) {
             e.printStackTrace();

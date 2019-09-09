@@ -35,8 +35,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -436,13 +434,13 @@ public class ClienteController {
                 switch (confirmaPedido.getFormaPagamentos().get(0).getId()) {
                     case 0:
                         pedido.setEstado(4);
-                        this.dao.inserirPedido(pedido, cliente);
+                        this.dao.inserirPedido(pedido, cliente, null);
                         confirmacaoPedido.setStatus(0);
                         sessao.setAttribute("pre-pedido-itens", null);
                         sessao.setAttribute("pre-pedido-preco", null);
                         sessao.setAttribute("pre-pedido-cupom", null);
                         break;
-                    case 1:
+                    case 2:
                         String tokenSessao;
                             if (sessao.getAttribute("token_sessao_pagseguro") == null) {
                                 ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
@@ -456,16 +454,15 @@ public class ClienteController {
                             }
                             System.out.println("Gerando pagamento pagseguro com token: " + tokenSessao);
                             ExecutarPagamento pagamento = new ExecutarPagamento();
-                            pagamento.setCliente(cliente);
+                            pagamento.setCliente(this.dao.getCliente(cliente));
                             pagamento.setPedido(pedido);
-                            pagamento.setEndereco(confirmaPedido.getEnderecos().get(0));
+                            pagamento.setEndereco(this.dao.getEndereco(confirmaPedido.getEnderecos().get(0), cliente));
+                            pagamento.setTokenSessao(tokenSessao);
                             sessao.setAttribute("executar-pagamento", pagamento);
-                            this.dao.inserirPrePedido(pedido, cliente, tokenSessao);
+                            pedido.setEstado(1);
+                            this.dao.inserirPedido(pedido, cliente, tokenSessao);
                             confirmacaoPedido.setStatus(2);
                             confirmacaoPedido.setLink(tokenSessao);
-                        break;
-                    case 2:
-                        
                         break;
                     case 3:
                         

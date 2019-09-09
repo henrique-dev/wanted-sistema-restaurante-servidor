@@ -11,8 +11,8 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
     <script type="text/javascript" src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
     <script>
-        function getToken() {
-            PagSeguroDirectPayment.setSessionId('${tokenSessao}'); // tokenSessao -> Obtido na chamada confirmar-pedido
+        function getToken() {            
+            PagSeguroDirectPayment.setSessionId(document.getElementById("token").value); // tokenSessao -> Obtido na chamada confirmar-pedido
             PagSeguroDirectPayment.onSenderHashReady(function (response) {
                 if (response.status == 'error') {
                     console.log(response.message);
@@ -28,13 +28,13 @@
                 expirationMonth: '05',
                 expirationYear: '2021',
                 success: function (response) {
-                    
+                    console.log(response);
                 },
                 error: function (response) {
-                    
+                    console.log(response);
                 },
                 complete: function (response) {
-                    
+                    console.log(response);
                 }
             };
             PagSeguroDirectPayment.createCardToken(param);
@@ -42,6 +42,7 @@
     </script>    
 </head>
 <body>
+    <input type="text" id="token"/>
     <button onclick="getToken()">Pagar</button>    
 </body>
 </html>

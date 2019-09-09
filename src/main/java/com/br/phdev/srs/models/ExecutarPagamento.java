@@ -11,49 +11,13 @@ package com.br.phdev.srs.models;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 public class ExecutarPagamento {
-        
-    private String nome;
-    private String cpf;
-    private String data;
-    private String telefone;
+            
     private Endereco endereco;
     private Pedido pedido;
     private Cliente cliente;
     private String tokenSessao;
     private String tokenCartao;
-    private String hashCliente;
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
+    private String hashCliente;    
 
     public Endereco getEndereco() {
         return endereco;
@@ -101,11 +65,6 @@ public class ExecutarPagamento {
 
     public void setHashCliente(String hashCliente) {
         this.hashCliente = hashCliente;
-    }
-
-    @Override
-    public String toString() {
-        return "ExecutarPagamento{" + "nome=" + nome + ", cpf=" + cpf + ", data=" + data + ", telefone=" + telefone + ", endereco=" + endereco + ", pedido=" + pedido + ", cliente=" + cliente + ", tokenSessao=" + tokenSessao + ", tokenCartao=" + tokenCartao + ", hashCliente=" + hashCliente + '}';
     }
                 
 }

@@ -18,7 +18,6 @@ import com.br.phdev.srs.models.IPNMessage;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.HttpUtils;
 import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
-import com.br.phdev.srs.utils.ServicoPagamentoPayPal;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
@@ -27,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
-
+@Controller
 public class PagamentoController {
     
     private ClienteDAO dao;
@@ -71,57 +69,17 @@ public class PagamentoController {
         try {            
             ExecutarPagamento pagamentoRecuperado = (ExecutarPagamento) sessao.getAttribute("executar-pagamento");
             ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
-            pagamentoRecuperado.setEndereco(this.dao.getEndereco(pagamentoRecuperado.getEndereco(), pagamentoRecuperado.getCliente()));
-            pagamentoRecuperado.setCpf(ep.getCpf());
-            pagamentoRecuperado.setNome(ep.getNome());
-            pagamentoRecuperado.setData(ep.getData());
-            pagamentoRecuperado.setTelefone(ep.getTelefone());
-            pagamentoRecuperado.setTokenSessao(ep.getTokenSessao());
+            //pagamentoRecuperado.setEndereco(ep.getEndereco());
+            //pagamentoRecuperado.setCpf(ep.getCliente().getCpf());
+            //pagamentoRecuperado.setNome(ep.getCliente().getNome());
+            //pagamentoRecuperado.setData(ep.getData());
+            //pagamentoRecuperado.setTelefone(ep.getCliente().getTelefone());
+            //pagamentoRecuperado.setTokenSessao(ep.getTokenSessao());
             pagamentoRecuperado.setTokenCartao(ep.getTokenCartao());
             pagamentoRecuperado.setHashCliente(ep.getHashCliente());
+            System.out.println("HERE1");
             String codigoPagamento = servicoPagamento.executarPagamentoCartaoCredito(pagamentoRecuperado);            
-            if (codigoPagamento != null) {
-                if (this.dao.atualizarTokenPrePedido(ep.getTokenSessao(), codigoPagamento)) {
-                    mensagem.setCodigo(100);
-                    mensagem.setDescricao("Processando pagamento");
-                } else {
-                    mensagem.setCodigo(300);
-                    mensagem.setDescricao("Houve algum erro ao processar o pagamento");
-                }
-            } else {
-                mensagem.setCodigo(101);
-                mensagem.setDescricao("Não foi possível processar o pagamento");
-            }
-        } catch (PaymentException e) {
-            e.printStackTrace();
-            mensagem.setCodigo(300);
-            mensagem.setDescricao(e.getMessage());
-        } catch (DAOException e) {
-            e.printStackTrace();
-            mensagem.setCodigo(300);
-            mensagem.setDescricao(e.getMessage());
-        }
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
-    }
-    
-    @PostMapping("pagamentos/executar-pagamento3")
-    public ResponseEntity<Mensagem> executarPagamento3(@RequestBody ExecutarPagamento ep, HttpSession sessao) {
-        System.out.println("Executando pagamento pag-seguro com cartão de debito");
-        Mensagem mensagem = new Mensagem();
-        try {            
-            ExecutarPagamento pagamentoRecuperado = (ExecutarPagamento) sessao.getAttribute("executar-pagamento");
-            ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
-            pagamentoRecuperado.setEndereco(this.dao.getEndereco(pagamentoRecuperado.getEndereco(), pagamentoRecuperado.getCliente()));
-            pagamentoRecuperado.setCpf(ep.getCpf());
-            pagamentoRecuperado.setNome(ep.getNome());
-            pagamentoRecuperado.setData(ep.getData());
-            pagamentoRecuperado.setTelefone(ep.getTelefone());
-            pagamentoRecuperado.setTokenSessao(ep.getTokenSessao());
-            pagamentoRecuperado.setTokenCartao(ep.getTokenCartao());
-            pagamentoRecuperado.setHashCliente(ep.getHashCliente());
-            String codigoPagamento = servicoPagamento.executarPagamentoCartaoDebito(pagamentoRecuperado);            
+            System.out.println("HERE2");
             if (codigoPagamento != null) {
                 if (this.dao.atualizarTokenPrePedido(ep.getTokenSessao(), codigoPagamento)) {
                     mensagem.setCodigo(100);

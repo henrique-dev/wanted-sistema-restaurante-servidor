@@ -66,11 +66,11 @@ public class Cliente {
     }
     
     public String getTelefoneSemCodigoArea() {
-        return this.telefone.substring(2, this.telefone.length());
+        return this.telefone.substring(5, this.telefone.length());
     }
     
     public String getCodigoAreaTelefone() {
-        return this.telefone.substring(0, 2);
+        return this.telefone.substring(3, 5);
     }
 
     public void setTelefone(String telefone) {
