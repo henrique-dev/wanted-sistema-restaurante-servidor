@@ -6,32 +6,23 @@ package com.br.phdev.srs.models;
  */
 public class Cartao {
 
-    private String numero;
-    private String validade;
-    private String nome;
+    private String hashId;
+    private String descricao;
 
-    public String getNumero() {
-        return numero;
+    public String getHashId() {
+        return hashId;
     }
 
-    public void setNumero(String numero) {
-        this.numero = numero;
+    public void setHashId(String hashId) {
+        this.hashId = hashId;
     }
 
-    public String getValidade() {
-        return validade;
+    public String getDescricao() {
+        return descricao;
     }
 
-    public void setValidade(String validade) {
-        this.validade = validade;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
 }

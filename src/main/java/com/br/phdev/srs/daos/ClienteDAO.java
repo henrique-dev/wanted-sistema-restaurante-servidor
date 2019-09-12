@@ -1219,17 +1219,12 @@ public class ClienteDAO extends BasicDAO {
         if (cliente == null || cartao == null) {
             throw new DAOIncorrectData(300);
         }
-        if (cartao.getNome() == null || cartao.getNumero() == null || cartao.getValidade() == null) {
-            throw new DAOIncorrectData(300);
-        }
-        if (cartao.getNome().isEmpty() || cartao.getNumero().isEmpty() || cartao.getValidade().isEmpty()) {
-            throw new DAOIncorrectData(301);
-        }
-        String sql = "INSERT INTO formapagamento VALUES (default, ?, ?, ?)";
+        String sql = "INSERT INTO formapagamento VALUES (default, ?, ?, ?, ?)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
-            stmt.setString(2, "PAGSEGURO");
-            stmt.setString(0, sql);
+            stmt.setString(2, "PAGARME");
+            stmt.setString(3, "Cartao de credito - Pagarme");
+            stmt.setString(4, cartao.getHashId());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);

@@ -2,6 +2,7 @@
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.Foto;
+import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -14,6 +15,11 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import me.pagar.model.Card;
+import me.pagar.model.PagarMeException;
+import me.pagar.model.Transaction;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -27,9 +33,15 @@ import java.util.Calendar;
 public class Teste {
 
     public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-        String nome = "josé henrique";
-        System.out.println(nome.matches("^[a-zà-ÿ']+(\\s([a-zà-ÿ']\\s?)*[a-zà-ÿ][A-zà-ÿ']+)*$"));
+/*
+        ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
+        try {
+            //Card c = p.salvarCartao();
+            //Transaction t = p.criarPagamento(c.getId());
+            //System.out.println(t);
+        } catch (PagarMeException e) {
+            e.printStackTrace();
+        }*/
 
     }
 

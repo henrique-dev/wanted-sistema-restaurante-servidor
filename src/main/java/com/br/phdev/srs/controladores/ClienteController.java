@@ -589,13 +589,12 @@ public class ClienteController {
     @PostMapping("cliente/cadastrar-forma-pagamento")
     public ResponseEntity<Mensagem> cadastrarFormaPagamento(@RequestBody Cartao cartao, HttpSession sessao, HttpServletRequest req) {
         HttpStatus httpStatus = HttpStatus.OK;
-        Mensagem mensagem = new Mensagem();
+        Mensagem mensagem = new Mensagem();        
         try {
-            
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             this.dao.cadastrarFormaPagamento(cliente, cartao);
             mensagem.setCodigo(100);
-            mensagem.setDescricao("Endereço cadastrado com sucesso");
+            mensagem.setDescricao("Forma de pagamento cadastrado com sucesso");
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
