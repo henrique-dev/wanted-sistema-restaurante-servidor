@@ -31,6 +31,7 @@ import com.br.phdev.srs.models.TokenAlerta;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
+import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -581,6 +582,17 @@ public class ClienteController {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());
         }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+    
+    @PostMapping("cliente/preparar-forma-pagamento")
+    public ResponseEntity<Mensagem> cadastrarFormaPagamento() {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        mensagem.setCodigo(100);
+        mensagem.setDescricao(ServicoPagamentoPagarme.ENCRYPT_KEY);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);

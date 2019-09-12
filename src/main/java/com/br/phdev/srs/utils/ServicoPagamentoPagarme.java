@@ -27,7 +27,7 @@ import me.pagar.model.Transaction;
 public class ServicoPagamentoPagarme {
 
     private final String apiKey = "ak_test_VbiowWEdoiTrDtv6afJ7xmoYquJN9a";
-    private final String encryptKey = "ek_test_LJoeMvAv6o0pl4nfyTiVql2AHwsx49";
+    public static final String ENCRYPT_KEY = "ek_test_LJoeMvAv6o0pl4nfyTiVql2AHwsx49";
 
     public Card salvarCartao(Card cartao) throws PagarMeException {
         PagarMe.init(apiKey);
