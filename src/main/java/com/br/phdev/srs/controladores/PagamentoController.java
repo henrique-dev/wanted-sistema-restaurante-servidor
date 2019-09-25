@@ -18,6 +18,7 @@ import com.br.phdev.srs.models.IPNMessage;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.utils.HttpUtils;
 import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
+import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
@@ -26,6 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import me.pagar.model.PagarMe;
+import me.pagar.model.PagarMeRequest;
+import me.pagar.model.Postback;
+import me.pagar.model.PostbackDelivery;
+import me.pagar.model.Transaction;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -208,6 +214,18 @@ public class PagamentoController {
         } catch (DAOException | SQLException | JsonProcessingException e) {
             e.printStackTrace();
         }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.TEXT_HTML);
+        return new ResponseEntity<>("", httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("pagamentos/notificar-pagarme")
+    public ResponseEntity<String> notificarPagarMe(@RequestBody Postback postback, HttpServletRequest request) throws InterruptedException {        
+        System.out.println("Notificação pagarme recebida");
+        System.out.println(request);
+                                
+        System.out.println(postback);
+        
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.TEXT_HTML);
         return new ResponseEntity<>("", httpHeaders, HttpStatus.OK);

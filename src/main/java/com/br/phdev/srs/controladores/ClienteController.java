@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import me.pagar.model.PagarMeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -443,37 +444,54 @@ public class ClienteController {
                         break;
                     case 2:
                         String tokenSessao;
-                            if (sessao.getAttribute("token_sessao_pagseguro") == null) {
-                                ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
-                                tokenSessao = servicoPagamento.criarTokenPagamento();
-                                if (tokenSessao == null) {
-                                    throw new PaymentException();
-                                }
-                                sessao.setAttribute("token_sessao_pagseguro", tokenSessao);
-                            } else {
-                                tokenSessao = (String) sessao.getAttribute("token_sessao_pagseguro");
+                        if (sessao.getAttribute("token_sessao_pagseguro") == null) {
+                            ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
+                            tokenSessao = servicoPagamento.criarTokenPagamento();
+                            if (tokenSessao == null) {
+                                throw new PaymentException();
                             }
-                            System.out.println("Gerando pagamento pagseguro com token: " + tokenSessao);
-                            ExecutarPagamento pagamento = new ExecutarPagamento();
-                            pagamento.setCliente(this.dao.getCliente(cliente));
-                            pagamento.setPedido(pedido);
-                            pagamento.setEndereco(this.dao.getEndereco(confirmaPedido.getEnderecos().get(0), cliente));
-                            pagamento.setTokenSessao(tokenSessao);
-                            sessao.setAttribute("executar-pagamento", pagamento);
+                            sessao.setAttribute("token_sessao_pagseguro", tokenSessao);
+                        } else {
+                            tokenSessao = (String) sessao.getAttribute("token_sessao_pagseguro");
+                        }
+                        System.out.println("Gerando pagamento pagseguro com token: " + tokenSessao);
+                        ExecutarPagamento pagamento = new ExecutarPagamento();
+                        pagamento.setCliente(this.dao.getCliente(cliente));
+                        pagamento.setPedido(pedido);
+                        pagamento.setEndereco(this.dao.getEndereco(confirmaPedido.getEnderecos().get(0), cliente));
+                        pagamento.setTokenSessao(tokenSessao);
+                        sessao.setAttribute("executar-pagamento", pagamento);
+                        pedido.setEstado(1);
+                        this.dao.inserirPedido(pedido, cliente, tokenSessao);
+                        confirmacaoPedido.setStatus(2);
+                        confirmacaoPedido.setLink(tokenSessao);
+                        break;
+                    default:                        
+                        ServicoPagamentoPagarme pagarme = new ServicoPagamentoPagarme();
+                        ExecutarPagamento pagamento2 = new ExecutarPagamento();
+                        pagamento2.setCliente(this.dao.getCliente(cliente));
+                        pagamento2.setPedido(pedido);
+                        pagamento2.setEndereco(this.dao.getEndereco(confirmaPedido.getEnderecos().get(0), cliente));
+                        FormaPagamento formaPagamento = this.dao.getFormaPagamento(cliente, new FormaPagamento(confirmaPedido.getFormaPagamentos().get(0).getId()));
+                        if (formaPagamento.getHashId() != null) {
+                            pagamento2.setTokenCartao(formaPagamento.getHashId());
+                            pagarme.criarPagamento(pagamento2);
+                            
                             pedido.setEstado(1);
-                            this.dao.inserirPedido(pedido, cliente, tokenSessao);
-                            confirmacaoPedido.setStatus(2);
-                            confirmacaoPedido.setLink(tokenSessao);
-                        break;
-                    case 3:
-                        
-                        break;
-                    default:
-                        confirmacaoPedido.setStatus(-1);
+                            this.dao.inserirPedido(pedido, cliente, null);
+                            confirmacaoPedido.setStatus(0);
+                            sessao.setAttribute("pre-pedido-itens", null);
+                            sessao.setAttribute("pre-pedido-preco", null);
+                            sessao.setAttribute("pre-pedido-cupom", null);
+                        } else {
+                            confirmacaoPedido.setStatus(-1);
+                        }                        
                         break;
                 }
             }
         } catch (DAOException | PaymentException e) {
+            e.printStackTrace();
+        } catch (PagarMeException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();

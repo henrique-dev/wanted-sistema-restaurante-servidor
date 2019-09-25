@@ -15,8 +15,14 @@ public class FormaPagamento {
     private Integer id;
     private String descricao;
     private boolean favorito;
+    private String controle;
+    private String hashId;
 
     public FormaPagamento() {
+    }
+
+    public FormaPagamento(Integer id) {
+        this.id = id;
     }
 
     public FormaPagamento(Integer id, String descricao) {
@@ -46,6 +52,30 @@ public class FormaPagamento {
 
     public void setFavorito(Boolean favorito) {
         this.favorito = favorito;
+    }
+
+    public boolean isFavorito() {
+        return favorito;
+    }
+
+    public void setFavorito(boolean favorito) {
+        this.favorito = favorito;
+    }
+
+    public String getControle() {
+        return controle;
+    }
+
+    public void setControle(String controle) {
+        this.controle = controle;
+    }
+
+    public String getHashId() {
+        return hashId;
+    }
+
+    public void setHashId(String hashId) {
+        this.hashId = hashId;
     }
 
 }

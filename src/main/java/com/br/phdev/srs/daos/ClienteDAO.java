@@ -1274,6 +1274,25 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
+    
+    public FormaPagamento getFormaPagamento(Cliente cliente, FormaPagamento formaPagamento) throws DAOIncorrectData, DAOException {
+        checarConexao();
+        if (cliente == null) {
+            throw new DAOIncorrectData(300);
+        }
+        String sql = "SELECT * FROM formapagamento WHERE id_formapagamento=? AND id_cliente=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, formaPagamento.getId());
+            stmt.setLong(2, cliente.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                formaPagamento.setHashId(rs.getString("hash_id"));
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+        return formaPagamento;
+    }
 
     public List<CupomDesconto2> getCuponsDescontos(Cliente cliente) throws DAOException {
         checarConexao();

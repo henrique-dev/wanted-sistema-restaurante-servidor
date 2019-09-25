@@ -7,6 +7,8 @@
  */
 package com.br.phdev.srs.utils;
 
+import com.br.phdev.srs.models.ExecutarPagamento;
+import com.br.phdev.srs.models.ItemPedidoFacil;
 import java.util.ArrayList;
 import java.util.Collection;
 import me.pagar.model.Address;
@@ -26,7 +28,7 @@ import me.pagar.model.Transaction;
  */
 public class ServicoPagamentoPagarme {
 
-    private final String apiKey = "ak_test_VbiowWEdoiTrDtv6afJ7xmoYquJN9a";
+    public static final String apiKey = "ak_test_VbiowWEdoiTrDtv6afJ7xmoYquJN9a";
     public static final String ENCRYPT_KEY = "ek_test_LJoeMvAv6o0pl4nfyTiVql2AHwsx49";
 
     public Card salvarCartao(Card cartao) throws PagarMeException {
@@ -39,58 +41,64 @@ public class ServicoPagamentoPagarme {
         return cartao;
     }
 
-    public Transaction criarPagamento(String cardid) throws PagarMeException {
+    public Transaction criarPagamento(ExecutarPagamento pagamento) throws PagarMeException {
         Transaction transaction = new Transaction();
+        
+        transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
+        
         Customer customer = new Customer();
         customer.setType(Customer.Type.INDIVIDUAL);
-        customer.setExternalId("1001");
-        customer.setName("Phineas Flynn");
-        customer.setBirthday("1999-07-09");
-        customer.setEmail("phineas@threestatearea.com");
+        customer.setExternalId(String.valueOf(pagamento.getCliente().getId()));
+        customer.setName(pagamento.getCliente().getNome());
+        //customer.setBirthday(pagamento.getCliente().getda);
+        customer.setEmail(pagamento.getCliente().getEmail());
         customer.setCountry("br");
 
         Collection<Document> documents = new ArrayList();
         Document document = new Document();
         document.setType(Document.Type.CPF);
-        document.setNumber("77551442758");
+        document.setNumber(pagamento.getCliente().getCpf());
         documents.add(document);
         customer.setDocuments(documents);
 
         Collection<String> phones = new ArrayList();
-        phones.add("+5511982657575");
+        phones.add(pagamento.getCliente().getTelefone());
         customer.setPhoneNumbers(phones);
 
         Billing billing = new Billing();
-        billing.setName("Phineas Flynn");
+        billing.setName(pagamento.getEndereco().getDescricao());
         Address address = new Address();
-        address.setCity("Santo Andre");
+        address.setCity(pagamento.getEndereco().getCidade());
         address.setCountry("br");
-        address.setState("sp");
-        address.setNeighborhood("Parque Miami");
-        address.setStreet("Rua Rio Jari");
-        address.setZipcode("09133180");
-        address.setStreetNumber("7");
+        address.setState("ap");
+        address.setNeighborhood(pagamento.getEndereco().getBairro());
+        address.setStreet(pagamento.getEndereco().getLogradouro());
+        address.setZipcode(pagamento.getEndereco().getCep().replace("-", ""));
+        address.setStreetNumber(pagamento.getEndereco().getNumero());
         billing.setAddress(address);
 
         Shipping shipping = new Shipping();
         shipping.setAddress(address);
-        shipping.setName("Phineas Flynn");
-        shipping.setFee(3200);
+        shipping.setName(pagamento.getEndereco().getDescricao());
+        shipping.setFee(0);
 
         Collection<Item> items = new ArrayList();
-        Item item = new Item();
-        item.setId("OX890");
-        item.setQuantity(12);
-        item.setTangible(Boolean.TRUE);
-        item.setTitle("Rockets");
-        item.setUnitPrice(120);
+        for (ItemPedidoFacil p : pagamento.getPedido().getItens()) {
+            Item item = new Item();
+            item.setId(String.valueOf(p.getId()));
+            item.setQuantity(p.getQuantidade());
+            item.setTangible(Boolean.TRUE);
+            item.setTitle(p.getNome());
+            item.setUnitPrice(Integer.parseInt(String.valueOf(p.getPreco()).replace(",", "")));
+            items.add(item);
+        }        
 
         transaction.setShipping(shipping);
         transaction.setBilling(billing);
         transaction.setItems(items);
         transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
         transaction.setAmount(4640);
-        transaction.setCardId(cardid);
+        transaction.setCardId(pagamento.getTokenCartao());
         transaction.setCustomer(customer);
         return transaction.save();
     }
