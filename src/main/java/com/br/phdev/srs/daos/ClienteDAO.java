@@ -1490,6 +1490,7 @@ public class ClienteDAO extends BasicDAO {
 
     public void atualizarEstadoPedido2(Pedido2 pedido) throws DAOException {
         checarConexao();
+        System.out.println("HEEEEEEEEEEEEEERE====>");
         String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getEstado());
