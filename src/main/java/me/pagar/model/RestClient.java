@@ -48,8 +48,9 @@ public class RestClient {
                 version = version.substring(0, dot);
             }
         }
-
-        return Integer.parseInt(version);
+        
+        return 8;
+        //return Integer.parseInt(version);
     }
 
     private void setupSecureConnection(final HttpsURLConnection httpClient) throws IOException,
