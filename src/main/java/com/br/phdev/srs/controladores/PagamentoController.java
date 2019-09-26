@@ -220,11 +220,9 @@ public class PagamentoController {
     }
     
     @PostMapping("pagamentos/notificar-pagarme")
-    public ResponseEntity<String> notificarPagarMe(@RequestBody Postback postback, HttpServletRequest request) throws InterruptedException {        
+    public ResponseEntity<String> notificarPagarMe(HttpServletRequest request) throws InterruptedException {        
         System.out.println("Notificação pagarme recebida");
         System.out.println(request);
-                                
-        System.out.println(postback);
         
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.TEXT_HTML);
