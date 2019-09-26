@@ -1140,7 +1140,7 @@ public class ClienteDAO extends BasicDAO {
     public Pedido2 getPedidoPorToken(String token) throws DAOException, IOException {
         checarConexao();
         Pedido2 pedido = null;
-        String sql = "SELECT pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
+        String sql = "SELECT pedido.id_pedido, pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
                 + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao, "
                 + " pedido.id_cupomdesconto, percentual, valor, codigo "
                 + " FROM pedido "
@@ -1154,6 +1154,7 @@ public class ClienteDAO extends BasicDAO {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 pedido = new Pedido2();
+                pedido.setId(rs.getLong("id_pedido"));
                 String time = LocalDateTime.parse(rs.getString("data"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
                 pedido.setData(time);
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
@@ -1490,7 +1491,6 @@ public class ClienteDAO extends BasicDAO {
 
     public void atualizarEstadoPedido2(Pedido2 pedido) throws DAOException {
         checarConexao();
-        System.out.println("HEEEEEEEEEEEEEERE====>");
         String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getEstado());
