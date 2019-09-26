@@ -473,9 +473,11 @@ public class ClienteController {
                         pagamento2.setPedido(pedido);
                         pagamento2.setEndereco(this.dao.getEndereco(confirmaPedido.getEnderecos().get(0), cliente));
                         FormaPagamento formaPagamento = this.dao.getFormaPagamento(cliente, new FormaPagamento(confirmaPedido.getFormaPagamentos().get(0).getId()));
+                        System.out.println("Preparando para gerar pagamento com pagarme");
                         if (formaPagamento.getHashId() != null) {
                             pagamento2.setTokenCartao(formaPagamento.getHashId());
                             pagarme.criarPagamento(pagamento2);
+                            System.out.println("Pagamento criado");
                             
                             pedido.setEstado(1);
                             this.dao.inserirPedido(pedido, cliente, null);
