@@ -44,6 +44,8 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                     
                     || uri.endsWith("teste")
                     
+                    || uri.endsWith("pagamentos/notificar-pagarme")                    
+                    
                     || uri.endsWith("sessao/autenticar")
                     || uri.endsWith("sessao/autenticar-2")
                     || uri.endsWith("sessao/entrar")
