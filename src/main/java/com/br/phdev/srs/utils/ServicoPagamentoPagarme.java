@@ -109,7 +109,7 @@ public class ServicoPagamentoPagarme {
         Transaction transaction = new Transaction();
 
         transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
-        
+
         try {
 
             Customer customer = new Customer();
@@ -161,12 +161,11 @@ public class ServicoPagamentoPagarme {
             transaction.setItems(items);
             transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
             transaction.setAmount(4640);
-            System.out.println("Token do cartao: " + pagamento.getTokenCartao());
-            transaction.setCardId("card_ck0g39zb500my4s6dg1xpdvpa");
+            transaction.setCardHolderName("Phineas Flynn");
+            transaction.setCardNumber("4242424242424242");
+            transaction.setCardCvv("909");
+            transaction.setCardExpirationDate("1119");
             transaction.setCustomer(customer);
-            
-            System.out.println("Api key: " + PagarMe.getApiKey());
-            
             transaction.save();
         } catch (PagarMeException e) {
             e.printStackTrace();
