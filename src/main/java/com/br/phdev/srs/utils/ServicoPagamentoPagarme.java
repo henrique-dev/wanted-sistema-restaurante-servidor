@@ -46,9 +46,12 @@ public class ServicoPagamentoPagarme {
         PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
+        
         //transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
         
         try {
+            
+            /*
             Customer customer = new Customer();
             customer.setType(Customer.Type.INDIVIDUAL);
             customer.setExternalId(String.valueOf(pagamento.getCliente().getId()));
@@ -89,7 +92,6 @@ public class ServicoPagamentoPagarme {
             shipping.setFee(0);
 
             Collection<Item> items = new ArrayList();
-            /*
             for (ItemPedidoFacil p : pagamento.getPedido().getItens()) {
                 Item item = new Item();
                 item.setId(String.valueOf(p.getId()));
@@ -99,7 +101,7 @@ public class ServicoPagamentoPagarme {
                 //item.setUnitPrice(Integer.parseInt(String.valueOf(p.getPreco()).replace(".", "")));
                 item.setUnitPrice(500);
                 items.add(item);
-            }*/
+            }
 
             transaction.setShipping(shipping);
             transaction.setBilling(billing);
@@ -108,6 +110,12 @@ public class ServicoPagamentoPagarme {
             transaction.setAmount(4640);
             transaction.setCardId(pagamento.getTokenCartao());
             transaction.setCustomer(customer);
+            */
+            
+            transaction.setAmount(1000);
+            transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
+            transaction.setCardId(pagamento.getTokenCartao());
+            transaction.save();
         } catch (Exception e) {
             e.printStackTrace();
         }
