@@ -39,6 +39,7 @@ public class RestClient {
 
     private static int getJavaVersion() {
         String version = System.getProperty("java.version");
+        System.out.println("Versão do java: " + version);
         if(version.startsWith("1.")) {
             version = version.substring(2, 3);
         } else {
