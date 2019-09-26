@@ -21,7 +21,8 @@ public class Teste {
 
         ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
         try {
-            Card c = p.salvarCartao();            
+            Card c = p.salvarCartao();
+            p.criarPagamento2(c.getId());
             System.out.println(c);
         } catch (PagarMeException e) {
             e.printStackTrace();
