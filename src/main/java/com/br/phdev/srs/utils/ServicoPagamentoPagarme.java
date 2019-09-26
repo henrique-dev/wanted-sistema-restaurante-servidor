@@ -159,7 +159,8 @@ public class ServicoPagamentoPagarme {
             transaction.setBilling(billing);
             transaction.setItems(items);
             transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
-            transaction.setAmount(Integer.parseInt(String.valueOf(pagamento.getPedido().getPrecoTotal()).replace(".", "")));
+            transaction.setAmount(4640);
+            System.out.println("Token do cartao: " + pagamento.getTokenCartao());
             transaction.setCardId(pagamento.getTokenCartao());
             transaction.setCustomer(customer);
         } catch (Exception e) {
