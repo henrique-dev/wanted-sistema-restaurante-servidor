@@ -482,8 +482,7 @@ public class ClienteController {
                             System.out.println("Pagamento criado");
                             
                             pedido.setEstado(1);
-                            pedido.setToken(String.valueOf(t.getId()));
-                            this.dao.inserirPedido(pedido, cliente, null);
+                            this.dao.inserirPedido(pedido, cliente, String.valueOf(t.getId()));
                             confirmacaoPedido.setStatus(0);
                             sessao.setAttribute("pre-pedido-itens", null);
                             sessao.setAttribute("pre-pedido-preco", null);
