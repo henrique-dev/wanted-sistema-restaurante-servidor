@@ -623,7 +623,7 @@ public class ClienteDAO extends BasicDAO {
         } catch (SQLException e) {
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
-        return endereco;
+        return enderecoRetorno;
     }
 
     public List<FormaPagamento> getFormasPagamento(Cliente cliente) throws DAOException {

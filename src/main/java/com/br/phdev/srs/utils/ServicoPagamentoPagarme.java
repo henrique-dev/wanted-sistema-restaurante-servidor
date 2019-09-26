@@ -45,7 +45,7 @@ public class ServicoPagamentoPagarme {
         PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
-        //transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
+        transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
         try {
             Customer customer = new Customer();
             customer.setType(Customer.Type.INDIVIDUAL);
@@ -76,8 +76,8 @@ public class ServicoPagamentoPagarme {
             address.setState("ap");
             address.setNeighborhood(pagamento.getEndereco().getBairro());
             address.setStreet(pagamento.getEndereco().getLogradouro());
-            //address.setZipcode(pagamento.getEndereco().getCep().replace("-", ""));
-            address.setZipcode("68928313");
+            address.setZipcode(pagamento.getEndereco().getCep().replace("-", ""));
+            //address.setZipcode("68928313");
             address.setStreetNumber(pagamento.getEndereco().getNumero());
             billing.setAddress(address);
 
