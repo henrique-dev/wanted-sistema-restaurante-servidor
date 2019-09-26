@@ -164,6 +164,9 @@ public class ServicoPagamentoPagarme {
             System.out.println("Token do cartao: " + pagamento.getTokenCartao());
             transaction.setCardId("card_ck0g39zb500my4s6dg1xpdvpa");
             transaction.setCustomer(customer);
+            
+            System.out.println("Api key: " + PagarMe.getApiKey());
+            
             transaction.save();
         } catch (PagarMeException e) {
             e.printStackTrace();
