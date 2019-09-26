@@ -31,8 +31,9 @@ public class ServicoPagamentoPagarme {
     public static final String apiKey = "ak_test_VbiowWEdoiTrDtv6afJ7xmoYquJN9a";
     public static final String ENCRYPT_KEY = "ek_test_LJoeMvAv6o0pl4nfyTiVql2AHwsx49";
 
-    public Card salvarCartao(Card cartao) throws PagarMeException {
+    public Card salvarCartao() throws PagarMeException {
         PagarMe.init(apiKey);
+        Card cartao = new Card();
         cartao.setNumber("4018720572598048");
         cartao.setHolderName("Aardvark Silva");
         cartao.setExpiresAt("1122");
@@ -45,7 +46,8 @@ public class ServicoPagamentoPagarme {
         PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
-        transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
+        //transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
+        
         try {
             Customer customer = new Customer();
             customer.setType(Customer.Type.INDIVIDUAL);
@@ -87,6 +89,7 @@ public class ServicoPagamentoPagarme {
             shipping.setFee(0);
 
             Collection<Item> items = new ArrayList();
+            /*
             for (ItemPedidoFacil p : pagamento.getPedido().getItens()) {
                 Item item = new Item();
                 item.setId(String.valueOf(p.getId()));
@@ -96,7 +99,7 @@ public class ServicoPagamentoPagarme {
                 //item.setUnitPrice(Integer.parseInt(String.valueOf(p.getPreco()).replace(".", "")));
                 item.setUnitPrice(500);
                 items.add(item);
-            }
+            }*/
 
             transaction.setShipping(shipping);
             transaction.setBilling(billing);
