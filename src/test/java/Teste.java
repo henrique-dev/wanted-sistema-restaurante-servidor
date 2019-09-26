@@ -22,7 +22,7 @@ public class Teste {
         ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
         try {
             Card c = p.salvarCartao();
-            p.criarPagamento2("card_ck0h6sn9x01xtw06fog76r1vm");
+            p.criarPagamento2(c.getId());
             System.out.println(c);
         } catch (PagarMeException e) {
             e.printStackTrace();

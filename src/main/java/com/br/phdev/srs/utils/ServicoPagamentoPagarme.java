@@ -108,7 +108,8 @@ public class ServicoPagamentoPagarme {
         PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
-        //transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
+        transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
+        
         try {
 
             Customer customer = new Customer();
