@@ -494,8 +494,6 @@ public class ClienteController {
             }
         } catch (DAOException | PaymentException e) {
             e.printStackTrace();
-        } catch (PagarMeException e) {
-            e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

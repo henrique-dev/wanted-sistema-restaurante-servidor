@@ -104,7 +104,7 @@ public class ServicoPagamentoPagarme {
         return transaction.save();
     }
 
-    public Transaction criarPagamento(ExecutarPagamento pagamento) throws PagarMeException {
+    public Transaction criarPagamento(ExecutarPagamento pagamento) {
         PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
@@ -163,10 +163,11 @@ public class ServicoPagamentoPagarme {
             System.out.println("Token do cartao: " + pagamento.getTokenCartao());
             transaction.setCardId(pagamento.getTokenCartao());
             transaction.setCustomer(customer);
-        } catch (Exception e) {
+            transaction.save();
+        } catch (PagarMeException e) {
             e.printStackTrace();
         }
-        return transaction.save();
+        return transaction;
     }
 
 }
