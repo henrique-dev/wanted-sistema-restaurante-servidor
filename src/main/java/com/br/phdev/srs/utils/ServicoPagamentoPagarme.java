@@ -65,6 +65,8 @@ public class ServicoPagamentoPagarme {
             Collection<String> phones = new ArrayList();
             phones.add(pagamento.getCliente().getTelefone());
             customer.setPhoneNumbers(phones);
+            
+            System.out.println(pagamento.getEndereco());
 
             Billing billing = new Billing();
             billing.setName(pagamento.getEndereco().getDescricao());
@@ -74,7 +76,8 @@ public class ServicoPagamentoPagarme {
             address.setState("ap");
             address.setNeighborhood(pagamento.getEndereco().getBairro());
             address.setStreet(pagamento.getEndereco().getLogradouro());
-            address.setZipcode(pagamento.getEndereco().getCep().replace("-", ""));
+            //address.setZipcode(pagamento.getEndereco().getCep().replace("-", ""));
+            address.setZipcode("68928313");
             address.setStreetNumber(pagamento.getEndereco().getNumero());
             billing.setAddress(address);
 
