@@ -29,6 +29,7 @@ import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.TipoCupomDesconto;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
@@ -381,10 +382,10 @@ public class ClienteDAO extends BasicDAO {
         }
         return listaItens;
     }
-    
+
     public ItemPedido getItem(ItemPedido item, Cliente cliente) throws DAOException {
         checarConexao();
-        Item i = getItem((Item)item, cliente);
+        Item i = getItem((Item) item, cliente);
         item.setId(i.getId());
         item.setNome(i.getNome());
         item.setPreco(i.getPreco());
@@ -398,7 +399,7 @@ public class ClienteDAO extends BasicDAO {
         item.setTipos(i.getTipos());
         item.setComplementos(i.getComplementos());
         item.setIngredientes(i.getIngredientes());
-        item.setVariacoes(i.getVariacoes());   
+        item.setVariacoes(i.getVariacoes());
         return item;
     }
 
@@ -445,7 +446,7 @@ public class ClienteDAO extends BasicDAO {
                         + " WHERE item.id_item = ?";
                 try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
-                    ResultSet rs2 = stmt2.executeQuery();                    
+                    ResultSet rs2 = stmt2.executeQuery();
                     while (rs2.next()) {
                         Foto foto = new Foto();
                         foto.setId(rs2.getLong("id_arquivo"));
@@ -636,9 +637,9 @@ public class ClienteDAO extends BasicDAO {
         }
         List<FormaPagamento> formaPagamentos = null;
         String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, "
-                    + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
-                    + " FROM formapagamento, formapagamentos_favoritas "
-                    + " WHERE formapagamentos_favoritas.id_cliente = ?";
+                + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
+                + " FROM formapagamento, formapagamentos_favoritas "
+                + " WHERE formapagamentos_favoritas.id_cliente = ?";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
@@ -924,7 +925,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
         return confirmaPedido;
-    }    
+    }
 
     public void inserirPedido(Pedido pedido, Cliente cliente, String token) throws DAOException {
         checarConexao();
@@ -1080,9 +1081,9 @@ public class ClienteDAO extends BasicDAO {
                     cupom.setPercentual(rs.getBoolean("percentual"));
                     cupom.setValor(rs.getDouble("valor"));
                     pedido.setCupom(cupom);
-                }                
+                }
                 pedido.calcularPedido();
-                pedidos.add(pedido);                
+                pedidos.add(pedido);
             }
         } catch (SQLException e) {
             throw new DAOException(e, 200);
@@ -1134,6 +1135,54 @@ public class ClienteDAO extends BasicDAO {
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
+    }
+
+    public Pedido2 getPedidoPorToken(String token) throws DAOException, IOException {
+        checarConexao();
+        Pedido2 pedido = null;
+        String sql = "SELECT pedido.data, pedido.itens, pedido.precototal, pedido.estado, pedido.observacao_entrega, pedido.frete, "
+                + " formapagamento.descricao formapagamento_descricao, endereco.descricao endereco_descricao, pedido_estado.descricao, "
+                + " pedido.id_cupomdesconto, percentual, valor, codigo "
+                + " FROM pedido "
+                + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
+                + " LEFT JOIN formapagamento ON pedido.id_formapagamento = formapagamento.id_formapagamento "
+                + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
+                + " LEFT JOIN cupomdesconto ON pedido.id_cupomdesconto = cupomdesconto.id_cupomdesconto "
+                + " WHERE pedido.token = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setString(1, token);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                pedido = new Pedido2();
+                String time = LocalDateTime.parse(rs.getString("data"), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
+                pedido.setData(time);
+                pedido.setPrecoTotal(rs.getDouble("precototal"));
+                pedido.setFormaPagamento(new FormaPagamento(0, rs.getString("formapagamento_descricao")));
+                pedido.setObservacaoEntrega(rs.getString("observacao_entrega"));
+                pedido.setFrete(rs.getDouble("frete"));
+                pedido.setStatus(rs.getString("pedido_estado.descricao"));
+                Endereco endereco = new Endereco();
+                endereco.setId(-1);
+                endereco.setDescricao(rs.getString("endereco_descricao"));
+                pedido.setEndereco(endereco);
+
+                ObjectMapper mapeador = new ObjectMapper();
+                List<ItemPedido> itens = mapeador.readValue(rs.getString("itens"), new TypeReference<List<ItemPedido>>() {
+                });
+                pedido.setItens(itens);
+                if (rs.getObject("id_cupomdesconto") != null) {
+                    CupomDesconto2 cupom = new CupomDesconto2();
+                    cupom.setCodigo(rs.getString("codigo"));
+                    cupom.setPercentual(rs.getBoolean("percentual"));
+                    cupom.setValor(rs.getDouble("valor"));
+                    pedido.setCupom(cupom);
+                }
+                pedido.calcularPedido();
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+        return pedido;
     }
 
     public void cadastrarEndereco(Cliente cliente, Endereco endereco) throws DAOException {
@@ -1213,7 +1262,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public void cadastrarFormaPagamento(Cliente cliente, Cartao cartao) throws DAOException {
         checarConexao();
         if (cliente == null || cartao == null) {
@@ -1259,7 +1308,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public void favoritarFormaPagamento(Cliente cliente, FormaPagamento pagamento) throws DAOIncorrectData, DAOException {
         checarConexao();
         if (cliente == null || pagamento == null) {
@@ -1274,7 +1323,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
     }
-    
+
     public FormaPagamento getFormaPagamento(Cliente cliente, FormaPagamento formaPagamento) throws DAOIncorrectData, DAOException {
         checarConexao();
         if (cliente == null) {
@@ -1437,6 +1486,49 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOException(e, 200);
         }
         return cupom;
+    }
+
+    public void atualizarEstadoPedido2(Pedido2 pedido) throws DAOException {
+        checarConexao();
+        String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, pedido.getEstado());
+            stmt.setLong(2, pedido.getId());
+            stmt.execute();
+            sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle, id_cupomdesconto FROM pedido "
+                    + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
+                    + " WHERE id_pedido=? ";
+            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                stmt2.setLong(1, pedido.getId());
+                ResultSet rs = stmt2.executeQuery();
+                if (rs.next()) {
+                    if (rs.getInt("estado") == 11 && rs.getObject("id_cupomdesconto") != null) {
+                        sql = "UPDATE cupomdesconto_cliente SET usado = true, proxima_compra = false WHERE id_cliente = ? AND id_cupomdesconto = ?";
+                        try (PreparedStatement stmt3 = this.conexao.prepareStatement(sql)) {
+                            stmt3.setLong(1, rs.getLong("id_cliente"));
+                            stmt3.setLong(2, rs.getLong("id_cupomdesconto"));
+                            stmt3.execute();
+                        }
+                    }
+
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setCliente(new Cliente(rs.getLong("id_cliente")));
+                    notificacao.setMensagem("{\"id\":\"?\", \"tipo\":\"atualizacao_estado_pedido\", \"id_pedido\":" + pedido.getId() + ", "
+                            + " \"estado_id\":" + rs.getInt("estado") + ", "
+                            + " \"estado_descricao\" : \"" + rs.getString("pedido_estado.descricao") + "\", "
+                            + " \"estado_controle\" : \"" + rs.getString("pedido_estado.controle") + "\"}");
+
+                    sql = "INSERT INTO notificacao VALUES (default, ?, ?, false)";
+                    try (PreparedStatement stmt3 = this.conexao.prepareStatement(sql)) {
+                        stmt3.setLong(1, notificacao.getCliente().getId());
+                        stmt3.setString(2, notificacao.getMensagem());
+                        stmt3.execute();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
     }
 
 }

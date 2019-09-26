@@ -28,6 +28,7 @@ public class Pedido {
     private int estado;
     private String observacaoEntrega;
     private CupomDesconto cupom;
+    private String token;
 
     public Pedido() {
 
@@ -137,6 +138,14 @@ public class Pedido {
 
     public void setCupom(CupomDesconto cupom) {
         this.cupom = cupom;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }

@@ -39,6 +39,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import me.pagar.model.PagarMeException;
+import me.pagar.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -477,10 +478,11 @@ public class ClienteController {
                         System.out.println(formaPagamento);
                         if (formaPagamento.getHashId() != null) {
                             pagamento2.setTokenCartao(formaPagamento.getHashId());
-                            pagarme.criarPagamento(pagamento2);
+                            Transaction t = pagarme.criarPagamento(pagamento2);
                             System.out.println("Pagamento criado");
                             
                             pedido.setEstado(1);
+                            pedido.setToken(String.valueOf(t.getId()));
                             this.dao.inserirPedido(pedido, cliente, null);
                             confirmacaoPedido.setStatus(0);
                             sessao.setAttribute("pre-pedido-itens", null);

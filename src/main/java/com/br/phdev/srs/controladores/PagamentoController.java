@@ -16,15 +16,19 @@ import com.br.phdev.srs.jdbc.FabricaConexao;
 import com.br.phdev.srs.models.ExecutarPagamento;
 import com.br.phdev.srs.models.IPNMessage;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.utils.HttpUtils;
 import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
 import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import me.pagar.model.PagarMe;
@@ -223,9 +227,21 @@ public class PagamentoController {
     public ResponseEntity<String> notificarPagarMe(HttpServletRequest request) throws InterruptedException {        
         System.out.println("Notificação pagarme recebida");
         HttpUtils utils = new HttpUtils();
-        utils.showAttributes(request);
-        utils.showHeaders(request);
-        utils.showParams(request);
+        utils.showParams(request);        
+        String id = request.getParameterMap().get("transaction[id]")[0];        
+        try {
+            Pedido2 pedido = this.dao.getPedidoPorToken(id);
+            switch(request.getParameterMap().get("current_status")[0]) {
+                case "paid" :
+                    pedido.setEstado(4);
+                    this.dao.atualizarEstadoPedido2(pedido);
+                    break;
+            }            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.TEXT_HTML);
