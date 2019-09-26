@@ -162,7 +162,7 @@ public class ServicoPagamentoPagarme {
             transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
             transaction.setAmount(4640);
             System.out.println("Token do cartao: " + pagamento.getTokenCartao());
-            transaction.setCardId(pagamento.getTokenCartao());
+            transaction.setCardId("card_ck0g39zb500my4s6dg1xpdvpa");
             transaction.setCustomer(customer);
             transaction.save();
         } catch (PagarMeException e) {

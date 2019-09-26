@@ -1,4 +1,5 @@
 
+import com.br.phdev.srs.models.ExecutarPagamento;
 import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +23,10 @@ public class Teste {
         ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
         try {
             Card c = p.salvarCartao();
-            p.criarPagamento2(c.getId());
+            ExecutarPagamento pag = new ExecutarPagamento();
+            pag.setTokenCartao("card_ck0g39zb500my4s6dg1xpdvpa");
+            //p.criarPagamento2(c.getId());
+            p.criarPagamento(pag);
             System.out.println(c);
         } catch (PagarMeException e) {
             e.printStackTrace();
