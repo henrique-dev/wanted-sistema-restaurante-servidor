@@ -228,7 +228,9 @@ public class PagamentoController {
         System.out.println("Notificação pagarme recebida");
         HttpUtils utils = new HttpUtils();
         utils.showParams(request);        
-        String id = request.getParameterMap().get("transaction[id]")[0];        
+        String id = request.getParameterMap().get("transaction[id]")[0];
+        System.out.println(id);
+        System.out.println(request.getParameterMap().get("current_status")[0]);
         try {
             Pedido2 pedido = this.dao.getPedidoPorToken(id);
             switch(request.getParameterMap().get("current_status")[0]) {
