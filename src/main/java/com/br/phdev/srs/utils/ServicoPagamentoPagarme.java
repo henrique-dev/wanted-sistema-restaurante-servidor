@@ -93,7 +93,8 @@ public class ServicoPagamentoPagarme {
                 item.setQuantity(p.getQuantidade());
                 item.setTangible(Boolean.TRUE);
                 item.setTitle(p.getNome());
-                item.setUnitPrice(Integer.parseInt(String.valueOf(p.getPreco()).replace(".", "")));
+                //item.setUnitPrice(Integer.parseInt(String.valueOf(p.getPreco()).replace(".", "")));
+                item.setUnitPrice(500);
                 items.add(item);
             }
 
