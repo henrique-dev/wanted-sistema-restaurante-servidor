@@ -42,6 +42,7 @@ public class ServicoPagamentoPagarme {
     }
 
     public Transaction criarPagamento(ExecutarPagamento pagamento) throws PagarMeException {
+        PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
         //transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
