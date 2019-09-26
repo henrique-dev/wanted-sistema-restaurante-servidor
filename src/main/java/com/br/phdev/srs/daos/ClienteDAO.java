@@ -1289,6 +1289,7 @@ public class ClienteDAO extends BasicDAO {
                 formaPagamento.setHashId(rs.getString("hash_id"));
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException(e, 200);
         }
         return formaPagamento;
