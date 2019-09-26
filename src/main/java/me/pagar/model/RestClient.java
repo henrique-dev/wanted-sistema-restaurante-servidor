@@ -132,8 +132,12 @@ public class RestClient {
                 httpClient.setRequestMethod(this.method.toUpperCase());
                 httpClient.setDoInput(true);
                 httpClient.setDoOutput(false);
+                
+                System.out.println("HERE3");
 
                 setupSecureConnection(httpClient);
+                
+                System.out.println("HERE4");
 
                 if (headers.size() > 0) {
 
@@ -142,6 +146,8 @@ public class RestClient {
                     }
 
                 }
+                
+                System.out.println("HERE5");
 
             } catch (Exception e) {
                 throw PagarMeException.buildWithError(e);
