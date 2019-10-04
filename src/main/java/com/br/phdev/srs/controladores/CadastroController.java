@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -124,6 +125,16 @@ public class CadastroController {
         }
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @GetMapping("cadastro/termos-uso")
+    public String termosUso() {        
+        return "termos-uso";
+    }
+    
+    @GetMapping("cadastro/politica-privacidade")
+    public String politicaPrivacidade() {        
+        return "termos-uso";
     }
 
 }

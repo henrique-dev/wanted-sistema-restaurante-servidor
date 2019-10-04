@@ -639,10 +639,12 @@ public class ClienteDAO extends BasicDAO {
         String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, "
                 + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
                 + " FROM formapagamento, formapagamentos_favoritas "
-                + " WHERE formapagamentos_favoritas.id_cliente = ?";
+                + " WHERE (formapagamentos_favoritas.id_cliente = ? AND formapagamento.id_cliente = ?) "
+                + " OR (formapagamentos_favoritas.id_cliente = 0 AND formapagamento.id_cliente = 0) ";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
+            stmt.setLong(2, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             formaPagamentos = new ArrayList<>();
             while (rs.next()) {
@@ -728,8 +730,12 @@ public class ClienteDAO extends BasicDAO {
             }
             valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
             ip.setPrecoTotal(valorItem.doubleValue());
-            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade() == 0 ? 1 : ip.getQuantidade())));
+            if (ip.getQuantidade() <= 0) {
+                ip.setQuantidade(1);
+            }
+            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade())));
         }
+        confirmaPedido.setPrecoLiquido(valorTotal.doubleValue());
         if (confirmaPedido.getCupom() != null) {
             if (confirmaPedido.getCupom().getPercentual()) {
                 BigDecimal porcentagem = new BigDecimal(confirmaPedido.getCupom().getValor()).divide(new BigDecimal(100));
@@ -891,7 +897,7 @@ public class ClienteDAO extends BasicDAO {
                 for (ItemPedido ipf : confirmaPedido.getItens()) {
                     ItemPedido ip = new ItemPedido();
                     ip.setId(ipf.getId());
-                    ip = getItem(ip, cliente);
+                    ip = getItem(ipf, cliente);
                     ip.setQuantidade(ipf.getQuantidade());
                     for (Complemento c : ip.getComplementos()) {
                         for (Complemento cf : ipf.getComplementos()) {

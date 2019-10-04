@@ -64,5 +64,10 @@ public class Foto {
     public int hashCode() {
         return (int)this.id;
     }
+
+    @Override
+    public String toString() {
+        return "Foto{" + "id=" + id + ", arquivo=" + arquivo + ", tamanho=" + tamanho + '}';
+    }
     
 }

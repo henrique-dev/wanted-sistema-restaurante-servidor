@@ -19,6 +19,7 @@ public class ListaItens {
     private List<Genero> generos;
     private List<Item> itens;
     private List<Item> itensDia;
+    private List<Item> itensPromocao;
 
     public List<Genero> getGeneros() {
         return generos;
@@ -50,6 +51,14 @@ public class ListaItens {
 
     public void setItensDia(List<Item> itensDia) {
         this.itensDia = itensDia;
+    }
+
+    public List<Item> getItensPromocao() {
+        return itensPromocao;
+    }
+
+    public void setItensPromocao(List<Item> itensPromocao) {
+        this.itensPromocao = itensPromocao;
     }
     
 }
