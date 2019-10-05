@@ -134,7 +134,12 @@ public class CadastroController {
     
     @GetMapping("cadastro/politica-privacidade")
     public String politicaPrivacidade() {        
-        return "termos-uso";
+        return "politica-privacidade";
+    }
+    
+    @GetMapping("cadastro/politica-troca")
+    public String politicaTroca() {        
+        return "politica-troca";
     }
 
 }

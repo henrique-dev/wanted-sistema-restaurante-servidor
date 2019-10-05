@@ -8,7 +8,6 @@
 package com.br.phdev.srs.utils;
 
 import com.br.phdev.srs.models.ExecutarPagamento;
-import com.br.phdev.srs.models.ItemPedidoFacil;
 import java.util.ArrayList;
 import java.util.Collection;
 import me.pagar.model.Address;
@@ -30,9 +29,12 @@ public class ServicoPagamentoPagarme {
 
     public static final String apiKey = "ak_test_VbiowWEdoiTrDtv6afJ7xmoYquJN9a";
     public static final String ENCRYPT_KEY = "ek_test_LJoeMvAv6o0pl4nfyTiVql2AHwsx49";
-
-    public Card salvarCartao() throws PagarMeException {
+    
+    public ServicoPagamentoPagarme() {
         PagarMe.init(apiKey);
+    }
+
+    public Card salvarCartao() throws PagarMeException {        
         Card cartao = new Card();
         cartao.setNumber("4018720572598048");
         cartao.setHolderName("Aardvark Silva");
@@ -41,9 +43,12 @@ public class ServicoPagamentoPagarme {
         cartao.save();
         return cartao;
     }
+    
+    public Card getCartao(String hashID) throws PagarMeException {
+        return new Card().find(hashID);
+    }
 
-    public Transaction criarPagamento2(String token) throws PagarMeException {
-        PagarMe.init(apiKey);
+    public Transaction criarPagamento2(String token) throws PagarMeException {        
         Transaction transaction = new Transaction();
         try {
 
@@ -105,7 +110,6 @@ public class ServicoPagamentoPagarme {
     }
 
     public Transaction criarPagamento(ExecutarPagamento pagamento) {
-        PagarMe.init(apiKey);
         Transaction transaction = new Transaction();
 
         transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");

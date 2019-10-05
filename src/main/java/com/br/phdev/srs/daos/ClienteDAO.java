@@ -636,7 +636,7 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         List<FormaPagamento> formaPagamentos = null;
-        String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, "
+        String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, hash_id, "
                 + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
                 + " FROM formapagamento, formapagamentos_favoritas "
                 + " WHERE (formapagamentos_favoritas.id_cliente = ? AND formapagamento.id_cliente = ?) "
@@ -652,6 +652,7 @@ public class ClienteDAO extends BasicDAO {
                 formaPagamento.setId(rs.getInt("id_formapagamento"));
                 formaPagamento.setDescricao(rs.getString("descricao"));
                 formaPagamento.setFavorito(rs.getBoolean("favorito"));
+                formaPagamento.setHashId(rs.getString("hash_id"));
                 formaPagamentos.add(formaPagamento);
             }
         } catch (SQLException e) {

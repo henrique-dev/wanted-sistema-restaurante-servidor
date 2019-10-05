@@ -22,8 +22,6 @@ import com.br.phdev.srs.models.ListaPedidos;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
-import com.br.phdev.srs.models.Pedido2;
-import com.br.phdev.srs.models.Pedido3;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.fasterxml.jackson.core.JsonProcessingException;

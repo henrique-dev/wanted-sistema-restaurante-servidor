@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import me.pagar.model.Card;
 import me.pagar.model.PagarMeException;
 import me.pagar.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -667,7 +668,13 @@ public class ClienteController {
 
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             formaPagamentos = this.dao.getFormasPagamento(cliente);
-        } catch (DAOException e) {
+            ServicoPagamentoPagarme sp = new ServicoPagamentoPagarme();
+            for (FormaPagamento fp : formaPagamentos) {
+                Card cartao = sp.getCartao(fp.getHashId());
+                fp.setDescricao("**** **** **** " + cartao.getLastDigits());
+                fp.setBandeira(cartao.getBrand().name());
+            }
+        } catch (DAOException | PagarMeException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();

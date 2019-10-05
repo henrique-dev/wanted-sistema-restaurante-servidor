@@ -17,6 +17,7 @@ public class FormaPagamento {
     private boolean favorito;
     private String controle;
     private String hashId;
+    private String bandeira;
 
     public FormaPagamento() {
     }
@@ -77,5 +78,13 @@ public class FormaPagamento {
     public void setHashId(String hashId) {
         this.hashId = hashId;
     }
+
+    public String getBandeira() {
+        return bandeira;
+    }
+
+    public void setBandeira(String bandeira) {
+        this.bandeira = bandeira;
+    }        
 
 }
