@@ -14,8 +14,8 @@ import java.util.List;
  */
 public class ConfirmaPedido {
         
-    private Double precoTotal;
-    private Double precoLiquido;
+    private double precoTotal;
+    private double precoLiquido;
     private String observacaoEntrega;
     private Double frete;
     private List<ItemPedido> itens;

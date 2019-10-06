@@ -392,7 +392,7 @@ public class ClienteController {
     }
 
     @PostMapping(value = "cliente/pre-confirmar-pedido")
-    public ResponseEntity<ConfirmaPedido> preConfirmaPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao, HttpServletRequest req) {
+    public ResponseEntity<ConfirmaPedido> preConfirmaPedido(@RequestBody ConfirmaPedido confirmaPedido, HttpSession sessao) {
         HttpStatus httpStatus = HttpStatus.OK;
         try {
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
@@ -406,11 +406,9 @@ public class ClienteController {
                 sessao.setAttribute("pre-pedido-cupom", confirmaPedido.getCupom());
                 confirmaPedido.setMensagem(new Mensagem(100, "Pedido pré-confirmado"));
             } else {
-                confirmaPedido = new ConfirmaPedido();
                 confirmaPedido.setMensagem(new Mensagem(101, "Já existe um pedido em andamento"));
-                System.out.println(confirmaPedido.getMensagem());
             }
-        } catch (DAOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();
