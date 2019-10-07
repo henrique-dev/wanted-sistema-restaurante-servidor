@@ -629,6 +629,15 @@ public class ClienteController {
         Mensagem mensagem = new Mensagem();
         try {
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
+            cartao.setDescricao("Cartão de crédito - Pagarme");
+            try {
+                ServicoPagamentoPagarme sp = new ServicoPagamentoPagarme();
+                Card c = sp.getCartao(cartao.getHashId());
+                cartao.setDescricao("**** **** **** " + c.getLastDigits());
+                cartao.setBandeira(c.getBrand().name());
+            } catch (PagarMeException e) {
+                e.printStackTrace();
+            }
             this.dao.cadastrarFormaPagamento(cliente, cartao);
             mensagem.setCodigo(100);
             mensagem.setDescricao("Forma de pagamento cadastrado com sucesso");
@@ -666,13 +675,7 @@ public class ClienteController {
 
             Cliente cliente = (Cliente) sessao.getAttribute("cliente");
             formaPagamentos = this.dao.getFormasPagamento(cliente);
-            ServicoPagamentoPagarme sp = new ServicoPagamentoPagarme();
-            for (FormaPagamento fp : formaPagamentos) {
-                Card cartao = sp.getCartao(fp.getHashId());
-                fp.setDescricao("**** **** **** " + cartao.getLastDigits());
-                fp.setBandeira(cartao.getBrand().name());
-            }
-        } catch (DAOException | PagarMeException e) {
+        } catch (DAOException e) {
             e.printStackTrace();
         }
         HttpHeaders httpHeaders = new HttpHeaders();

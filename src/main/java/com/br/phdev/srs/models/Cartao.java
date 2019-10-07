@@ -8,6 +8,7 @@ public class Cartao {
 
     private String hashId;
     private String descricao;
+    private String bandeira;
 
     public String getHashId() {
         return hashId;
@@ -23,6 +24,14 @@ public class Cartao {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public String getBandeira() {
+        return bandeira;
+    }
+
+    public void setBandeira(String bandeira) {
+        this.bandeira = bandeira;
     }
 
 }

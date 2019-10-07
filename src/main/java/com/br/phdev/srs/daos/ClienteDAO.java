@@ -1276,12 +1276,13 @@ public class ClienteDAO extends BasicDAO {
         if (cliente == null || cartao == null) {
             throw new DAOIncorrectData(300);
         }
-        String sql = "INSERT INTO formapagamento VALUES (default, ?, ?, ?, ?)";
+        String sql = "INSERT INTO formapagamento VALUES (default, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setString(2, "PAGARME");
-            stmt.setString(3, "Cartao de credito - Pagarme");
+            stmt.setString(3, cartao.getDescricao());
             stmt.setString(4, cartao.getHashId());
+            stmt.setString(5, cartao.getBandeira());
             stmt.execute();
         } catch (SQLException e) {
             throw new DAOException(e, 200);
