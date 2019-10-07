@@ -640,7 +640,7 @@ public class ClienteDAO extends BasicDAO {
                 + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
                 + " FROM formapagamento, formapagamentos_favoritas "
                 + " WHERE (formapagamentos_favoritas.id_cliente = ? AND formapagamento.id_cliente = ?) "
-                + " OR (formapagamentos_favoritas.id_cliente = 0 AND formapagamento.id_cliente = ?) ";
+                + " OR (formapagamento.id_formapagamento = 0 AND formapagamentos_favoritas.id_cliente = ?) ";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
