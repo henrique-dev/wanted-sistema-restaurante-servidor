@@ -635,6 +635,7 @@ public class ClienteController {
                 Card c = sp.salvarCartao(cartao);
                 cartao.setDescricao("**** **** **** " + c.getLastDigits());
                 cartao.setBandeira(c.getBrand().name());
+                cartao.setHashId(c.getId());
             } catch (PagarMeException e) {
                 e.printStackTrace();
             }
