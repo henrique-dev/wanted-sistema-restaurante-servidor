@@ -632,7 +632,7 @@ public class ClienteController {
             cartao.setDescricao("Cartão de crédito - Pagarme");
             try {
                 ServicoPagamentoPagarme sp = new ServicoPagamentoPagarme();
-                Card c = sp.getCartao(cartao.getHashId());
+                Card c = sp.salvarCartao(cartao);
                 cartao.setDescricao("**** **** **** " + c.getLastDigits());
                 cartao.setBandeira(c.getBrand().name());
             } catch (PagarMeException e) {

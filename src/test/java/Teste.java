@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import me.pagar.model.Card;
 import me.pagar.model.PagarMe;
 import me.pagar.model.PagarMeException;
+import me.pagar.model.PagarMeRequest;
 import me.pagar.model.Transaction;
 
 /*
@@ -22,19 +23,19 @@ public class Teste {
     public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
+        
         try {
-            Card c = p.salvarCartao();
-            System.out.println(c);
-            ExecutarPagamento pag = new ExecutarPagamento();
-            pag.setTokenCartao("card_ck14136s503nuxj6ds0jo42zf");
-
-            ServicoPagamentoPagarme sp = new ServicoPagamentoPagarme();
-            Card card = sp.getCartao("card_ck19hhaz800xppo6dnphw4hv3");
+            //Card c = p.salvarCartao();
+            //System.out.println(c);
+            //ExecutarPagamento pag = new ExecutarPagamento();
+            //pag.setTokenCartao(c.getId());
+            //System.out.println(c.getId());
+            Card card = p.getCartao("card_ck1fv82cd08oupo6doqvza0xl");
             System.out.println(card);
             //System.out.println(cards);
             //p.criarPagamento2(c.getId());
-            Transaction t = p.criarPagamento(pag);
-            System.out.println(t);
+            //Transaction t = p.criarPagamento(pag);
+            //System.out.println(t);
         } catch (Exception e) {
             e.printStackTrace();
         }

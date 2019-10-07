@@ -7,6 +7,7 @@
  */
 package com.br.phdev.srs.utils;
 
+import com.br.phdev.srs.models.Cartao;
 import com.br.phdev.srs.models.ExecutarPagamento;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,14 +35,14 @@ public class ServicoPagamentoPagarme {
         PagarMe.init(apiKey);
     }
 
-    public Card salvarCartao() throws PagarMeException {        
-        Card cartao = new Card();
-        cartao.setNumber("4018720572598048");
-        cartao.setHolderName("Aardvark Silva");
-        cartao.setExpiresAt("1122");
-        cartao.setCvv(123);
-        cartao.save();
-        return cartao;
+    public Card salvarCartao(Cartao cartao) throws PagarMeException {        
+        Card c = new Card();
+        c.setNumber(cartao.getNumero());
+        c.setHolderName(cartao.getNome());
+        c.setExpiresAt(cartao.getValidade());
+        c.setCvv(cartao.getCvv());
+        c.save();
+        return c;
     }
     
     public Card getCartao(String hashID) throws PagarMeException {
