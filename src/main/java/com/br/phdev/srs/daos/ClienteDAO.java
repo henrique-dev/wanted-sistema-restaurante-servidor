@@ -636,15 +636,16 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         List<FormaPagamento> formaPagamentos = null;
-        String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, hash_id, "
+        String sql = "SELECT formapagamentos_favoritas.id_cliente, formapagamento.id_formapagamento, descricao, hash_id, bandeira, "
                 + " formapagamentos_favoritas.id_formapagamento, (formapagamento.id_formapagamento = formapagamentos_favoritas.id_formapagamento) favorito "
                 + " FROM formapagamento, formapagamentos_favoritas "
                 + " WHERE (formapagamentos_favoritas.id_cliente = ? AND formapagamento.id_cliente = ?) "
-                + " OR (formapagamentos_favoritas.id_cliente = 0 AND formapagamento.id_cliente = 0) ";
+                + " OR (formapagamentos_favoritas.id_cliente = 0 AND formapagamento.id_cliente = ?) ";
         // get_lista_formaspagamento
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             stmt.setLong(2, cliente.getId());
+            stmt.setLong(3, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             formaPagamentos = new ArrayList<>();
             while (rs.next()) {
@@ -652,7 +653,8 @@ public class ClienteDAO extends BasicDAO {
                 formaPagamento.setId(rs.getInt("id_formapagamento"));
                 formaPagamento.setDescricao(rs.getString("descricao"));
                 formaPagamento.setFavorito(rs.getBoolean("favorito"));
-                formaPagamento.setHashId(rs.getString("hash_id"));
+                formaPagamento.setBandeira(rs.getString("bandeira"));
+                //formaPagamento.setHashId(rs.getString("hash_id"));
                 formaPagamentos.add(formaPagamento);
             }
         } catch (SQLException e) {
