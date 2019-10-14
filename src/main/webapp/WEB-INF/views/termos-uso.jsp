@@ -1,9 +1,9 @@
 <%@page contentType="text/plain" pageEncoding="UTF-8"%>
 TERMOS E CONDIÇÕES
-Por favor, leia com atenção os termos e condições. Ao se cadastrar na Wanted você
-ESTÁ DE ACORDO COM AS CONDIÇÕES E TERMOS do App. Note que a recusa
-destes Termos do Website impedirá que você faça pedidos de produtos do nosso
-Website.
+Por favor, leia com atenção os termos e condições. Ao se cadastrar na Wanted 
+possuidora do CNPJ 29.950.578/0001-90, você ESTÁ DE ACORDO COM AS CONDIÇÕES E 
+TERMOS do App. Note que a recusa destes Termos do Website impedirá 
+que você faça pedidos de produtos do nosso Website.
 1. SERVIÇOS OFERECIDOS
 1.1 Este TERMO se aplica para regular o uso do serviço oferecido pela Wanted aos
 USUÁRIOS, qual seja, possibilitar a escolha, pelos USUÁRIOS, de seus
