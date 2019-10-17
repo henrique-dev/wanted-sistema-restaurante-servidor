@@ -52,6 +52,7 @@ public class ServicoPagamentoPagarme {
     
     public Transaction gerarRembolso(Pedido pedido) throws PagarMeException {
         Transaction transaction = new Transaction().find(pedido.getToken());
+        System.out.println("Valor: " +  Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
         transaction.refund(Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
         return transaction;
     }
