@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
 import me.pagar.model.PagarMeException;
+import me.pagar.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -344,7 +345,8 @@ public class GerenciadorController {
                 this.dao.atualizarEstadoPedido2(pedido);
                 if (pedido.getToken() != null && !pedido.getToken().equals("")) {
                     ServicoPagamentoPagarme pagamento = new ServicoPagamentoPagarme();
-                    pagamento.gerarRembolso(pedido);
+                    Transaction t = pagamento.gerarRembolso(pedido);
+                    System.out.println(t);
                 }
             }            
         } catch (DAOException | PagarMeException e) {

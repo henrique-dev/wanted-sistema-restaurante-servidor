@@ -86,10 +86,8 @@ public class PagamentoController {
             //pagamentoRecuperado.setTelefone(ep.getCliente().getTelefone());
             //pagamentoRecuperado.setTokenSessao(ep.getTokenSessao());
             pagamentoRecuperado.setTokenCartao(ep.getTokenCartao());
-            pagamentoRecuperado.setHashCliente(ep.getHashCliente());
-            System.out.println("HERE1");
-            String codigoPagamento = servicoPagamento.executarPagamentoCartaoCredito(pagamentoRecuperado);            
-            System.out.println("HERE2");
+            pagamentoRecuperado.setHashCliente(ep.getHashCliente());            
+            String codigoPagamento = servicoPagamento.executarPagamentoCartaoCredito(pagamentoRecuperado);                        
             if (codigoPagamento != null) {
                 if (this.dao.atualizarTokenPrePedido(ep.getTokenSessao(), codigoPagamento)) {
                     mensagem.setCodigo(100);

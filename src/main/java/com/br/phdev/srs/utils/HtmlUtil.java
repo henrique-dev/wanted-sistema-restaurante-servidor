@@ -25,8 +25,7 @@ public class HtmlUtil {
                     "</a>";
     }
     
-    public static String botao(String id, String descricao, String href, String classe, String icone) {
-        System.out.println("HERE");
+    public static String botao(String id, String descricao, String href, String classe, String icone) {        
         return "ola mubndo";
     }
     

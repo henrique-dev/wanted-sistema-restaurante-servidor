@@ -113,9 +113,7 @@ public class RestClient {
 
                 if (this.parameters.containsKey(AMOUNT) && this.parameters.size() == 1) {
                     builder.queryParam(AMOUNT, this.parameters.remove(AMOUNT));
-                }
-                
-                System.out.println("HERE1");
+                }                               
 
                 if (method.equalsIgnoreCase(HttpMethod.GET)) {
 
@@ -124,8 +122,6 @@ public class RestClient {
                     }
 
                 }
-                
-                System.out.println("HERE2");
 
                 httpClient = (HttpsURLConnection) builder
                         .build(this)
@@ -134,12 +130,8 @@ public class RestClient {
                 httpClient.setRequestMethod(this.method.toUpperCase());
                 httpClient.setDoInput(true);
                 httpClient.setDoOutput(false);
-                
-                System.out.println("HERE3");
 
                 setupSecureConnection(httpClient);
-                
-                System.out.println("HERE4");
 
                 if (headers.size() > 0) {
 
