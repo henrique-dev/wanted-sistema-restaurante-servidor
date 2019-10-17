@@ -29,8 +29,8 @@ import me.pagar.model.Transaction;
  */
 public class ServicoPagamentoPagarme {
 
-    public static final String apiKey = "ak_test_VbiowWEdoiTrDtv6afJ7xmoYquJN9a";
-    public static final String ENCRYPT_KEY = "ek_test_LJoeMvAv6o0pl4nfyTiVql2AHwsx49";
+    public static final String apiKey = "ak_live_W0ndrvfrr5lQMAkP0UAGYxw0NgFPen";
+    public static final String ENCRYPT_KEY = "ek_live_zIZULHGU8MABqVcfYhcySYc688O3bg";
     
     public ServicoPagamentoPagarme() {
         PagarMe.init(apiKey);
@@ -52,7 +52,7 @@ public class ServicoPagamentoPagarme {
     
     public Transaction gerarRembolso(Pedido pedido) throws PagarMeException {
         Transaction transaction = new Transaction().find(pedido.getToken());
-        System.out.println("Valor: " +  Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
+        //System.out.println("Valor: " +  Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
         transaction.refund(Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
         return transaction;
     }

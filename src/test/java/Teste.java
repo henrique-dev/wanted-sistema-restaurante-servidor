@@ -2,6 +2,7 @@
 import com.br.phdev.srs.models.ExecutarPagamento;
 import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import me.pagar.model.Card;
 import me.pagar.model.PagarMe;
@@ -23,6 +24,8 @@ public class Teste {
     public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
+        
+        System.out.println(new BigDecimal(5.5).toString());
         
         try {
             //Card c = p.salvarCartao();
