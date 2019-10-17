@@ -9,6 +9,7 @@ package com.br.phdev.srs.utils;
 
 import com.br.phdev.srs.models.Cartao;
 import com.br.phdev.srs.models.ExecutarPagamento;
+import com.br.phdev.srs.models.Pedido;
 import java.util.ArrayList;
 import java.util.Collection;
 import me.pagar.model.Address;
@@ -47,6 +48,12 @@ public class ServicoPagamentoPagarme {
     
     public Card getCartao(String hashID) throws PagarMeException {
         return new Card().find(hashID);
+    }
+    
+    public Transaction gerarRembolso(Pedido pedido) throws PagarMeException {
+        Transaction transaction = new Transaction().find(pedido.getToken());
+        transaction.refund(Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
+        return transaction;
     }
 
     public Transaction criarPagamento2(String token) throws PagarMeException {        

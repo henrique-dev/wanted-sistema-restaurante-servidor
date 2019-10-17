@@ -13,6 +13,7 @@ import com.br.phdev.srs.models.Arquivo;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.CupomDesconto;
+import com.br.phdev.srs.models.CupomDesconto2;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -26,6 +27,7 @@ import com.br.phdev.srs.models.ItemPedidoFacil;
 import com.br.phdev.srs.models.ListaPedidos;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
+import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Pedido3;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.TipoCupomDesconto;
@@ -315,6 +317,24 @@ public class GerenciadorDAO extends BasicDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DAOException(200);
+        }
+        return pedido;
+    }
+    
+    public Pedido getPedido(Pedido pedido) throws DAOException {
+        checarConexao();
+        String sql = "SELECT * FROM pedido "
+                + " WHERE pedido.id_pedido = ?";
+        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            stmt.setLong(1, pedido.getId());
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                pedido.setEstado(rs.getInt("estado"));
+                pedido.setToken(rs.getString("token"));
+                pedido.setPrecoTotal(rs.getDouble("precototal"));
+            }
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
         }
         return pedido;
     }

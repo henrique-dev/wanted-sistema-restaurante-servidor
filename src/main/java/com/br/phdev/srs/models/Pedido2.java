@@ -28,6 +28,13 @@ public class Pedido2 {
     private double frete;
     private Cliente cliente;
 
+    public Pedido2() {
+    }
+
+    public Pedido2(long id) {
+        this.id = id;
+    }
+
     public void calcularPedido() {
         BigDecimal valorTotal = new BigDecimal("0.00");
         for (ItemPedido ip : this.getItens()) {

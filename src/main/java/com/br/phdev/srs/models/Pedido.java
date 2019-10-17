@@ -34,6 +34,10 @@ public class Pedido {
 
     }
 
+    public Pedido(long id) {
+        this.id = id;
+    }
+
     public Pedido(long id, double precoTotal, Timestamp data, List<ItemPedidoFacil> itens, FormaPagamento formaPagamento, Endereco endereco, int estado, String observacaoEntrega) {
         this.id = id;
         this.precoTotal = precoTotal;

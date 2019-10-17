@@ -24,6 +24,7 @@ import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
+import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
+import me.pagar.model.PagarMeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -336,12 +338,16 @@ public class GerenciadorController {
         try {
             Admin admin = (Admin) sessao.getAttribute("admin");
             if (admin != null) {
-                Pedido pedido = new Pedido();
+                Pedido pedido = this.dao.getPedido(new Pedido(id));
                 pedido.setId(id);
                 pedido.setEstado(6);
                 this.dao.atualizarEstadoPedido2(pedido);
+                if (pedido.getToken() != null && !pedido.getToken().equals("")) {
+                    ServicoPagamentoPagarme pagamento = new ServicoPagamentoPagarme();
+                    pagamento.gerarRembolso(pedido);
+                }
             }            
-        } catch (DAOException e) {
+        } catch (DAOException | PagarMeException e) {
             e.printStackTrace();
         }
     }
