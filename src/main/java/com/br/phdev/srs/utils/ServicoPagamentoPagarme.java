@@ -184,7 +184,7 @@ public class ServicoPagamentoPagarme {
             System.out.println(transaction);
             
             transaction.save();
-        } catch (PagarMeException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return transaction;
