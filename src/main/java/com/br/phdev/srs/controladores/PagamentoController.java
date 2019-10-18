@@ -236,6 +236,10 @@ public class PagamentoController {
                     pedido.setEstado(4);
                     this.dao.atualizarEstadoPedido2(pedido);
                     break;
+                default :
+                    pedido.setEstado(3);
+                    this.dao.atualizarEstadoPedido2(pedido);
+                    break;
             }            
         } catch (DAOException e) {
             e.printStackTrace();
