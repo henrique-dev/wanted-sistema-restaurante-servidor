@@ -180,6 +180,9 @@ public class ServicoPagamentoPagarme {
             transaction.setAmount(Integer.parseInt(String.valueOf(pagamento.getPedido().getPrecoTotal()).replace(".", "")));            
             transaction.setCardId(pagamento.getTokenCartao());
             transaction.setCustomer(customer);
+            
+            System.out.println(transaction);
+            
             transaction.save();
         } catch (PagarMeException e) {
             e.printStackTrace();
