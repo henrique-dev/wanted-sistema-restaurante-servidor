@@ -25,7 +25,7 @@ public class Teste {
 
         ServicoPagamentoPagarme p = new ServicoPagamentoPagarme();
         
-        System.out.println(new BigDecimal(5.5).toString());
+        System.out.println(String.format("%.2f", 503.2));
         
         try {
             //Card c = p.salvarCartao();
@@ -33,8 +33,8 @@ public class Teste {
             //ExecutarPagamento pag = new ExecutarPagamento();
             //pag.setTokenCartao(c.getId());
             //System.out.println(c.getId());
-            Card card = p.getCartao("card_ck1fv82cd08oupo6doqvza0xl");
-            System.out.println(card);
+            //Card card = p.getCartao("card_ck1fv82cd08oupo6doqvza0xl");
+            //System.out.println(card);
             //System.out.println(cards);
             //p.criarPagamento2(c.getId());
             //Transaction t = p.criarPagamento(pag);

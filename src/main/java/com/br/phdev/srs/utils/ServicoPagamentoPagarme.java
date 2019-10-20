@@ -53,71 +53,9 @@ public class ServicoPagamentoPagarme {
 
     public Transaction gerarRembolso(Pedido pedido) throws PagarMeException {
         Transaction transaction = new Transaction().find(pedido.getToken());
-        //System.out.println("Valor: " +  Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
-        transaction.refund(Integer.parseInt(String.valueOf(pedido.getPrecoTotal()).replace(".", "")));
+        transaction.refund(Integer.parseInt(String.format("%.2f", pedido.getPrecoTotal()).replace(",", "")));        
         return transaction;
-    }
-
-    public Transaction criarPagamento2(String token) throws PagarMeException {
-        Transaction transaction = new Transaction();
-        try {
-
-            Customer customer = new Customer();
-            customer.setType(Customer.Type.INDIVIDUAL);
-            customer.setExternalId("1001");
-            customer.setName("Phineas Flynn");
-            customer.setBirthday("1999-07-09");
-            customer.setEmail("phineas@threestatearea.com");
-            customer.setCountry("br");
-
-            Collection<Document> documents = new ArrayList();
-            Document document = new Document();
-            document.setType(Document.Type.CPF);
-            document.setNumber("77551442758");
-            documents.add(document);
-            customer.setDocuments(documents);
-
-            Collection<String> phones = new ArrayList();
-            phones.add("+5511982657575");
-            customer.setPhoneNumbers(phones);
-
-            Billing billing = new Billing();
-            billing.setName("Phineas Flynn");
-            Address address = new Address();
-            address.setCity("Santo Andre");
-            address.setCountry("br");
-            address.setState("sp");
-            address.setNeighborhood("Parque Miami");
-            address.setStreet("Rua Rio Jari");
-            address.setZipcode("09133180");
-            address.setStreetNumber("7");
-            billing.setAddress(address);
-
-            Shipping shipping = new Shipping();
-            shipping.setAddress(address);
-            shipping.setName("Phineas Flynn");
-            shipping.setFee(3200);
-
-            Collection<Item> items = new ArrayList();
-            Item item = new Item();
-            item.setId("OX890");
-            item.setQuantity(12);
-            item.setTangible(Boolean.TRUE);
-            item.setTitle("Rockets");
-            item.setUnitPrice(120);
-
-            transaction.setShipping(shipping);
-            transaction.setBilling(billing);
-            transaction.setItems(items);
-            transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
-            transaction.setAmount(4640);
-            transaction.setCardId(token);
-            transaction.setCustomer(customer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return transaction.save();
-    }
+    }    
 
     public Transaction criarPagamento(ExecutarPagamento pagamento) {
         Transaction transaction = new Transaction();
@@ -167,14 +105,14 @@ public class ServicoPagamentoPagarme {
                 item.setQuantity(ipf.getQuantidade());
                 item.setTangible(Boolean.TRUE);
                 item.setTitle(ipf.getNome());
-                item.setUnitPrice(Integer.parseInt(String.valueOf(ipf.getPrecoTotal()).replace(".", "")));
+                item.setUnitPrice(Integer.parseInt(String.format("%.2f", ipf.getPrecoTotal()).replace(",", "")));
                 items.add(item);
             }
             
             transaction.setBilling(billing);
             transaction.setItems(items);
             transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
-            transaction.setAmount(Integer.parseInt(String.valueOf(pagamento.getPedido().getPrecoTotal()).replace(".", "")));            
+            transaction.setAmount(Integer.parseInt(String.format("%.2f", pagamento.getPedido().getPrecoTotal()).replace(",", "")));
             transaction.setCardId(pagamento.getTokenCartao());
             transaction.setCustomer(customer);
             
