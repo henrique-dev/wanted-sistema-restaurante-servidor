@@ -30,8 +30,8 @@ import me.pagar.model.Transaction;
  */
 public class ServicoPagamentoPagarme {
 
-    public static final String apiKey = "ak_live_W0ndrvfrr5lQMAkP0UAGYxw0NgFPen";
-    public static final String ENCRYPT_KEY = "ek_live_zIZULHGU8MABqVcfYhcySYc688O3bg";
+    public static final String apiKey = "ak_test_erLRvqWGTsyAFT5mUpnLgJmSh9zJHA";
+    public static final String ENCRYPT_KEY = "ek_test_Vd1rUsrFzUzwZxKCr662la4TSLj85M";
 
     public ServicoPagamentoPagarme() {
         PagarMe.init(apiKey);
