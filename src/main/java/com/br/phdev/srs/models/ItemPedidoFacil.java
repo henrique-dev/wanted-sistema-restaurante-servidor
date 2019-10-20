@@ -21,6 +21,7 @@ public class ItemPedidoFacil extends ItemFacil {
     public ItemPedidoFacil(ItemPedido itemPedido) {
         super(itemPedido);
         this.quantidade = itemPedido.getQuantidade();
+        this.precoTotal = itemPedido.getPrecoTotal();
     }
 
     public int getQuantidade() {
