@@ -144,6 +144,8 @@ public class ServicoPagamentoPagarme {
             Collection<String> phones = new ArrayList();
             phones.add(pagamento.getCliente().getTelefone());
             customer.setPhoneNumbers(phones);
+            
+            System.out.println(pagamento.getEndereco());
 
             Billing billing = new Billing();
             billing.setName(pagamento.getCliente().getNome());
