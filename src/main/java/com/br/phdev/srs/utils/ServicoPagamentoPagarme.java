@@ -53,7 +53,7 @@ public class ServicoPagamentoPagarme {
 
     public Transaction gerarRembolso(Pedido pedido) throws PagarMeException {
         Transaction transaction = new Transaction().find(pedido.getToken());
-        transaction.refund(Integer.parseInt(String.format("%.2f", pedido.getPrecoTotal()).replace(",", "")));        
+        transaction.refund(Integer.parseInt(String.format("%.2f", pedido.getPrecoTotal()).replace(",", "").replace(".", "")));        
         return transaction;
     }    
 
@@ -105,14 +105,14 @@ public class ServicoPagamentoPagarme {
                 item.setQuantity(ipf.getQuantidade());
                 item.setTangible(Boolean.TRUE);
                 item.setTitle(ipf.getNome());
-                item.setUnitPrice(Integer.parseInt(String.format("%.2f", ipf.getPrecoTotal()).replace(",", "")));
+                item.setUnitPrice(Integer.parseInt(String.format("%.2f", ipf.getPrecoTotal()).replace(",", "").replace(".", "")));
                 items.add(item);
             }
             
             transaction.setBilling(billing);
             transaction.setItems(items);
             transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
-            transaction.setAmount(Integer.parseInt(String.format("%.2f", pagamento.getPedido().getPrecoTotal()).replace(",", "")));
+            transaction.setAmount(Integer.parseInt(String.format("%.2f", pagamento.getPedido().getPrecoTotal()).replace(",", "").replace(".", "")));
             transaction.setCardId(pagamento.getTokenCartao());
             transaction.setCustomer(customer);
             
