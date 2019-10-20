@@ -598,16 +598,11 @@ public class ClienteDAO extends BasicDAO {
             throw new DAOIncorrectData(301);
         }
         Endereco enderecoRetorno = null;
-        String sql = "SELECT endereco.id_endereco, logradouro, bairro, complemento, numero, cidade, cep, descricao, "
-                + " IF(enderecos_favoritos.id_endereco = endereco.id_endereco, true, false)favorito "
-                + " FROM endereco "
-                + " RIGHT JOIN enderecos_favoritos ON enderecos_favoritos.id_cliente = ? "
-                + " WHERE endereco.id_cliente = ? AND endereco.id_endereco = ?";
+        String sql = "SELECT * FROM endereco "
+                + " WHERE endereco.id_endereco = ?";
         // get_endereco
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
-            stmt.setLong(1, cliente.getId());
-            stmt.setLong(2, cliente.getId());
-            stmt.setLong(3, endereco.getId());
+            stmt.setLong(1, endereco.getId());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 enderecoRetorno = new Endereco();
