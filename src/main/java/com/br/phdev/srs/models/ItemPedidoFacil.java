@@ -39,4 +39,9 @@ public class ItemPedidoFacil extends ItemFacil {
         this.precoTotal = precoTotal;
     }        
 
+    @Override
+    public String toString() {
+        return super.toString() + "\nItemPedidoFacil{" + "quantidade=" + quantidade + ", precoTotal=" + precoTotal + '}';
+    }
+
 }

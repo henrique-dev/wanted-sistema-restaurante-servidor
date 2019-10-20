@@ -167,6 +167,7 @@ public class ServicoPagamentoPagarme {
             Collection<Item> items = new ArrayList();
             for (ItemPedidoFacil ipf : pagamento.getPedido().getItens()) {
                 Item item = new Item();
+                System.out.println(ipf);
                 item.setId(String.valueOf(ipf.getId()));
                 item.setQuantity(ipf.getQuantidade());
                 item.setTangible(Boolean.TRUE);

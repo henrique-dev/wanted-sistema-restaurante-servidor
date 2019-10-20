@@ -87,5 +87,10 @@ public class ItemFacil {
     public void setIngredientes(Set<Ingrediente> ingredientes) {
         this.ingredientes = ingredientes;
     }        
+
+    @Override
+    public String toString() {
+        return "ItemFacil{" + "id=" + id + ", nome=" + nome + ", preco=" + preco + ", complementos=" + complementos + ", ingredientes=" + ingredientes + ", variacoes=" + variacoes + '}';
+    }
             
 }
