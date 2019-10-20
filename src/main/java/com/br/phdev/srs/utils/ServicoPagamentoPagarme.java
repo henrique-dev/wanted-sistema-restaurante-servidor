@@ -7,6 +7,7 @@
  */
 package com.br.phdev.srs.utils;
 
+import com.br.phdev.srs.exceptions.PaymentException;
 import com.br.phdev.srs.models.Cartao;
 import com.br.phdev.srs.models.ExecutarPagamento;
 import com.br.phdev.srs.models.ItemPedidoFacil;
@@ -57,7 +58,7 @@ public class ServicoPagamentoPagarme {
         return transaction;
     }    
 
-    public Transaction criarPagamento(ExecutarPagamento pagamento) {
+    public Transaction criarPagamento(ExecutarPagamento pagamento) throws PaymentException {
         Transaction transaction = new Transaction();
 
         transaction.setPostbackUrl("https://headred.com.br/wanted/pagamentos/notificar-pagarme");
@@ -120,7 +121,7 @@ public class ServicoPagamentoPagarme {
             
             transaction.save();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new PaymentException(e);
         }
         return transaction;
     }
