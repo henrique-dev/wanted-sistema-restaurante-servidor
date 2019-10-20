@@ -159,11 +159,6 @@ public class ServicoPagamentoPagarme {
             address.setStreetNumber(pagamento.getEndereco().getNumero());
             billing.setAddress(address);
 
-            Shipping shipping = new Shipping();
-            shipping.setAddress(address);
-            shipping.setName(pagamento.getCliente().getNome());
-            //shipping.setFee(3200);
-
             Collection<Item> items = new ArrayList();
             for (ItemPedidoFacil ipf : pagamento.getPedido().getItens()) {
                 Item item = new Item();
@@ -175,8 +170,7 @@ public class ServicoPagamentoPagarme {
                 item.setUnitPrice(Integer.parseInt(String.valueOf(ipf.getPrecoTotal()).replace(".", "")));
                 items.add(item);
             }
-
-            transaction.setShipping(shipping);
+            
             transaction.setBilling(billing);
             transaction.setItems(items);
             transaction.setPaymentMethod(Transaction.PaymentMethod.CREDIT_CARD);
