@@ -18,22 +18,18 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" >
         <property name="maxUploadSizePerFile" value="10485760" />
     </bean>    
-    <bean id="basicDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="basicDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://localhost:3306/restaurante_wanted?useTimezone=true&amp;serverTimezone=UTC&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
         <property name="username" value="root"/>
         <property name="password" value="root"/>
-        <property name="initialSize" value="10" />
-        <property name="maxActive" value="25" />
-        <property name="minIdle" value="10" /> 
+        <property name="initialSize" value="15" />
+        <property name="maxTotal" value="40" />
+        <property name="minIdle" value="25" /> 
         <property name="testOnBorrow" value="true" />
-        <property name="testOnReturn" value="true" />
-        <property name="testWhileIdle" value="true" />
         <property name="validationQuery" value="SELECT 1" />
-        <property name="timeBetweenEvictionRunsMillis" value="5000" />         
-        <property name="maxWait" value="-1" />          
-        
-        <property name="removeAbandoned" value="true" />
+        <property name="removeAbandonedOnBorrow" value="true" />
+        <property name="removeAbandonedTimeout" value="3" />
         
     </bean>
     <mvc:default-servlet-handler/>     

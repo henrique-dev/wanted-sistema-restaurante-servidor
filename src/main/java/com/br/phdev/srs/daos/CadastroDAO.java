@@ -15,13 +15,11 @@ import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import com.br.phdev.srs.utils.Util;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -30,17 +28,11 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class CadastroDAO {
-    
-    private Connection conexao;
+public class CadastroDAO extends BasicDAO {
 
     @Autowired
     CadastroDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        super(dataSource);
     }
 
     public MensagemCadastro verificarNumero(Cadastro cadastro) throws DAOException {        
@@ -52,7 +44,7 @@ public class CadastroDAO {
                 String sql = "SELECT nome, ativo, verificado, token_cadastro, token_cadastro_data, "
                         + " (MINUTE(TIMEDIFF(now(), token_cadastro_data)) * 60 + SECOND(TIMEDIFF(now(), token_cadastro_data))) tempo_atual "
                         + " FROM usuario WHERE nome=?";
-                PreparedStatement stmt = this.conexao.prepareStatement(sql);
+                PreparedStatement stmt = getConexao().prepareStatement(sql);
                 stmt.setString(1, cadastro.getTelefone());
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
@@ -99,7 +91,7 @@ public class CadastroDAO {
             switch (mensagem.getCodigo()) {
                 case 105:
                     sql = "INSERT INTO usuario VALUES (default, ?, '', null, ?, null, null, 0, 0, now())";
-                    try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
                         String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
                         stmt.setString(1, cadastro.getTelefone());                        
                         stmt.setString(2, token);
@@ -112,7 +104,7 @@ public class CadastroDAO {
                 case 104:
                 case 103:                    
                     sql = "UPDATE usuario set token_cadastro=?, token_cadastro_data=now() WHERE nome=?";
-                    try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
                         String token = ServicoGeracaoToken.gerarToken(cadastro.getTelefone(), 6);
                         stmt.setString(1, token);
                         stmt.setString(2, cadastro.getTelefone());
@@ -137,13 +129,13 @@ public class CadastroDAO {
             return null;
         }
         String sql = "SELECT id_usuario FROM usuario WHERE nome=? AND token_cadastro=?";        
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)){
             stmt.setString(1, cadastro.getTelefone());
             stmt.setString(2, cadastro.getCodigo());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 sql = "UPDATE usuario SET verificado=1, token_sessao=? WHERE id_usuario=?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setString(1, tokenSessao);
                     stmt2.setLong(2, rs.getLong("id_usuario"));
                     stmt2.execute();
@@ -190,7 +182,7 @@ public class CadastroDAO {
             String sql = "UPDATE usuario SET usuario.senha = ?, usuario.ativo = true, "
                     + " token_login_usuario = ?, token_login_segredo = ? "
                     + " WHERE usuario.id_usuario = ?";
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
                 stmt.setString(1, cadastro.getSenhaUsuario());
                 stmt.setString(2, tokenLoginUsuario);
                 stmt.setString(3, tokenLoginSegredo);
@@ -198,7 +190,7 @@ public class CadastroDAO {
                 stmt.execute();
             }
             sql = "INSERT INTO cliente VALUES (default, ?, ?, ?, ?, ?)";
-            try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement stmt = getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, cadastro.getNome());
                 stmt.setString(2, cadastro.getCpf());
                 stmt.setString(3, usuario.getNomeUsuario());
@@ -208,17 +200,17 @@ public class CadastroDAO {
                 ResultSet rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
                     sql = "INSERT INTO enderecos_favoritos VALUES (?,0)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, rs.getLong(1));
                         stmt2.execute();
                     }
                     sql = "INSERT INTO formapagamentos_favoritas VALUES (?,0)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, rs.getLong(1));
                         stmt2.execute();
                     }
                     sql = "INSERT INTO websocket VALUES (?,null)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, rs.getLong(1));
                         stmt2.execute();
                     }
@@ -238,7 +230,7 @@ public class CadastroDAO {
         
         Cliente cliente = null;
         String sql = "SELECT * FROM cliente WHERE id_usuario=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, usuario.getIdUsuario());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {

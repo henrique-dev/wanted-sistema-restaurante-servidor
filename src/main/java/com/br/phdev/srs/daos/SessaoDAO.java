@@ -14,13 +14,11 @@ import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,17 +26,11 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class SessaoDAO {
-    
-    private Connection conexao;
+public class SessaoDAO extends BasicDAO {        
     
     @Autowired
     SessaoDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        super(dataSource);
     }
     
     public Cliente autenticar(Usuario usuario) throws DAOException {
@@ -57,7 +49,7 @@ public class SessaoDAO {
             String sql = "SELECT cliente.id_usuario, cliente.id_cliente, cliente.nome, cliente.cpf, cliente.telefone, cliente.email "
                 + " FROM cliente "
                 + " WHERE cliente.id_usuario = (SELECT usuario.id_usuario FROM usuario WHERE usuario.nome = ? AND usuario.senha = ? AND usuario.ativo = true)";
-            PreparedStatement stmt = this.conexao.prepareStatement(sql);
+            PreparedStatement stmt = getConexao().prepareStatement(sql);
             stmt.setString(1, usuario.getNomeUsuario());
             stmt.setString(2, usuario.getSenhaUsuario());
             ResultSet rs = stmt.executeQuery();
@@ -87,7 +79,7 @@ public class SessaoDAO {
         }
         Admin admin = null;
         String sql = "SELECT * FROM usuario_admin WHERE nome=? AND senha=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)){
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)){
             stmt.setString(1, usuario.getNomeUsuario());
             stmt.setString(2, usuario.getSenhaUsuario());
             ResultSet rs = stmt.executeQuery();
@@ -108,7 +100,7 @@ public class SessaoDAO {
         
         String sql = "UPDATE usuario SET token_sessao = ?, token_login_usuario = ?, token_login_segredo = ? "
                 + " WHERE usuario.id_usuario = ?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setString(1, token1);
             String tokenNome = new ServicoGeracaoToken().gerarSHA256(usuario.getNomeUsuario());
             usuario.setNomeUsuario(tokenNome);
@@ -127,7 +119,7 @@ public class SessaoDAO {
     public void gerarSessao2(Usuario usuario, String token1) throws DAOException {
         
         String sql = "UPDATE usuario_admin SET token_sessao = ? WHERE usuario_admin.id_usuario = ?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setString(1, token1);
             stmt.setLong(2, usuario.getIdUsuario());            
             stmt.execute();
@@ -145,7 +137,7 @@ public class SessaoDAO {
             throw new DAOIncorrectData(301);
         }
         String sql = "UPDATE usuario SET token_sessao = null WHERE usuario.id_usuario = ?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, usuario.getIdUsuario());
             stmt.execute();
         } catch (SQLException e) {
@@ -158,7 +150,7 @@ public class SessaoDAO {
         if (sessaoId == null) {
             return false;
         }
-        try (PreparedStatement stmt = this.conexao.prepareStatement("SELECT id_usuario FROM usuario WHERE usuario.token_sessao = ?")) {
+        try (PreparedStatement stmt = getConexao().prepareStatement("SELECT id_usuario FROM usuario WHERE usuario.token_sessao = ?")) {
             stmt.setString(1, sessaoId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -186,7 +178,7 @@ public class SessaoDAO {
                 + " WHERE usuario.nome = ? "
                 + " AND usuario.token_login_usuario = ? "
                 + " AND usuario.token_login_segredo = ? ";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setString(1, telefone);
             stmt.setString(2, usuario);
             stmt.setString(3, segredo);

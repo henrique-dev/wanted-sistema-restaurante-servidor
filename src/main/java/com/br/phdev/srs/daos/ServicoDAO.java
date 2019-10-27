@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -34,23 +34,17 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Goncalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class ServicoDAO {
-
-    private Connection conexao;
+public class ServicoDAO extends BasicDAO {   
 
     @Autowired
     ServicoDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        super(dataSource);
     }
 
     public void confirmarRecebimentoNotificacao(Notificacao notificacao) {
 
         String sql = "UPDATE notificacao SET entregue=1 WHERE id_notificacao=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, notificacao.getId());
             stmt.execute();
         } catch (SQLException e) {
@@ -64,8 +58,7 @@ public class ServicoDAO {
         String sql = "SELECT * FROM notificacao "
                 + " LEFT JOIN websocket ON notificacao.id_cliente = websocket.id_cliente "
                 + " WHERE notificacao.entregue = 0 AND websocket.token != '' AND websocket.token IS NOT NULL";
-        System.out.println("HERE");
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Notificacao notificacao = new Notificacao();
@@ -92,7 +85,7 @@ public class ServicoDAO {
                 + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco "
                 + " WHERE pedido.estado IN (4,5,8,9,10)";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             List<Pedido2> pedidos = new ArrayList<>();
             Boolean pedidoPendente = false;
@@ -130,7 +123,7 @@ public class ServicoDAO {
             }
             notificacaoPedido.setPedidos(pedidos);
             sql = "SELECT * FROM websocket_admin WHERE id_usuario=1";
-            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                 ResultSet rs2 = stmt2.executeQuery();
                 if (rs2.next()) {
                     notificacaoPedido.setWebsocketId(rs2.getString("token"));

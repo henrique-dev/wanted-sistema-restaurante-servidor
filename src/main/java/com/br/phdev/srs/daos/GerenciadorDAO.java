@@ -48,7 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -57,17 +57,11 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class GerenciadorDAO {
-    
-    private Connection conexao;
+public class GerenciadorDAO extends BasicDAO {        
 
     @Autowired
     GerenciadorDAO(BasicDataSource dataSource) {
-        try {
-            this.conexao = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        super(dataSource);
     }    
 
     public List<Item> getItens() throws DAOException {
@@ -77,9 +71,11 @@ public class GerenciadorDAO {
                 + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
                 + " FROM item "
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero order by item.id_item, genero.nome";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
+            System.out.println(rs);
             while (rs.next()) {
+                System.out.println(rs.getLong("id_item"));
                 Item item = new Item();
                 item.setId(rs.getLong("id_item"));
                 item.setNome(rs.getString("nome"));
@@ -95,8 +91,8 @@ public class GerenciadorDAO {
                         + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
                         + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                    stmt2.setLong(1, rs.getLong("id_item"));
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
+                    stmt2.setLong(1, item.getId());
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Foto> fotos = new HashSet<>();
                     while (rs2.next()) {
@@ -113,8 +109,8 @@ public class GerenciadorDAO {
                         + " LEFT JOIN item_tipo ON item.id_item = item_tipo.id_item "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
-                    stmt2.setLong(1, rs.getLong("id_item"));
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
+                    stmt2.setLong(1, item.getId());
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Tipo> tipos = new HashSet<>();
                     while (rs2.next()) {
@@ -130,6 +126,7 @@ public class GerenciadorDAO {
                 itens.add(item);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DAOException("Erro ao recuperar informações", e, 200);
         }
         return itens;
@@ -140,7 +137,7 @@ public class GerenciadorDAO {
         List<Genero> generos = new ArrayList<>();
         String sql = "SELECT genero.id_genero, genero.nome FROM genero "
                 + " ORDER BY genero.nome";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Genero genero = new Genero();
@@ -158,7 +155,7 @@ public class GerenciadorDAO {
         
         List<Tipo> tipos = new ArrayList<>();
         String sql = "SELECT * FROM tipo ORDER BY nome";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Tipo tipo = new Tipo();
@@ -176,7 +173,7 @@ public class GerenciadorDAO {
         
         List<Complemento> complementos = new ArrayList<>();
         String sql = "SELECT * FROM complemento ORDER BY nome";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Complemento complemento = new Complemento();
@@ -195,7 +192,7 @@ public class GerenciadorDAO {
         
         List<Ingrediente> ingredientes = new ArrayList<>();
         String sql = "SELECT * FROM ingrediente ORDER BY nome";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Ingrediente ingrediente = new Ingrediente();
@@ -216,7 +213,7 @@ public class GerenciadorDAO {
                 + " LEFT JOIN usuario ON cliente.id_usuario = usuario.id_usuario "
                 + " WHERE cliente.telefone = usuario.nome AND id_cliente != 0"
                 + " ORDER BY id_cliente";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Cliente cliente = new Cliente();
@@ -242,7 +239,7 @@ public class GerenciadorDAO {
                 + " LEFT JOIN cliente ON pedido.id_cliente = cliente.id_cliente "
                 + " LEFT JOIN endereco ON pedido.id_endereco = endereco.id_endereco " 
                 + " WHERE pedido.estado IN (4,5,8,9,10)";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Pedido3 pedido = new Pedido3();
@@ -296,7 +293,7 @@ public class GerenciadorDAO {
                 + " LEFT JOIN endereco ende ON ped.id_endereco=ende.id_endereco "
                 + " LEFT JOIN cliente cli ON ped.id_cliente=cli.id_cliente "
                 + " LEFT JOIN formapagamento pag ON ped.id_formapagamento=pag.id_formapagamento ";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             pedido = new Pedido();
             while (rs.next()) {
@@ -331,7 +328,7 @@ public class GerenciadorDAO {
         
         String sql = "SELECT * FROM pedido "
                 + " WHERE pedido.id_pedido = ?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -350,12 +347,12 @@ public class GerenciadorDAO {
         String sql = "SELECT usuario.id_usuario, usuario.nome, now() data FROM usuario "
                 + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
                 + " WHERE id_cliente=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, cliente.getId());
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 sql = "UPDATE usuario set nome=? WHERE id_usuario=?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     String time = LocalDateTime.parse(rs.getString("data"),
                             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy-HH:mm"));
                     stmt2.setString(1, rs.getString("nome") + "?" + time);
@@ -375,7 +372,7 @@ public class GerenciadorDAO {
             throw new DAOException("Erro", 300);
         }
         String sql = "UPDATE websocket_admin SET token=? WHERE id_usuario=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setString(1, token);
             stmt.setLong(2, usuario.getIdUsuario());
             stmt.execute();
@@ -387,19 +384,19 @@ public class GerenciadorDAO {
     public void confirmarPedido(Pedido pedido) throws DAOException {
         
         String sql = "UPDATE pedido SET estado=5 WHERE id_pedido=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             stmt.execute();
             sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle, id_cupomdesconto FROM pedido "
                     + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                     + " WHERE id_pedido=? ";
-            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                 stmt2.setLong(1, pedido.getId());
                 ResultSet rs = stmt2.executeQuery();
                 if (rs.next()) {                    
                     if (rs.getInt("estado") == 5 && rs.getObject("id_cupomdesconto") != null) {
                         sql = "UPDATE cupomdesconto_cliente SET usado = true, proxima_compra = false WHERE id_cliente = ? AND id_cupomdesconto = ?";
-                        try (PreparedStatement stmt3 = this.conexao.prepareStatement(sql)) {
+                        try (PreparedStatement stmt3 = getConexao().prepareStatement(sql)) {
                             stmt3.setLong(1, rs.getLong("id_cliente"));
                             stmt3.setLong(2, rs.getLong("id_cupomdesconto"));
                             stmt3.execute();
@@ -434,19 +431,19 @@ public class GerenciadorDAO {
                 sql = "UPDATE pedido SET estado=(IF(estado < 11 AND estado != 5, estado + 1, (IF(estado = 5, 8, 11)))) WHERE id_pedido=?";
                 break;
         }        
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
             stmt.execute();
             sql = "SELECT id_cliente, estado, pedido_estado.descricao, pedido_estado.controle, id_cupomdesconto FROM pedido "
                     + " LEFT JOIN pedido_estado ON pedido.estado = pedido_estado.id_pedido_estado "
                     + " WHERE id_pedido=? ";
-            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                 stmt2.setLong(1, pedido.getId());
                 ResultSet rs = stmt2.executeQuery();
                 if (rs.next()) {                    
                     if (rs.getInt("estado") == 11 && rs.getObject("id_cupomdesconto") != null) {
                         sql = "UPDATE cupomdesconto_cliente SET usado = true, proxima_compra = false WHERE id_cliente = ? AND id_cupomdesconto = ?";
-                        try (PreparedStatement stmt3 = this.conexao.prepareStatement(sql)) {
+                        try (PreparedStatement stmt3 = getConexao().prepareStatement(sql)) {
                             stmt3.setLong(1, rs.getLong("id_cliente"));
                             stmt3.setLong(2, rs.getLong("id_cupomdesconto"));
                             stmt3.execute();
@@ -471,7 +468,7 @@ public class GerenciadorDAO {
         
         String sql = "INSERT INTO item (id_item, nome, descricao, preco, id_genero, modificavel, modificavel_ingrediente, tempo_preparo) "
                 + " values (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE nome=?, descricao=?, preco=?, id_genero=?, modificavel=?, modificavel_ingrediente=?, tempo_preparo=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setLong(1, item.getId());
             stmt.setString(2, item.getNome());
             stmt.setString(3, item.getDescricao());
@@ -498,39 +495,39 @@ public class GerenciadorDAO {
                     idItem = rs.getLong(1);
                 }
                 sql = "DELETE FROM item_tipo WHERE id_item=?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setLong(1, idItem);
                     stmt2.execute();
                 }
                 for (Tipo t : item.getTipos()) {
                     sql = "INSERT INTO item_tipo VALUES (?,?)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
                         stmt2.setLong(2, t.getId());
                         stmt2.execute();
                     }
                 }
                 sql = "DELETE FROM item_complemento WHERE id_item=?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setLong(1, idItem);
                     stmt2.execute();
                 }
                 for (Complemento c : item.getComplementos()) {
                     sql = "INSERT INTO item_complemento VALUES (?,?)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
                         stmt2.setLong(2, c.getId());
                         stmt2.execute();
                     }
                 }
                 sql = "DELETE FROM item_ingrediente WHERE id_item=?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setLong(1, idItem);
                     stmt2.execute();
                 }
                 for (Ingrediente i : item.getIngredientes()) {
                     sql = "INSERT INTO item_ingrediente VALUES (?,?)";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, idItem);
                         stmt2.setLong(2, i.getId());
                         stmt2.execute();
@@ -542,13 +539,13 @@ public class GerenciadorDAO {
                 for (Arquivo arquivo : item.getFotos()) {
                     if (arquivo.getId() == 0) {
                         sql = "INSERT INTO arquivo VALUES (default, null)";
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                        try (PreparedStatement stmt2 = getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                             stmt2.execute();
                             ResultSet rs2 = stmt2.getGeneratedKeys();
                             if (rs2.next()) {
                                 sa.salvar(arquivo.getMultipartFile(), rs2.getLong(1));
                                 sql = "INSERT INTO item_arquivo VALUES (?,?)";
-                                try (PreparedStatement stmt3 = this.conexao.prepareCall(sql)) {
+                                try (PreparedStatement stmt3 = getConexao().prepareCall(sql)) {
                                     stmt3.setLong(1, idItem);
                                     stmt3.setLong(2, rs2.getLong(1));
                                     stmt3.execute();
@@ -557,13 +554,13 @@ public class GerenciadorDAO {
                         }
                     } else if (arquivo.getId() < 0) {
                         sql = "DELETE FROM item_arquivo WHERE id_item=? AND id_arquivo=?";
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                             stmt2.setLong(1, idItem);
                             stmt2.setLong(2, arquivo.getId() * -1);
                             stmt2.execute();
                         }
                         sql = "DELETE FROM arquivo WHERE id_arquivo=?";
-                        try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                        try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                             stmt2.setLong(1, arquivo.getId() * -1);
                             stmt2.execute();
                         }
@@ -593,7 +590,7 @@ public class GerenciadorDAO {
                 + " FROM item "
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero "
                 + " WHERE item.id_item = ? ";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, item.getId());
             ResultSet rs = stmt.executeQuery();
             Set<Ingrediente> ingredientes = new HashSet<>();
@@ -614,7 +611,7 @@ public class GerenciadorDAO {
                         + " LEFT JOIN item_arquivo ON arquivo.id_arquivo = item_arquivo.id_arquivo "
                         + " LEFT JOIN item ON item_arquivo.id_item = item.id_item "
                         + " WHERE item.id_item = ?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Foto> fotos = new HashSet<>();
@@ -631,7 +628,7 @@ public class GerenciadorDAO {
                 sql = "SELECT tipo.id_tipo, tipo.nome FROM item_tipo "
                         + " LEFT JOIN tipo ON item_tipo.id_tipo = tipo.id_tipo "
                         + " WHERE item_tipo.id_item = ?";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setLong(1, rs.getLong("id_item"));
                     ResultSet rs2 = stmt2.executeQuery();
                     Set<Tipo> tipos = new HashSet<>();
@@ -651,7 +648,7 @@ public class GerenciadorDAO {
                             + " FROM complemento "
                             + " LEFT JOIN item_complemento ON complemento.id_complemento = item_complemento.id_complemento "
                             + " WHERE item_complemento.id_item = ?";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, item.getId());
                         ResultSet rs2 = stmt2.executeQuery();
                         complementos = new HashSet<>();
@@ -672,7 +669,7 @@ public class GerenciadorDAO {
                             + " FROM ingrediente "
                             + " LEFT JOIN item_ingrediente ON ingrediente.id_ingrediente = item_ingrediente.id_ingrediente "
                             + " WHERE item_ingrediente.id_item = ?";
-                    try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                    try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                         stmt2.setLong(1, item.getId());
                         ResultSet rs2 = stmt2.executeQuery();
                         ingredientes = new HashSet<>();
@@ -691,7 +688,7 @@ public class GerenciadorDAO {
                         + " FROM variacao "
                         + " LEFT JOIN grupo_variacao ON variacao.id_grupo_variacao = grupo_variacao.id_grupo_variacao "
                         + " WHERE id_item = ? ORDER BY grupo, ordem ASC";
-                try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+                try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                     stmt2.setLong(1, item.getId());
                     ResultSet rs2 = stmt2.executeQuery();
                     variacoes = new ArrayList<>();
@@ -729,7 +726,7 @@ public class GerenciadorDAO {
         
         List<TipoCupomDesconto> tipoCupomDescontos = new ArrayList<>();
         String sql = "SELECT id_cupomdesconto_tipo, descricao FROM cupomdesconto_tipo";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 TipoCupomDesconto tipo = new TipoCupomDesconto();
@@ -748,7 +745,7 @@ public class GerenciadorDAO {
     public boolean checarExistenciaCupomCodigo(String codigo) throws DAOException {
         
         String sql = "SELECT 1 FROM cupomdesconto WHERE codigo=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setString(1, codigo);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -766,7 +763,7 @@ public class GerenciadorDAO {
         List<CupomDesconto> cupomDescontos = new ArrayList<>();
         String sql = "SELECT * FROM cupomdesconto "
                 + "LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo ";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 CupomDesconto cupom = new CupomDesconto();
@@ -792,7 +789,7 @@ public class GerenciadorDAO {
         
         String sql = "INSERT INTO cupomdesconto (id_cupomdesconto_tipo, codigo, descricao, quantidade, validade, ativo, percentual, valor) "
                 + " VALUES (?,?,?,?,?,?,?,?)";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, cupom.getTipo().getId());
             stmt.setString(2, cupom.getCodigo());
             stmt.setString(3, cupom.getDescricao());
@@ -811,13 +808,13 @@ public class GerenciadorDAO {
     public void atualizarEstadoPedido(Pedido pedido) throws DAOException {
         
         String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setInt(1, pedido.getEstado());
             stmt.setLong(2, pedido.getId());
             stmt.execute();
 
             sql = "SELECT id_cliente FROM pedido WHERE id_pedido=?";
-            try (PreparedStatement stmt2 = this.conexao.prepareStatement(sql)) {
+            try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                 stmt2.setLong(1, pedido.getId());
                 ResultSet rs = stmt2.executeQuery();
                 if (rs.next()) {
@@ -836,7 +833,7 @@ public class GerenciadorDAO {
     public void adicionarNotificacao(Notificacao notificacao) throws DAOException {
         
         String sql = "INSERT INTO notificacao VALUES (default, ?, ?, false)";
-        try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             stmt.setLong(1, notificacao.getCliente().getId());
             stmt.setString(2, notificacao.getMensagem());
             stmt.execute();
