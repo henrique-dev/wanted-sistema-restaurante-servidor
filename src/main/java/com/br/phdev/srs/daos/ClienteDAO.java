@@ -30,7 +30,10 @@ import com.br.phdev.srs.models.GrupoVariacao;
 import com.br.phdev.srs.models.Ingrediente;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
+import com.br.phdev.srs.models.PerguntaSeguranca;
+import com.br.phdev.srs.models.RedefinicaoSenha;
 import com.br.phdev.srs.models.TipoCupomDesconto;
+import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.models.Variacao;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,7 +41,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,7 +50,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -764,45 +765,45 @@ public class ClienteDAO extends BasicDAO {
 
         try {
             if (confirmaPedido.getItens() == null) {
-            throw new DAOIncorrectData(300);
-        }
-        if (confirmaPedido.getItens().isEmpty()) {
-            throw new DAOIncorrectData(301);
-        }
-        RepositorioProdutos repositorioPrecos = RepositorioProdutos.getInstancia();
-        repositorioPrecos.carregar(getConexao());
-        BigDecimal valorTotal = new BigDecimal("0.00");
-        for (ItemPedido ip : confirmaPedido.getItens()) {
-            repositorioPrecos.preencherItemFacil(ip);
-            BigDecimal valorItem = new BigDecimal("0.00");
-            if (ip.getComplementos() != null) {
-                for (Complemento c : ip.getComplementos()) {
-                    repositorioPrecos.preencherComplementoFacil(c);
-                    valorItem = valorItem.add(new BigDecimal(String.valueOf(c.getPreco())));
-                }
+                throw new DAOIncorrectData(300);
             }
-            if (ip.getVariacoes() != null) {
-                List<GrupoVariacao> variacoes = ip.getVariacoes();
-                repositorioPrecos.checarVariacoes(variacoes, ip);
-                for (GrupoVariacao gv : variacoes) {
-                    if (gv.getVariacoes() != null) {
-                        for (Variacao v : gv.getVariacoes()) {
-                            repositorioPrecos.preecherVariacao(v);
-                            valorItem = valorItem.add(new BigDecimal(String.valueOf(v.getPreco())));
+            if (confirmaPedido.getItens().isEmpty()) {
+                throw new DAOIncorrectData(301);
+            }
+            RepositorioProdutos repositorioPrecos = RepositorioProdutos.getInstancia();
+            repositorioPrecos.carregar(getConexao());
+            BigDecimal valorTotal = new BigDecimal("0.00");
+            for (ItemPedido ip : confirmaPedido.getItens()) {
+                repositorioPrecos.preencherItemFacil(ip);
+                BigDecimal valorItem = new BigDecimal("0.00");
+                if (ip.getComplementos() != null) {
+                    for (Complemento c : ip.getComplementos()) {
+                        repositorioPrecos.preencherComplementoFacil(c);
+                        valorItem = valorItem.add(new BigDecimal(String.valueOf(c.getPreco())));
+                    }
+                }
+                if (ip.getVariacoes() != null) {
+                    List<GrupoVariacao> variacoes = ip.getVariacoes();
+                    repositorioPrecos.checarVariacoes(variacoes, ip);
+                    for (GrupoVariacao gv : variacoes) {
+                        if (gv.getVariacoes() != null) {
+                            for (Variacao v : gv.getVariacoes()) {
+                                repositorioPrecos.preecherVariacao(v);
+                                valorItem = valorItem.add(new BigDecimal(String.valueOf(v.getPreco())));
+                            }
                         }
                     }
                 }
+                valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
+                ip.setPrecoTotal(valorItem.doubleValue());
+                valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade() == 0 ? 1 : ip.getQuantidade())));
             }
-            valorItem = valorItem.add(new BigDecimal(String.valueOf(ip.getPreco())));
-            ip.setPrecoTotal(valorItem.doubleValue());
-            valorTotal = valorTotal.add(valorItem.multiply(new BigDecimal(ip.getQuantidade() == 0 ? 1 : ip.getQuantidade())));
-        }
-        confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
+            confirmaPedido.setPrecoTotal(valorTotal.doubleValue());
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DAOException(e, 200);
         }
-        
+
     }
 
     public List<ItemPedido> recuperarPrePredido(Cliente cliente) throws DAOException {
@@ -1548,6 +1549,35 @@ public class ClienteDAO extends BasicDAO {
         } catch (SQLException e) {
             throw new DAOException(e, 200);
         }
+    }
+
+    public boolean alterarSenha(RedefinicaoSenha redefinicaoSenha, Usuario usuario) throws DAOException {
+        if (redefinicaoSenha == null) {
+            return false;
+        }
+        String sql = "SELECT 1 FROM usuario WHERE id_usuario=? AND senha=?";
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
+            stmt.setLong(1, usuario.getIdUsuario());
+            stmt.setString(2, redefinicaoSenha.getSenhaAntiga());
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {                
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        sql = "UPDATE usuario SET senha=? WHERE id_usuario=?";
+        System.out.println("HERE");
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
+            stmt.setString(1, redefinicaoSenha.getSenha());
+            stmt.setLong(2, usuario.getIdUsuario());
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+        return true;
     }
 
 }

@@ -23,11 +23,10 @@ public class ServicoSms {
     private static final String ACCOUNT_SID = "AC3d4416535a462a996a081251985f1094";
     private static final String AUTH_TOKEN = "05fa8c5e7f6df0166287430633645864";
 
-    public void enviarMensagem(String numero, String token) {
+    public void enviarMensagem(String numero, String msg) {
         try {
             Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
-            Message sms = Message.creator(new PhoneNumber(numero), new PhoneNumber("+12084178988"),
-                    "Bem vindo a Wanted. Insira o código " + token + " para ativar sua conta.").create();
+            Message sms = Message.creator(new PhoneNumber(numero), new PhoneNumber("+12084178988"),msg).create();
         } catch (ApiException e) {
             e.printStackTrace();
         }

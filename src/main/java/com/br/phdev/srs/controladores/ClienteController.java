@@ -29,6 +29,9 @@ import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.TokenAlerta;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.PerguntaSeguranca;
+import com.br.phdev.srs.models.RedefinicaoSenha;
+import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
 import com.br.phdev.srs.utils.ServicoPagamentoPagSeguro;
 import com.br.phdev.srs.utils.ServicoPagamentoPagarme;
@@ -36,6 +39,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import me.pagar.model.Card;
@@ -693,6 +697,28 @@ public class ClienteController {
             this.dao.favoritarFormaPagamento(cliente, pagamento);
             mensagem.setCodigo(100);
             mensagem.setDescricao("Forma de pagamento favoritada com sucesso");
+        } catch (DAOException e) {
+            mensagem.setCodigo(e.codigo);
+            mensagem.setDescricao(e.getMessage());
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, httpStatus);
+    }
+
+    @PostMapping("cliente/redefinir-senha")
+    public ResponseEntity<Mensagem> redefinirSenha(@RequestBody RedefinicaoSenha redefinicaoSenha, HttpSession sessao) {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Mensagem mensagem = new Mensagem();
+        try {
+            Usuario usuario = (Usuario) sessao.getAttribute("usuario");
+            if (this.dao.alterarSenha(redefinicaoSenha, usuario)) {
+                mensagem.setCodigo(100);
+                mensagem.setDescricao("Senha alterada com sucesso");
+            } else {
+                mensagem.setCodigo(101);
+                mensagem.setDescricao("Erro ao alterar senha");
+            }
         } catch (DAOException e) {
             mensagem.setCodigo(e.codigo);
             mensagem.setDescricao(e.getMessage());

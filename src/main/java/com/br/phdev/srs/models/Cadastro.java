@@ -5,18 +5,21 @@
  */
 package com.br.phdev.srs.models;
 
+import java.util.Set;
+
 /**
  *
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 public class Cadastro {
-    
+
     private String nome;
     private String cpf;
     private String telefone;
-    private String email;   
+    private String email;
     private String senhaUsuario;
     private String codigo;
+    private Set<PerguntaSeguranca> perguntasSeguranca;
 
     public String getNome() {
         return nome;
@@ -56,7 +59,7 @@ public class Cadastro {
 
     public void setSenhaUsuario(String senhaUsuario) {
         this.senhaUsuario = senhaUsuario;
-    }        
+    }
 
     public String getCodigo() {
         return codigo;
@@ -64,11 +67,19 @@ public class Cadastro {
 
     public void setCodigo(String codigo) {
         this.codigo = codigo;
-    }        
+    }
+
+    public Set<PerguntaSeguranca> getPerguntasSeguranca() {
+        return perguntasSeguranca;
+    }
+
+    public void setPerguntasSeguranca(Set<PerguntaSeguranca> perguntasSeguranca) {
+        this.perguntasSeguranca = perguntasSeguranca;
+    }
 
     @Override
     public String toString() {
         return "Cadastro{" + "nome=" + nome + ", cpf=" + cpf + ", telefone=" + telefone + ", email=" + email + ", senhaUsuario=" + senhaUsuario + ", codigo=" + codigo + '}';
     }
-    
+
 }

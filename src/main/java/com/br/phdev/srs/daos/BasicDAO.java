@@ -11,15 +11,18 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 public class BasicDAO {
     
-    private BasicDataSource dataSource;
+    final private BasicDataSource dataSource;
+    private Connection conexao;
 
     public BasicDAO(BasicDataSource dataSource) {
         this.dataSource = dataSource;
     }
     
     protected Connection getConexao() throws SQLException {
-        Connection con = this.dataSource.getConnection();
-        return con;
+        if (this.conexao == null || this.conexao.isClosed()) {
+            this.conexao = this.dataSource.getConnection();
+        }        
+        return this.conexao;
     }
     
 }

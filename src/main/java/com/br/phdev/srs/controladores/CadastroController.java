@@ -12,11 +12,15 @@ import com.br.phdev.srs.exceptions.DAOException;
 import com.br.phdev.srs.models.Cadastro;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Mensagem;
+import com.br.phdev.srs.models.PerguntaSeguranca;
+import com.br.phdev.srs.models.RedefinicaoSenha;
 import com.br.phdev.srs.models.Usuario;
 import com.br.phdev.srs.utils.ServicoGeracaoToken;
 import com.br.phdev.srs.utils.ServicoSms;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -62,7 +66,7 @@ public class CadastroController {
         try {
             mensagem = this.dao.enviarCodigoAtivacao(cadastro);
             if (mensagem.getCodigo() == 100) {
-                new ServicoSms().enviarMensagem(cadastro.getTelefone(), mensagem.getDescricao());
+                new ServicoSms().enviarMensagem(cadastro.getTelefone(), "Bem vindo a Wanted. Insira o código " + mensagem.getDescricao() + " para ativar sua conta.");
                 mensagem.setDescricao("Sms enviado");
             }
         } catch (DAOException e) {
@@ -126,6 +130,61 @@ public class CadastroController {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
     }
+    
+    @PostMapping("cadastro/perguntas-seguranca")
+    public ResponseEntity<List<PerguntaSeguranca>> perguntasSeguranca(HttpSession sessao) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        List<PerguntaSeguranca> perguntas = new ArrayList<>();
+        try {
+            Usuario usuario = (Usuario) sessao.getAttribute("usuario");
+            if (usuario != null) {
+                perguntas = this.dao.getPerguntasSeguranca();
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(perguntas, httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("cadastro/enviar-codigo-redefinir-senha")
+    public ResponseEntity<Mensagem> enviarCodigoRedefinirSenha(@RequestBody Cadastro cadastro) {
+        Mensagem mensagem = new Mensagem();
+        try {
+            mensagem = this.dao.enviarCodigoRedefinirSenha(cadastro);
+            if (mensagem.getCodigo() == 100) {
+                new ServicoSms().enviarMensagem(cadastro.getTelefone(), "Redefinição de senha da sua conta Wanted. Insira o código " + mensagem.getDescricao() + 
+                        " no aplicativo para continuar com a redefinição de senha.");
+                mensagem.setDescricao("Sms enviado");
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(e.codigo);
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    @PostMapping("cadastro/validar-codigo-redefinir-senha")
+    public ResponseEntity<Mensagem> validarCodigoRedefinirSenha(@RequestBody RedefinicaoSenha redefinicaoSenha) {
+        Mensagem mensagem = new Mensagem();
+        try {
+            mensagem = this.dao.redefinirSenha(redefinicaoSenha);
+        } catch (DAOException e) {
+            e.printStackTrace();
+            mensagem.setCodigo(e.codigo);
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }
+    
+    /*@PostMapping("cadastro/recuperar-senha")
+    public ResponseEntity<Mensagem> recuperarSenha(HttpSession sessao) {
+        
+        return new ResponseEntity<>(mensagem, httpHeaders, HttpStatus.OK);
+    }*/
     
     @GetMapping("cadastro/termos-uso")
     public String termosUso() {        

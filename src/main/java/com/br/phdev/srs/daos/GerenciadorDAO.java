@@ -73,9 +73,7 @@ public class GerenciadorDAO extends BasicDAO {
                 + " LEFT JOIN genero ON item.id_genero = genero.id_genero order by item.id_item, genero.nome";
         try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
-            System.out.println(rs);
             while (rs.next()) {
-                System.out.println(rs.getLong("id_item"));
                 Item item = new Item();
                 item.setId(rs.getLong("id_item"));
                 item.setNome(rs.getString("nome"));
