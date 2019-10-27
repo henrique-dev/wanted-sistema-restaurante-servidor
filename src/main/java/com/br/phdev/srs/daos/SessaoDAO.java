@@ -18,7 +18,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -27,15 +28,21 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class SessaoDAO extends BasicDAO {
+public class SessaoDAO {
+    
+    private Connection conexao;
     
     @Autowired
     SessaoDAO(BasicDataSource dataSource) {
-        super(dataSource);
+        try {
+            this.conexao = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     public Cliente autenticar(Usuario usuario) throws DAOException {
-        checarConexao();
+        
         if (usuario == null) {
             throw new DAOIncorrectData(300);
         }
@@ -68,7 +75,7 @@ public class SessaoDAO extends BasicDAO {
     }
     
     public Admin autenticar2(Usuario usuario) throws DAOException {
-        checarConexao();
+        
         if (usuario == null) {
             throw new DAOIncorrectData(300);
         }
@@ -98,7 +105,7 @@ public class SessaoDAO extends BasicDAO {
     }
 
     public void gerarSessao(Usuario usuario, String token1) throws DAOException {
-        checarConexao();
+        
         String sql = "UPDATE usuario SET token_sessao = ?, token_login_usuario = ?, token_login_segredo = ? "
                 + " WHERE usuario.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -118,7 +125,7 @@ public class SessaoDAO extends BasicDAO {
     }
     
     public void gerarSessao2(Usuario usuario, String token1) throws DAOException {
-        checarConexao();
+        
         String sql = "UPDATE usuario_admin SET token_sessao = ? WHERE usuario_admin.id_usuario = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, token1);
@@ -130,7 +137,7 @@ public class SessaoDAO extends BasicDAO {
     }
 
     public void sairSessao(Usuario usuario, String token) throws DAOException {
-        checarConexao();
+        
         if (usuario == null) {
             return;
         }
@@ -147,7 +154,7 @@ public class SessaoDAO extends BasicDAO {
     }
     
     public boolean verificarSessao(String sessaoId) throws DAOException {
-        checarConexao();
+        
         if (sessaoId == null) {
             return false;
         }
@@ -168,7 +175,7 @@ public class SessaoDAO extends BasicDAO {
     }
     
     public Cliente verificarTokenLogin(String telefone, String usuario, String segredo) throws DAOException {
-        checarConexao();
+        
         Cliente cliente = null;
         if (usuario == null || segredo == null) {
             return cliente;

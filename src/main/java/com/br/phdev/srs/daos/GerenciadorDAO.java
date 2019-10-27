@@ -13,7 +13,6 @@ import com.br.phdev.srs.models.Arquivo;
 import com.br.phdev.srs.models.Cliente;
 import com.br.phdev.srs.models.Complemento;
 import com.br.phdev.srs.models.CupomDesconto;
-import com.br.phdev.srs.models.CupomDesconto2;
 import com.br.phdev.srs.models.Endereco;
 import com.br.phdev.srs.models.FormaPagamento;
 import com.br.phdev.srs.models.Foto;
@@ -27,7 +26,6 @@ import com.br.phdev.srs.models.ItemPedidoFacil;
 import com.br.phdev.srs.models.ListaPedidos;
 import com.br.phdev.srs.models.Notificacao;
 import com.br.phdev.srs.models.Pedido;
-import com.br.phdev.srs.models.Pedido2;
 import com.br.phdev.srs.models.Pedido3;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.models.TipoCupomDesconto;
@@ -38,6 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,7 +47,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.dbcp2.BasicDataSource;
+import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -57,15 +57,21 @@ import org.springframework.stereotype.Repository;
  * @author Paulo Henrique Gonçalves Bacelar <henrique.phgb@gmail.com>
  */
 @Repository
-public class GerenciadorDAO extends BasicDAO {
+public class GerenciadorDAO {
+    
+    private Connection conexao;
 
     @Autowired
     GerenciadorDAO(BasicDataSource dataSource) {
-        super(dataSource);
+        try {
+            this.conexao = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }    
 
     public List<Item> getItens() throws DAOException {
-        checarConexao();
+        
         List<Item> itens = new ArrayList<>();
         String sql = "SELECT item.id_item, item.nome, item.preco, item.descricao, genero.id_genero, genero.nome genero, "
                 + " item.modificavel, item.modificavel_ingrediente, item.tempo_preparo "
@@ -130,7 +136,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public List<Genero> getGeneros() throws DAOException {
-        checarConexao();
+        
         List<Genero> generos = new ArrayList<>();
         String sql = "SELECT genero.id_genero, genero.nome FROM genero "
                 + " ORDER BY genero.nome";
@@ -149,7 +155,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public List<Tipo> getTipos() throws DAOException {
-        checarConexao();
+        
         List<Tipo> tipos = new ArrayList<>();
         String sql = "SELECT * FROM tipo ORDER BY nome";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -167,7 +173,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public List<Complemento> getComplementos() throws DAOException {
-        checarConexao();
+        
         List<Complemento> complementos = new ArrayList<>();
         String sql = "SELECT * FROM complemento ORDER BY nome";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -186,7 +192,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public List<Ingrediente> getIngredientes() throws DAOException {
-        checarConexao();
+        
         List<Ingrediente> ingredientes = new ArrayList<>();
         String sql = "SELECT * FROM ingrediente ORDER BY nome";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -204,7 +210,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public List<Cliente> getClientes() throws DAOException {
-        checarConexao();
+        
         List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT * FROM cliente "
                 + " LEFT JOIN usuario ON cliente.id_usuario = usuario.id_usuario "
@@ -227,7 +233,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public ListaPedidos getPedidos() throws DAOException { 
-        checarConexao();
+        
         ListaPedidos listaPedidos = new ListaPedidos();
         List<Pedido3> pedidos = new ArrayList<>();
         List<Pedido3> pedidosPendentes = new ArrayList<>();
@@ -284,7 +290,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public Pedido getPedido() throws DAOException, IOException {
-        checarConexao();
+        
         Pedido pedido = null;
         String sql = "SELECT * FROM pedido ped"
                 + " LEFT JOIN endereco ende ON ped.id_endereco=ende.id_endereco "
@@ -322,7 +328,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
     
     public Pedido getPedido(Pedido pedido) throws DAOException {
-        checarConexao();
+        
         String sql = "SELECT * FROM pedido "
                 + " WHERE pedido.id_pedido = ?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -340,7 +346,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void removerCliente(Cliente cliente) throws DAOException {
-        checarConexao();
+        
         String sql = "SELECT usuario.id_usuario, usuario.nome, now() data FROM usuario "
                 + " LEFT JOIN cliente ON usuario.id_usuario = cliente.id_usuario "
                 + " WHERE id_cliente=?";
@@ -364,7 +370,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void cadastrarTokenAlerta(Usuario usuario, String token) throws DAOException {
-        checarConexao();
+        
         if (usuario == null) {
             throw new DAOException("Erro", 300);
         }
@@ -379,7 +385,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
     
     public void confirmarPedido(Pedido pedido) throws DAOException {
-        checarConexao();
+        
         String sql = "UPDATE pedido SET estado=5 WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, pedido.getId());
@@ -415,7 +421,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void atualizarEstadoPedido2(Pedido pedido) throws DAOException {
-        checarConexao();
+        
         String sql = "";
         switch (pedido.getEstado()) {
             case 5:
@@ -462,7 +468,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void adicionarItem(Item2 item) throws DAOException {
-        checarConexao();
+        
         String sql = "INSERT INTO item (id_item, nome, descricao, preco, id_genero, modificavel, modificavel_ingrediente, tempo_preparo) "
                 + " values (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE nome=?, descricao=?, preco=?, id_genero=?, modificavel=?, modificavel_ingrediente=?, tempo_preparo=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -574,7 +580,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public Item getItem(Item item) throws DAOException {
-        checarConexao();
+        
         if (item == null) {
             throw new DAOIncorrectData(300);
         }
@@ -720,7 +726,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public List<TipoCupomDesconto> getTipoCupomDescontos() throws DAOException {
-        checarConexao();
+        
         List<TipoCupomDesconto> tipoCupomDescontos = new ArrayList<>();
         String sql = "SELECT id_cupomdesconto_tipo, descricao FROM cupomdesconto_tipo";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -740,7 +746,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public boolean checarExistenciaCupomCodigo(String codigo) throws DAOException {
-        checarConexao();
+        
         String sql = "SELECT 1 FROM cupomdesconto WHERE codigo=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setString(1, codigo);
@@ -756,7 +762,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
     
     public List<CupomDesconto> getCupomDescontos() throws DAOException {
-        checarConexao();
+        
         List<CupomDesconto> cupomDescontos = new ArrayList<>();
         String sql = "SELECT * FROM cupomdesconto "
                 + "LEFT JOIN cupomdesconto_tipo ON cupomdesconto.id_cupomdesconto_tipo = cupomdesconto_tipo.id_cupomdesconto_tipo ";
@@ -783,7 +789,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void inserirCupom(CupomDesconto cupom) throws DAOException {
-        checarConexao();
+        
         String sql = "INSERT INTO cupomdesconto (id_cupomdesconto_tipo, codigo, descricao, quantidade, validade, ativo, percentual, valor) "
                 + " VALUES (?,?,?,?,?,?,?,?)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
@@ -803,7 +809,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void atualizarEstadoPedido(Pedido pedido) throws DAOException {
-        checarConexao();
+        
         String sql = "UPDATE pedido SET estado=? WHERE id_pedido=?";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setInt(1, pedido.getEstado());
@@ -828,7 +834,7 @@ public class GerenciadorDAO extends BasicDAO {
     }
 
     public void adicionarNotificacao(Notificacao notificacao) throws DAOException {
-        checarConexao();
+        
         String sql = "INSERT INTO notificacao VALUES (default, ?, ?, false)";
         try (PreparedStatement stmt = this.conexao.prepareStatement(sql)) {
             stmt.setLong(1, notificacao.getCliente().getId());
