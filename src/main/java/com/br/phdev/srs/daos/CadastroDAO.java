@@ -179,8 +179,8 @@ public class CadastroDAO extends BasicDAO {
         if (cadastro.getSenhaUsuario() == null || cadastro.getSenhaUsuario().isEmpty()) {
             return new MensagemCadastro(101, "Forneça uma senha válida");
         }
-        if (cadastro.getPerguntasSeguranca() == null || cadastro.getPerguntasSeguranca().size() < 3) {
-            return new MensagemCadastro(101, "Forneça 3 perguntas de seguranca");
+        if (cadastro.getPerguntasSeguranca() == null || cadastro.getPerguntasSeguranca().size() < 2) {
+            return new MensagemCadastro(101, "Forneça 2 perguntas de seguranca");
         }
 
         try {
@@ -369,7 +369,7 @@ public class CadastroDAO extends BasicDAO {
                             }
                         }
                     }
-                    if (perguntaRespondias == 3) {
+                    if (perguntaRespondias == 2) {
                         sql = "UPDATE usuario SET senha=? WHERE id_usuario=?";
                         try (PreparedStatement stmt2 = getConexao().prepareStatement(sql)) {
                             stmt2.setString(1, redefinicaoSenha.getSenha());

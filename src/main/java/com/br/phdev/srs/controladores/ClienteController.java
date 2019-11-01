@@ -449,30 +449,6 @@ public class ClienteController {
                             sessao.setAttribute("pre-pedido-preco", null);
                             sessao.setAttribute("pre-pedido-cupom", null);
                             break;
-                        case 2:
-                            String tokenSessao;
-                            if (sessao.getAttribute("token_sessao_pagseguro") == null) {
-                                ServicoPagamentoPagSeguro servicoPagamento = new ServicoPagamentoPagSeguro();
-                                tokenSessao = servicoPagamento.criarTokenPagamento();
-                                if (tokenSessao == null) {
-                                    throw new PaymentException();
-                                }
-                                sessao.setAttribute("token_sessao_pagseguro", tokenSessao);
-                            } else {
-                                tokenSessao = (String) sessao.getAttribute("token_sessao_pagseguro");
-                            }
-                            System.out.println("Gerando pagamento pagseguro com token: " + tokenSessao);
-                            ExecutarPagamento pagamento = new ExecutarPagamento();
-                            pagamento.setCliente(this.dao.getCliente(cliente));
-                            pagamento.setPedido(pedido);
-                            pagamento.setEndereco(this.dao.getEndereco(confirmaPedido.getEnderecos().get(0), cliente));
-                            pagamento.setTokenSessao(tokenSessao);
-                            sessao.setAttribute("executar-pagamento", pagamento);
-                            pedido.setEstado(1);
-                            this.dao.inserirPedido(pedido, cliente, tokenSessao);
-                            confirmacaoPedido.setStatus(2);
-                            confirmacaoPedido.setLink(tokenSessao);
-                            break;
                         default:
                             ServicoPagamentoPagarme pagarme = new ServicoPagamentoPagarme();
                             ExecutarPagamento pagamento2 = new ExecutarPagamento();
