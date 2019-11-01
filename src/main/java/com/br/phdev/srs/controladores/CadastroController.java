@@ -84,7 +84,7 @@ public class CadastroController {
         HttpHeaders httpHeaders = new HttpHeaders();
         try {
             Usuario usuario = this.dao.validarCodigoAtivacao(cadastro, sessao.getId());
-            if (usuario != null) {                
+            if (usuario != null) {
                 sessao.setAttribute("usuario", usuario);                                
                 httpHeaders.add("session-id", sessao.getId());
                 mensagem.setCodigo(100);
@@ -115,9 +115,10 @@ public class CadastroController {
                     Cliente cliente = this.dao.getCliente(usuario);
                     if (cliente != null) {
                         sessao.setAttribute("cliente", cliente);
-                    }                    
+                    }
                 }
             } else {
+                this.dao.invalidarCadastro(cadastro);
                 mensagem.setCodigo(102);
                 mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
             }
@@ -132,13 +133,15 @@ public class CadastroController {
     }
     
     @PostMapping("cadastro/perguntas-seguranca")
-    public ResponseEntity<List<PerguntaSeguranca>> perguntasSeguranca(HttpSession sessao) {
+    public ResponseEntity<List<PerguntaSeguranca>> perguntasSeguranca(@RequestBody Cadastro cadastro, HttpSession sessao) {
         HttpHeaders httpHeaders = new HttpHeaders();
         List<PerguntaSeguranca> perguntas = new ArrayList<>();
         try {
             Usuario usuario = (Usuario) sessao.getAttribute("usuario");
             if (usuario != null) {
                 perguntas = this.dao.getPerguntasSeguranca();
+            } else {
+                this.dao.invalidarCadastro(cadastro);
             }
         } catch (DAOException e) {
             e.printStackTrace();

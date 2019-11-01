@@ -59,10 +59,11 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                     || uri.contains("resources")) {
                 return true;
             } else {
-                if (uri.contains("cliente")) {
+                if (uri.contains("cliente") || uri.contains("cadastro")) {
                     if (validarSessao(request)) {
                         return true;
                     }
+                    response.setStatus(401);
                     response.sendRedirect("sem-autorizacao");
                 } else {
                     response.sendRedirect("/wanted/sessao/entrar");

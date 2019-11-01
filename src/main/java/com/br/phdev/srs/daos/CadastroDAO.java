@@ -244,6 +244,17 @@ public class CadastroDAO extends BasicDAO {
         }
         return mensagem;
     }
+    
+    public void invalidarCadastro(Cadastro cadastro) throws DAOException {
+        String sql = "UPDATE usuario SET verificado=false WHERE token_cadastro=? AND nome=? AND ativo=false";        
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)){ 
+            stmt.setString(1, cadastro.getCodigo());
+            stmt.setString(2, cadastro.getTelefone());
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DAOException(e, 200);
+        }
+    }
 
     public Cliente getCliente(Usuario usuario) throws DAOException {
 
