@@ -139,7 +139,7 @@ public class GerenciadorController {
     }
     
     @GetMapping("gerenciador/item/novo")
-    public String novoItem(String opcao, Integer id, Model modelo) {        
+    public String novoItem(Model modelo) {        
         try {
             modelo.addAttribute("generos", this.dao.getGeneros());
             modelo.addAttribute("tipos", this.dao.getTipos());
@@ -252,23 +252,89 @@ public class GerenciadorController {
     @GetMapping("gerenciador/generos")
     public String generos(Model modelo) {
         try {
-            List<Item> itens = this.dao.getItens();
-            modelo.addAttribute("itens", itens);            
+            List<Genero> generos = this.dao.getGeneros();
+            modelo.addAttribute("generos", generos);
         } catch (DAOException e) {
             e.printStackTrace();
         }
         return "admin/produtos/generos";
     }
     
+    @GetMapping("gerenciador/genero/novo")
+    public String novoGenero() {
+        return "admin/produtos/genero/novo";
+    }
+    
+    @GetMapping("gerenciador/genero/atualizar")
+    public String atualizarGenero(Integer id, Model modelo) {        
+        try {
+            modelo.addAttribute("genero", this.dao.getGenero(id));
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/genero/atualizar";
+    }
+    
+    @ResponseBody
+    @PostMapping("gerenciador/genero/salvar")    
+    public String adicionarGenero(Integer id, String nome) throws JsonProcessingException {
+        Mensagem mensagem = new Mensagem();
+        try {
+            Genero genero = new Genero();
+            genero.setId(id);
+            genero.setNome(nome);                                                                                    
+                                
+            this.dao.adicionarGenero(genero);
+            mensagem.setCodigo(100);
+        } catch (DAOException e) {
+            mensagem.setCodigo(101);
+            e.printStackTrace();
+        }
+        return new ObjectMapper().writeValueAsString(mensagem);
+    }
+    
     @GetMapping("gerenciador/complementos")
     public String complementos(Model modelo) {
+        try {
+            List<Complemento> complementos = this.dao.getComplementos();
+            modelo.addAttribute("complementos", complementos);            
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return "admin/produtos/complementos";
+    }
+    
+    @GetMapping("gerenciador/complemento/novo")
+    public String novoComplemento() {
+        return "admin/produtos/complemento/novo";
+    }
+    
+    @GetMapping("gerenciador/complemento/atualizar")
+    public String atualizarComplemento(Model modelo) {
         try {
             List<Item> itens = this.dao.getItens();
             modelo.addAttribute("itens", itens);            
         } catch (DAOException e) {
             e.printStackTrace();
         }
-        return "admin/produtos/complementos";
+        return "admin/produtos/complemento/atualizar";
+    }
+    
+    @PostMapping("gerenciador/complemento/salvar")    
+    public String adicionarComplemento(Integer id, String nome) throws JsonProcessingException {
+        Mensagem mensagem = new Mensagem();
+        try {
+            Genero genero = new Genero();
+            genero.setId(id);
+            genero.setNome(nome);                                                                                    
+                                
+            this.dao.adicionarGenero(genero);
+            mensagem.setCodigo(100);
+        } catch (DAOException e) {
+            mensagem.setCodigo(101);
+            e.printStackTrace();
+        }
+        return new ObjectMapper().writeValueAsString(mensagem);
     }
     
     @GetMapping("gerenciador/ingredientes")

@@ -148,6 +148,38 @@ public class GerenciadorDAO extends BasicDAO {
         }
         return generos;
     }
+    
+    public Genero getGenero(Integer id) throws DAOException {
+        Genero genero = null;
+        String sql = "SELECT genero.id_genero, genero.nome FROM genero WHERE id_genero=?";
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                genero = new Genero();
+                genero.setId(rs.getLong("id_genero"));
+                genero.setNome(rs.getString("nome"));                
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Erro ao recuperar informações", e, 200);
+        }
+        return genero;
+    }
+    
+    public void adicionarGenero(Genero genero) throws DAOException {
+        
+        String sql = "INSERT INTO genero (id_genero, nome) "
+                + " values (?,?) ON DUPLICATE KEY UPDATE nome=?";
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setLong(1, genero.getId());
+            stmt.setString(2, genero.getNome());
+            stmt.setString(3, genero.getNome());            
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+    }
 
     public List<Tipo> getTipos() throws DAOException {
         
