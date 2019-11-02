@@ -50,6 +50,9 @@ public class CadastroController {
     public ResponseEntity<Mensagem> verificarNumero(@RequestBody Cadastro cadastro) {
         Mensagem mensagem = new Mensagem();
         try {
+            if (cadastro.getCodigo() != null) {
+                this.dao.invalidarCadastro(cadastro);
+            }
             mensagem = this.dao.verificarNumero(cadastro);
         } catch (DAOException e) {
             e.printStackTrace();
