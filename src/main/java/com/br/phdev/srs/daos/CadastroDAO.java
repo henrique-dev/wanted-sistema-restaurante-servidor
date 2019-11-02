@@ -225,7 +225,7 @@ public class CadastroDAO extends BasicDAO {
                 }
             }
 
-            sql = "INSERT INTO pergunta_seguranca_usuario (id_pergunta_seguranca, id_usuario, resposta) VALUES (?,?,?), (?,?,?), (?,?,?)";
+            sql = "INSERT INTO pergunta_seguranca_usuario (id_pergunta_seguranca, id_usuario, resposta) VALUES (?,?,?), (?,?,?)";
             try (PreparedStatement stmt = getConexao().prepareStatement(sql)) {
                 int index = 1;
                 for (PerguntaSeguranca p : cadastro.getPerguntasSeguranca()) {

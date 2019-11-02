@@ -120,10 +120,6 @@ public class CadastroController {
                         sessao.setAttribute("cliente", cliente);
                     }
                 }
-            } else {
-                this.dao.invalidarCadastro(cadastro);
-                mensagem.setCodigo(102);
-                mensagem.setDescricao("Ocorreu um erro ao finalizar o cadastro");
             }
         } catch (DAOException e) {
             e.printStackTrace();
@@ -143,8 +139,6 @@ public class CadastroController {
             Usuario usuario = (Usuario) sessao.getAttribute("usuario");
             if (usuario != null) {
                 perguntas = this.dao.getPerguntasSeguranca();
-            } else {
-                this.dao.invalidarCadastro(cadastro);
             }
         } catch (DAOException e) {
             e.printStackTrace();
