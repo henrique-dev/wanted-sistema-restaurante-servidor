@@ -42,6 +42,7 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
                     || uri.endsWith("cadastro/validar-codigo")
                     || uri.endsWith("cadastro/validar-codigo-redefinir-senha")
                     || uri.endsWith("cadastro/enviar-codigo-redefinir-senha")
+                    || uri.endsWith("cadastro/perguntas-seguranca")                    
                     
                     || uri.endsWith("sessao/entrar")                    
                     

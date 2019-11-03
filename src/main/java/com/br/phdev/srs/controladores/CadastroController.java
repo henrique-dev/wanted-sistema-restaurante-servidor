@@ -136,10 +136,7 @@ public class CadastroController {
         HttpHeaders httpHeaders = new HttpHeaders();
         List<PerguntaSeguranca> perguntas = new ArrayList<>();
         try {
-            Usuario usuario = (Usuario) sessao.getAttribute("usuario");
-            if (usuario != null) {
-                perguntas = this.dao.getPerguntasSeguranca();
-            }
+            perguntas = this.dao.getPerguntasSeguranca();
         } catch (DAOException e) {
             e.printStackTrace();
         }
