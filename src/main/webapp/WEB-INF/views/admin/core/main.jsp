@@ -466,6 +466,7 @@
         }
 
         function verificarSeTemPedido(pedidos) {
+            console.log(pedidos);
             for (let i = 0; i < pedidos.length; i++) {
                 if (parseInt(pedidos[i]["estado"]) == 4) {
                     return true;
