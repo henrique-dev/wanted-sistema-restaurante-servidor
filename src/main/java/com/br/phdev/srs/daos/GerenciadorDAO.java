@@ -219,6 +219,23 @@ public class GerenciadorDAO extends BasicDAO {
         }
         return complementos;
     }
+    
+    public void adicionarComplemento(Complemento complemento) throws DAOException {
+        
+        String sql = "INSERT INTO complemento(id_complemento, nome, preco) "
+                + " values (?,?, ?) ON DUPLICATE KEY UPDATE nome=?, preco=?";
+        try (PreparedStatement stmt = getConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setLong(1, complemento.getId());
+            stmt.setString(2, complemento.getNome());
+            stmt.setDouble(3, complemento.getPreco());
+            stmt.setString(4, complemento.getNome());
+            stmt.setDouble(5, complemento.getPreco());
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DAOException(e, 200);
+        }
+    }
 
     public List<Ingrediente> getIngredientes() throws DAOException {
         

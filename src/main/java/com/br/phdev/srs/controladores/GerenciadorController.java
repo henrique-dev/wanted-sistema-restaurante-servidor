@@ -325,11 +325,11 @@ public class GerenciadorController {
     public String adicionarComplemento(Integer id, String nome) throws JsonProcessingException {
         Mensagem mensagem = new Mensagem();
         try {
-            Genero genero = new Genero();
-            genero.setId(id);
-            genero.setNome(nome);                                                                                    
+            Complemento complemento = new Complemento();
+            complemento.setId(id);
+            complemento.setNome(nome);
                                 
-            this.dao.adicionarGenero(genero);
+            this.dao.adicionarComplemento(complemento);
             mensagem.setCodigo(100);
         } catch (DAOException e) {
             mensagem.setCodigo(101);
