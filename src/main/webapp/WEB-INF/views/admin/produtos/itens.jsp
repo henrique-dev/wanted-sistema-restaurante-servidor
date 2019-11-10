@@ -23,7 +23,7 @@
     
 </style>
   
-<div id="ctn_index" class="h-100 w-100">
+<div id="ctn_index" class="w-100">
     <div class="row h-100">        
         <div class="col-lg-12 col-md-12 col-sm-12 p-4 h-100">
             <div class="row pb-4">

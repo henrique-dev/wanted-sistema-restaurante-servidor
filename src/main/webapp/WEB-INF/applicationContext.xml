@@ -31,7 +31,8 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
         <property name="removeAbandonedTimeout" value="3" />
         
     </bean>
-    <mvc:default-servlet-handler/>     
+    <mvc:default-servlet-handler/>    
+    <mvc:resources mapping="/resources/**" location="/resources/" /> 
     <mvc:interceptors>
         <bean class="com.br.phdev.srs.interceptors.AutorizadorInterceptor" />
     </mvc:interceptors>

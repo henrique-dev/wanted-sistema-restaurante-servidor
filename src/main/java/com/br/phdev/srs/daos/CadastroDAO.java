@@ -397,7 +397,6 @@ public class CadastroDAO extends BasicDAO {
                 throw new DAOException(e, 200);
             }
         }
-        mensagem.setCodigo(101);
         mensagem.setDescricao("Erro ao alterar senha");
         return mensagem;
     }

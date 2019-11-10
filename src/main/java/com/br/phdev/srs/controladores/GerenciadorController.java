@@ -21,6 +21,7 @@ import com.br.phdev.srs.models.Item2;
 import com.br.phdev.srs.models.ListaPedidos;
 import com.br.phdev.srs.models.Mensagem;
 import com.br.phdev.srs.models.Notificacao;
+import com.br.phdev.srs.models.NotificacaoPedido;
 import com.br.phdev.srs.models.Pedido;
 import com.br.phdev.srs.models.Tipo;
 import com.br.phdev.srs.utils.ServicoArmazenamento;
@@ -66,9 +67,9 @@ public class GerenciadorController {
     @GetMapping("gerenciador/index")
     public String main(Model modelo) {
         try {
-            ListaPedidos pedidos = this.dao.getPedidos();
-            modelo.addAttribute("pedidos", pedidos);
-        } catch (DAOException e) {
+            NotificacaoPedido notificacaoPedido = this.dao.listarPedidos();
+            modelo.addAttribute("pedidos", new ObjectMapper().writeValueAsString(notificacaoPedido));
+        } catch (DAOException | JsonProcessingException e) {
             e.printStackTrace();
         }
         return "admin/index";
