@@ -321,6 +321,7 @@ public class GerenciadorController {
         return "admin/produtos/complemento/atualizar";
     }
     
+    @ResponseBody
     @PostMapping("gerenciador/complemento/salvar")    
     public String adicionarComplemento(Integer id, String nome) throws JsonProcessingException {
         Mensagem mensagem = new Mensagem();
@@ -328,7 +329,6 @@ public class GerenciadorController {
             Complemento complemento = new Complemento();
             complemento.setId(id);
             complemento.setNome(nome);
-                                
             this.dao.adicionarComplemento(complemento);
             mensagem.setCodigo(100);
         } catch (DAOException e) {
