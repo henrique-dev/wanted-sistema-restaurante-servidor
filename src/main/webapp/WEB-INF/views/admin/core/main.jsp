@@ -3,7 +3,7 @@
     Created on : 11 de ago de 2019, 12:15:49
     Author     : Paulo Henrique Goncalves Bacelar <henrique.phgb@gmail.com>
 --%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html lang="pt">
@@ -207,7 +207,7 @@
                     <div id="menu_produtos" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <a id="menu_item_itens" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/itens">Itens</a>
-                            <a id="menu_item_generos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/generos">GenÃªros</a>
+                            <a id="menu_item_generos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/generos">Genêros</a>
                             <a id="menu_item_complementos" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/complementos">Complementos</a>
                             <a id="menu_item_ingredientes" class="collapse-item" href="${pageContext.request.contextPath}/gerenciador/ingredientes">Ingredientes</a>
                         </div>
@@ -303,7 +303,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
                         <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">Ã—</span>
+                            <span aria-hidden="true">×</span>
                         </button>
                     </div>
                     <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
@@ -316,7 +316,7 @@
         </div>
 
         <div id="ctn_notificacao" class="notification ctn-card mbg-primary">
-            <a class="btn mbg-primary w-100" href="index">Voce possuÃ­ um novo pedido</a>
+            <a class="btn mbg-primary w-100" href="index">Voce possuí um novo pedido</a>
         </div>
 
         <!-- Bootstrap core JavaScript-->
@@ -507,7 +507,7 @@
                     + "<td>" + pedido.endereco.bairro + "</td>"
                     + "</tr>"
                     + "<tr>"
-                    + "<td><strong>NÃºmero:</strong></td>"
+                    + "<td><strong>Número:</strong></td>"
                     + "<td>" + pedido.endereco.numero + "</td>"
                     + "</tr>"
                     + "<tr><td>&nbsp;</td></tr>"
