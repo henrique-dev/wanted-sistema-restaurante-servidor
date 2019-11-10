@@ -453,12 +453,12 @@
                             }
                             break;
                         default :
-                            console.log(dados)
-                            $("#ctn_notificacao").fadeIn(400, function () {
-                                if (verificarSeTemPedido(dados.pedidos)) {
+                            if (verificarSeTemPedido(dados.pedidos)) {
+                                $("#ctn_notificacao").fadeIn(400, function () {
                                     notificarComSom();
-                                }
-                            });
+
+                                });
+                            }
                             break;
                     }
                     break;
