@@ -41,8 +41,7 @@ public class SevicoAgendamento {
                 }
             }
         } catch (DAOException e) {
-            e.printStackTrace();
-
+            //e.printStackTrace();
         }
     }
 

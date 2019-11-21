@@ -133,10 +133,24 @@
                     let pedido = pedidos[i];
                     if (parseInt(pedido["estado"]) == 4) {
                         let itens = pedido.itens;
-                        let htmlItens = "";
+                        let htmlItens = "<p>Itens:</p>";
                         for (let j = 0; j < itens.length; j++) {
                             let item = itens[j];
                             htmlItens += "<p><strong>" + item.quantidade + " x " + item.nome + "</strong></p>";
+                            if (item.complementos.length > 0) {
+                                htmlItens += "<p>&emsp;Complementos:</p>";
+                                for (let k=0; k<item.complementos.length; k++) {
+                                    let complemento = item.complementos[k];
+                                    htmlItens += "<p>&emsp;&emsp;&emsp;&emsp;<strong>" + complemento.nome + "</strong></p>";
+                                }
+                            }
+                            if (item.ingredientes.length > 0) {
+                                htmlItens += "<p>&emsp;Ingredientes:</p>";
+                                for (let k=0; k<item.ingredientes.length; k++) {
+                                    let ingrediente = item.ingredientes[k];
+                                    htmlItens += "<p>&emsp;&emsp;&emsp;&emsp;<strong>" + ingrediente.nome + "</strong></p>"    ;
+                                }
+                            }
                         }
                         $("#ctn_pedido_pendente").find(".ctn-card-body").empty().append(
                                 "<div class='col-12 h-100'>"

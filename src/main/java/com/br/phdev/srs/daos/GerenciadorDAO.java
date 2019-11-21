@@ -911,7 +911,7 @@ public class GerenciadorDAO extends BasicDAO {
                 pedido.setPrecoTotal(rs.getDouble("precototal"));
                 pedido.setStatus(rs.getString("pedido_estado.descricao"));
                 pedido.setEstado(rs.getInt("pedido.estado"));
-
+                pedido.setFrete(rs.getDouble("pedido.frete"));                
                 Cliente cliente = new Cliente();
                 cliente.setNome(rs.getString("cliente.nome"));
                 cliente.setTelefone(rs.getString("cliente.telefone"));

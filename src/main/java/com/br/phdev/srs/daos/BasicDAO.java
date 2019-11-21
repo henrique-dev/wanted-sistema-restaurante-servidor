@@ -19,9 +19,9 @@ public class BasicDAO {
     }
     
     protected Connection getConexao() throws SQLException {
-        if (this.conexao == null || this.conexao.isClosed()) {
+        if (this.conexao == null || this.conexao.isClosed() || !this.conexao.isValid(0)) {
             this.conexao = this.dataSource.getConnection();
-        }        
+        }
         return this.conexao;
     }
     

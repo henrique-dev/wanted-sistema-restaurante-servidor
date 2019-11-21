@@ -27,8 +27,9 @@ http://www.springframework.org/schema/context/spring-context-3.0.xsd">
         <property name="testOnReturn" value="true" />
         <property name="testWhileIdle" value="true" />
         <property name="validationQuery" value="SELECT 1" />
+        <property name="validationQueryTimeout" value="1"/>
         <property name="removeAbandonedOnBorrow" value="true" />
-        <property name="removeAbandonedTimeout" value="3" />
+        <property name="removeAbandonedTimeout" value="1" />
         
     </bean>
     <mvc:default-servlet-handler/>    
